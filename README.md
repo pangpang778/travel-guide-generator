@@ -43,6 +43,23 @@ a logged-in Chrome session available for XiaoHongShu.
 
 This one command writes research.json, comparison.html and comparison.json.
 
+### Skill trigger
+
+After installing the Skill, use one explicit command:
+
+    /travel-guide
+
+The Skill asks for missing required inputs before it calls any platform:
+
+- origin
+- destination or candidate destinations
+- departure date
+- trip length in days/nights
+
+Example:
+
+    /travel-guide 从宁波出发，2026-09-26，苏州/福州候选，3天2夜，参考小红书，交通只用12306
+
 The research JSON is the handoff contract for an AI agent: synthesize one
 guide JSON per destination using the collected evidence, then run the existing
 scripts/build_guide.py pipeline.

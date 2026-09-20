@@ -497,5 +497,40 @@ Example:
 The collector is read-only. Booking, payment, publishing, comments, likes,
 and account management are intentionally outside this product.
 
+## Explicit command entry point
+
+The user-facing trigger is:
+
+    /travel-guide
+
+When this command is invoked, collect the request before using any tool.
+Required fields are:
+
+1. origin
+2. destination or candidate destinations
+3. departure date in YYYY-MM-DD
+4. trip length in days or nights
+
+Do not guess missing locations, dates, or duration. If fields are missing,
+ask only for the missing fields in one concise question and stop. Do not run
+XiaoHongShu, Agent Reach, OpenCLI, or 12306 until the required fields exist.
+
+Optional fields include reference-platforms, departure time window, return
+time window, traveler count, budget, pace, interests, dietary constraints and
+accessibility needs.
+
+Example command:
+
+    /travel-guide 从宁波出发，2026-09-26，苏州/福州候选，3天2夜，参考小红书，交通只用12306
+
+Once the required fields are complete:
+
+1. Use the requested reference platform, defaulting to XiaoHongShu.
+2. Use 12306 as the only transport backend.
+3. Use the internal plan_trip.py runner; users should not need to remember CLI
+   flags.
+4. Generate the candidate comparison first, then detailed guide JSON and all
+   existing exports for the selected destination.
+
 The user-facing entry point is this Skill. Do not ask users to remember the
 collector commands; the commands above are internal execution steps.

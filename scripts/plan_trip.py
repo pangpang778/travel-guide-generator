@@ -19,7 +19,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Collect and compare real travel sources")
     parser.add_argument("--origin", required=True)
     parser.add_argument("--destinations", required=True, help="Comma-separated city names")
-    parser.add_argument("--start-date", help="YYYY-MM-DD; required for 12306 queries")
+    parser.add_argument("--start-date", required=True, help="YYYY-MM-DD; required for 12306 queries")
     parser.add_argument("--return-date", help="YYYY-MM-DD; defaults to day N")
     parser.add_argument("--reference-platforms", default="xiaohongshu")
     parser.add_argument("--days", type=int, default=3)
