@@ -12,8 +12,11 @@ This fork adds a real-source research pipeline on top of the existing guide
 renderer:
 
 - Agent Reach/OpenCLI searches XiaoHongShu notes and preserves source URLs.
+- Reference platforms are selectable per request; the default is XiaoHongShu.
 - OpenCLI 12306 queries stations, direct trains, availability, prices and
   recommended train stop lists.
+- Transport is intentionally fixed to 12306; origin, destination, dates and
+  time windows are first-class trip inputs.
 - The collector degrades cleanly when a platform is not logged in or a date is
   missing; it never invents ticket availability.
 - compare_trip.py creates a standalone candidate comparison page.
@@ -36,7 +39,7 @@ a logged-in Chrome session available for XiaoHongShu.
 
 ### Collect a real trip research bundle
 
-    .\.venv\Scripts\python.exe scripts\plan_trip.py --origin 宁波 --destinations 苏州,重庆,成都,福州 --start-date 2026-09-26 --days 3 --nights 2 --xhs-details 2 --rail-details --output-dir generated\ningbo-candidates
+    .\.venv\Scripts\python.exe scripts\plan_trip.py --origin 宁波 --destinations 苏州,重庆,成都,福州 --start-date 2026-09-26 --days 3 --nights 2 --reference-platforms xiaohongshu --reference-details 2 --rail-details --output-dir generated\ningbo-candidates
 
 This one command writes research.json, comparison.html and comparison.json.
 

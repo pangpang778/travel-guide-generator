@@ -30,7 +30,7 @@ class CompareTripTests(unittest.TestCase):
         }
         rows = summarize(research)
         self.assertEqual([row["destination"] for row in rows], ["苏州", "重庆"])
-        self.assertEqual(rows[0]["xhs_count"], 1)
+        self.assertEqual(rows[0]["reference_count"], 1)
 
     def test_render_html_contains_candidate_and_source_link(self):
         research = {

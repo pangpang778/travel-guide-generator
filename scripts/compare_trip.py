@@ -29,6 +29,17 @@ def _records(leg: dict[str, Any]) -> list[dict[str, Any]]:
     return leg.get("trains", []) if isinstance(leg.get("trains"), list) else []
 
 
+def _reference_notes(result: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+    references = result.get("references")
+    if not isinstance(references, dict):
+        references = {"xiaohongshu": result.get("xiaohongshu", {})}
+    notes = []
+    for platform, payload in references.items():
+        for note in payload.get("notes", []) if isinstance(payload, dict) else []:
+            notes.append((platform, note))
+    return notes
+
+
 def _leg_text(leg: dict[str, Any]) -> str:
     trains = _records(leg)
     if not trains:
@@ -71,7 +82,7 @@ def summarize(research: dict[str, Any]) -> list[dict[str, Any]]:
                 "total_train_minutes": total,
                 "outbound_count": len(_records(outbound)),
                 "return_count": len(_records(return_leg)),
-                "xhs_count": len(result.get("xiaohongshu", {}).get("notes", [])),
+                "reference_count": len(_reference_notes(result)),
                 "warnings": result.get("warnings", []),
                 "status": transport.get("status", "unknown"),
             }
@@ -97,14 +108,15 @@ def render_html(research: dict[str, Any]) -> str:
             if item.get("destination") == destination
         )
         transport = result.get("transport", {})
-        notes = result.get("xiaohongshu", {}).get("notes", [])
+        notes = _reference_notes(result)
         note_links = "".join(
-            '<li><a href="{}" target="_blank" rel="noopener">{}</a> <span>{}</span></li>'.format(
+            '<li><b>{}</b> <a href="{}" target="_blank" rel="noopener">{}</a> <span>{}</span></li>'.format(
+                _text(platform),
                 _text(note.get("url", "")),
                 _text(note.get("title", "小红书笔记")),
                 _text(note.get("likes", "")),
             )
-            for note in notes[:5]
+            for platform, note in notes[:5]
             if note.get("url")
         )
         recommendation = "优先候选" if index == 0 else ""
@@ -127,14 +139,14 @@ def render_html(research: dict[str, Any]) -> str:
               <div class="metrics">
                 <div><b>{duration}</b><span>往返首班样本耗时</span></div>
                 <div><b>{outbound}/{return_count}</b><span>去程/返程车次</span></div>
-                <div><b>{xhs_count}</b><span>小红书证据</span></div>
+                <div><b>{xhs_count}</b><span>参考平台证据</span></div>
               </div>
               <section>
                 <h3>12306 车次样本</h3>
                 <pre>{transport}</pre>
               </section>
               <section>
-                <h3>小红书参考</h3>
+                <h3>参考平台证据</h3>
                 <ul>{notes}</ul>
               </section>
               {warning_block}
@@ -147,7 +159,7 @@ def render_html(research: dict[str, Any]) -> str:
                 duration=_text(duration),
                 outbound=summary["outbound_count"],
                 return_count=summary["return_count"],
-                xhs_count=summary["xhs_count"],
+                xhs_count=summary["reference_count"],
                 transport=_text(
                     "{}\n\n返程:\n{}".format(
                         _leg_text(transport.get("outbound", {})),

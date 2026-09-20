@@ -26,6 +26,7 @@ PREFERRED_STATIONS = {
     "成都": "成都东",
     "福州": "福州",
 }
+REFERENCE_PLATFORMS = {"xiaohongshu", "twitter", "reddit", "bilibili"}
 
 
 def _json_from_output(raw: str) -> Any:
@@ -179,6 +180,32 @@ def search_xiaohongshu(query: str, limit: int = 8) -> dict[str, Any]:
     )
 
 
+def search_reference(platform: str, query: str, limit: int = 8) -> dict[str, Any]:
+    """Search a configured reference platform through OpenCLI."""
+    if platform == "xiaohongshu":
+        return search_xiaohongshu(query, limit)
+    if platform not in REFERENCE_PLATFORMS:
+        return {
+            "ok": False,
+            "error": "unsupported_platform",
+            "message": "unsupported reference platform: {}".format(platform),
+        }
+    return run_json(
+        [
+            "opencli",
+            platform,
+            "search",
+            query,
+            "-f",
+            "json",
+            "--window",
+            "background",
+            "--site-session",
+            "persistent",
+        ]
+    )
+
+
 def read_xiaohongshu_note(url: str) -> dict[str, Any]:
     return run_json(
         [
@@ -322,6 +349,36 @@ def _recommended_train(trains: list[dict[str, Any]]) -> dict[str, Any] | None:
     return candidates[0] if candidates else (trains[0] if trains else None)
 
 
+def _time_minutes(value: Any) -> int | None:
+    if not value:
+        return None
+    try:
+        hour, minute = str(value).split(":", 1)
+        return int(hour) * 60 + int(minute)
+    except (TypeError, ValueError):
+        return None
+
+
+def _filter_trains(
+    trains: list[dict[str, Any]],
+    earliest: str | None = None,
+    latest: str | None = None,
+) -> list[dict[str, Any]]:
+    earliest_min = _time_minutes(earliest)
+    latest_min = _time_minutes(latest)
+    filtered = []
+    for train in trains:
+        start = _time_minutes(train.get("start_time"))
+        if start is None:
+            continue
+        if earliest_min is not None and start < earliest_min:
+            continue
+        if latest_min is not None and start > latest_min:
+            continue
+        filtered.append(train)
+    return filtered
+
+
 def collect_transport(
     origin: str,
     destination: str,
@@ -329,6 +386,8 @@ def collect_transport(
     return_date: str | None,
     limit: int,
     enrich_details: bool,
+    depart_after: str | None = None,
+    return_before: str | None = None,
 ) -> dict[str, Any]:
     if not start_date:
         return {
@@ -367,6 +426,10 @@ def collect_transport(
             _normalize_train(item)
             for item in _records(trains_result.get("data"), "trains", "results", "data")
         ]
+        if label == "outbound":
+            trains = _filter_trains(trains, earliest=depart_after)
+        else:
+            trains = _filter_trains(trains, latest=return_before)
         leg = {
             "direction": label,
             "date": travel_date,
@@ -420,44 +483,59 @@ def collect_destination(
     nights: int,
     start_date: str | None,
     return_date: str | None,
-    xhs_limit: int,
-    xhs_details: int,
+    reference_platforms: list[str],
+    reference_limit: int,
+    reference_details: int,
     rail_limit: int,
     rail_details: bool,
+    depart_after: str | None,
+    return_before: str | None,
     checked_at: str,
     sources: list[dict[str, Any]],
 ) -> dict[str, Any]:
     query = "{} {}天{}晚 攻略".format(origin, destination, days, nights)
-    xhs_result = search_xiaohongshu(query, xhs_limit)
-    notes = _records(xhs_result.get("data"), "notes", "results", "data")
-    xhs_items = []
-    for index, note in enumerate(notes):
-        note_url = note.get("url")
-        source_id = "xhs-{}-{}".format(_slug(destination), index + 1)
-        sources.append(
-            _source(
-                source_id,
-                note.get("title") or "XHS travel note",
-                checked_at,
-                "search",
-                note_url,
+    references: dict[str, dict[str, Any]] = {}
+    warnings = []
+    for platform in reference_platforms:
+        platform_result = search_reference(platform, query, reference_limit)
+        records = _records(platform_result.get("data"), "notes", "results", "data", "items")
+        items = []
+        for index, note in enumerate(records):
+            note_url = note.get("url") or note.get("link")
+            source_id = "{}-{}-{}".format(platform, _slug(destination), index + 1)
+            sources.append(
+                _source(
+                    source_id,
+                    note.get("title") or note.get("name") or "{} reference".format(platform),
+                    checked_at,
+                    "search",
+                    note_url,
+                )
             )
-        )
-        xhs_items.append(
-            {
+            item = {
                 "rank": note.get("rank", index + 1),
-                "title": note.get("title", ""),
-                "author": note.get("author", ""),
-                "likes": note.get("likes", ""),
-                "published_at": note.get("published_at", ""),
+                "title": note.get("title") or note.get("name") or note.get("text", ""),
+                "author": note.get("author") or note.get("author_name", ""),
+                "likes": note.get("likes") or note.get("score", ""),
+                "published_at": note.get("published_at") or note.get("created_at", ""),
                 "url": note_url,
                 "source_id": source_id,
             }
-        )
-        if index < xhs_details and note_url:
-            detail = read_xiaohongshu_note(note_url)
-            if detail["ok"] and isinstance(detail.get("data"), dict):
-                xhs_items[-1]["detail"] = detail["data"]
+            if platform == "xiaohongshu" and index < reference_details and note_url:
+                detail = read_xiaohongshu_note(note_url)
+                if detail["ok"] and isinstance(detail.get("data"), dict):
+                    item["detail"] = detail["data"]
+            items.append(item)
+        references[platform] = {
+            "status": "ok" if platform_result["ok"] else "error",
+            "notes": items,
+        }
+        if not platform_result["ok"]:
+            warnings.append(
+                "{} reference search unavailable: {}".format(
+                    platform, platform_result.get("message", "unknown error")
+                )
+            )
 
     rail = collect_transport(
         origin,
@@ -466,10 +544,9 @@ def collect_destination(
         return_date,
         rail_limit,
         rail_details,
+        depart_after,
+        return_before,
     )
-    warnings = []
-    if not xhs_result["ok"]:
-        warnings.append("XiaoHongShu search unavailable: {}".format(xhs_result.get("message", "unknown error")))
     if rail.get("status") != "ok":
         warnings.append(rail.get("message", "12306 data unavailable"))
     if rail.get("status") == "ok":
@@ -482,10 +559,8 @@ def collect_destination(
     return {
         "destination": destination,
         "research_query": query,
-        "xiaohongshu": {
-            "status": "ok" if xhs_result["ok"] else "error",
-            "notes": xhs_items,
-        },
+        "references": references,
+        "xiaohongshu": references.get("xiaohongshu", {"status": "skipped", "notes": []}),
         "transport": rail,
         "warnings": warnings,
     }
@@ -519,10 +594,13 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
                 args.nights,
                 args.start_date,
                 effective_return_date,
-                args.xhs_limit,
-                args.xhs_details,
+                args.reference_platforms,
+                args.reference_limit,
+                args.reference_details,
                 args.rail_limit,
                 args.rail_details,
+                args.depart_after,
+                args.return_before,
                 checked_at,
                 sources,
             )
@@ -538,6 +616,10 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
             "days": args.days,
             "nights": args.nights,
             "travelers": args.travelers,
+            "reference_platforms": args.reference_platforms,
+            "transport_platform": "12306",
+            "depart_after": args.depart_after,
+            "return_before": args.return_before,
         },
         "agent_reach": doctor(),
         "sources": sources,
@@ -546,16 +628,23 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Collect Agent Reach/XHS and 12306 travel evidence")
+    parser = argparse.ArgumentParser(description="Collect reference-platform and 12306 travel evidence")
     parser.add_argument("--origin", required=True)
     parser.add_argument("--destinations", required=True, help="Comma-separated city names")
     parser.add_argument("--start-date", help="YYYY-MM-DD; required for 12306 queries")
     parser.add_argument("--return-date", help="YYYY-MM-DD; defaults to day 3 for a 3-day trip")
+    parser.add_argument(
+        "--reference-platforms",
+        default="xiaohongshu",
+        help="Comma-separated reference platforms: xiaohongshu,twitter,reddit,bilibili",
+    )
     parser.add_argument("--days", type=int, default=3)
     parser.add_argument("--nights", type=int, default=2)
     parser.add_argument("--travelers", type=int, default=1)
-    parser.add_argument("--xhs-limit", type=int, default=8)
-    parser.add_argument("--xhs-details", type=int, default=0, help="Read details for the first N XHS results")
+    parser.add_argument("--depart-after", help="Only keep outbound trains departing at or after HH:MM")
+    parser.add_argument("--return-before", help="Only keep return trains departing at or before HH:MM")
+    parser.add_argument("--reference-limit", "--xhs-limit", type=int, default=8)
+    parser.add_argument("--reference-details", "--xhs-details", type=int, default=0)
     parser.add_argument("--rail-limit", type=int, default=10)
     parser.add_argument("--rail-details", action="store_true", help="Add prices and station stops for recommended trains")
     parser.add_argument("--output", default="generated/trip-research.json")
@@ -572,6 +661,18 @@ def main() -> int:
             date.fromisoformat(args.return_date)
         except ValueError:
             parser.error("return-date must use YYYY-MM-DD")
+    args.reference_platforms = [
+        platform.strip().lower()
+        for platform in args.reference_platforms.split(",")
+        if platform.strip()
+    ]
+    unknown_platforms = set(args.reference_platforms) - REFERENCE_PLATFORMS
+    if unknown_platforms:
+        parser.error("unsupported reference platforms: {}".format(", ".join(sorted(unknown_platforms))))
+    for name in ("depart_after", "return_before"):
+        value = getattr(args, name)
+        if value is not None and _time_minutes(value) is None:
+            parser.error("{} must use HH:MM".format(name.replace("_", "-")))
 
     result = collect(args)
     output = Path(args.output)
