@@ -1,12 +1,13 @@
 {
   "name": "travel-guide-generator",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "旅游攻略生成器 - 一键生成精美旅游攻略HTML。支持：国内外城市（威海/青岛/大连/大理/厦门等）、情侣浪漫游、周末短途游、自驾游规划。自动搜索全网真实攻略、高德API计算路线距离用时、生成PC/移动端自适应精美HTML，包含每日详细行程、酒店推荐、美食推荐、避坑指南、预算估算。支持中/英/日/韩/法/德/西等13种语言输出。",
-  "author": "GMMG55",
-  "repository": "https://github.com/GMMG55/travel-guide-generator",
+  "author": "pangpang778",
+  "repository": "https://github.com/pangpang778/travel-guide-generator",
   "tags": ["travel", "旅游", "攻略", "行程规划", "guide", "html", "vacation", "romantic", "情侣", "周末", "自驾", "威海", "大理", "厦门", "青岛"],
   "dependencies": {
-    "python": ">=3.8",
+    "python": ">=3.10",
+    "node": ">=18",
     "pip": ["requests>=2.32.4,<3"]
   },
   "env": {
@@ -19,7 +20,13 @@
   },
   "permissions": {
     "network": {
-      "outbound": ["https://restapi.amap.com"],
+      "outbound": [
+        "https://restapi.amap.com",
+        "https://www.xiaohongshu.com",
+        "https://kyfw.12306.cn",
+        "https://search.12306.cn",
+        "https://github.com/Panniantong/agent-reach"
+      ],
       "description": "仅向高德开放平台 REST API 发起路线规划/地理编码请求（需用户配置 AMAP_KEY）"
     },
     "env": {

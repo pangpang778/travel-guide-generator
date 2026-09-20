@@ -6,6 +6,44 @@
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge">
 </p>
 
+## Real-source product mode
+
+This fork adds a real-source research pipeline on top of the existing guide
+renderer:
+
+- Agent Reach/OpenCLI searches XiaoHongShu notes and preserves source URLs.
+- OpenCLI 12306 queries stations, direct trains, availability, prices and
+  recommended train stop lists.
+- The collector degrades cleanly when a platform is not logged in or a date is
+  missing; it never invents ticket availability.
+- compare_trip.py creates a standalone candidate comparison page.
+- The existing guide.json pipeline still creates HTML, Markdown, ICS and
+  GeoJSON outputs.
+
+### Install
+
+Windows:
+
+    .\install.ps1
+
+Linux/macOS:
+
+    ./install.sh
+
+Use -SkipSystem or SKIP_SYSTEM=1 for a read-only dependency check. The normal
+install sets up Agent Reach, OpenCLI, Twitter/X and XiaoHongShu backends. Keep
+a logged-in Chrome session available for XiaoHongShu.
+
+### Collect a real trip research bundle
+
+    .\.venv\Scripts\python.exe scripts\plan_trip.py --origin 宁波 --destinations 苏州,重庆,成都,福州 --start-date 2026-09-26 --days 3 --nights 2 --xhs-details 2 --rail-details --output-dir generated\ningbo-candidates
+
+This one command writes research.json, comparison.html and comparison.json.
+
+The research JSON is the handoff contract for an AI agent: synthesize one
+guide JSON per destination using the collected evidence, then run the existing
+scripts/build_guide.py pipeline.
+
 <p align="center">
   <b>🤖 一句话生成精美旅游攻略 HTML，让每一次出发都有温度</b><br>
   <b>🤖 Generate beautiful travel guide HTML with one sentence. Make every journey warm and memorable.</b>
