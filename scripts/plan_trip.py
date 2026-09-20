@@ -28,7 +28,7 @@ def main() -> int:
     parser.add_argument("--depart-after")
     parser.add_argument("--return-before")
     parser.add_argument("--reference-limit", "--xhs-limit", dest="reference_limit", type=int, default=8)
-    parser.add_argument("--reference-details", "--xhs-details", dest="reference_details", type=int, default=0)
+    parser.add_argument("--reference-details", "--xhs-details", dest="reference_details", type=int, default=3)
     parser.add_argument("--rail-limit", type=int, default=10)
     parser.add_argument("--rail-details", action="store_true")
     parser.add_argument("--output-dir", default="generated/trip")

@@ -55,6 +55,11 @@ def _resolve_command(name: str) -> str | None:
     """Find commands installed by venvs or npm on Windows."""
     found = shutil.which(name)
     if found:
+        found_path = Path(found)
+        if found_path.suffix.lower() == ".cmd":
+            powershell_wrapper = found_path.with_suffix(".ps1")
+            if powershell_wrapper.exists():
+                return str(powershell_wrapper)
         return found
 
     candidates = [
@@ -75,6 +80,17 @@ def run_json(command: list[str], timeout: int = DEFAULT_TIMEOUT) -> dict[str, An
     if not resolved:
         return {"ok": False, "error": "command_not_found", "message": command[0]}
     command = [resolved] + command[1:]
+    if Path(resolved).suffix.lower() == ".ps1":
+        shell = shutil.which("powershell") or shutil.which("pwsh")
+        if shell:
+            command = [
+                shell,
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                resolved,
+            ] + command[1:]
     try:
         completed = subprocess.run(
             command,
@@ -523,7 +539,7 @@ def collect_destination(
             }
             if platform == "xiaohongshu" and index < reference_details and note_url:
                 detail = read_xiaohongshu_note(note_url)
-                if detail["ok"] and isinstance(detail.get("data"), dict):
+                if detail["ok"] and detail.get("data") is not None:
                     item["detail"] = detail["data"]
             items.append(item)
         references[platform] = {
@@ -644,7 +660,7 @@ def main() -> int:
     parser.add_argument("--depart-after", help="Only keep outbound trains departing at or after HH:MM")
     parser.add_argument("--return-before", help="Only keep return trains departing at or before HH:MM")
     parser.add_argument("--reference-limit", "--xhs-limit", type=int, default=8)
-    parser.add_argument("--reference-details", "--xhs-details", type=int, default=0)
+    parser.add_argument("--reference-details", "--xhs-details", type=int, default=3)
     parser.add_argument("--rail-limit", type=int, default=10)
     parser.add_argument("--rail-details", action="store_true", help="Add prices and station stops for recommended trains")
     parser.add_argument("--output", default="generated/trip-research.json")

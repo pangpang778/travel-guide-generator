@@ -40,6 +40,153 @@ def _reference_notes(result: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]
     return notes
 
 
+def _detail_text(note: dict[str, Any]) -> str:
+    detail = note.get("detail")
+    if isinstance(detail, list):
+        field_values = {
+            item.get("field"): item.get("value")
+            for item in detail
+            if isinstance(item, dict) and item.get("field")
+        }
+        for key in ("content", "description", "desc", "text"):
+            value = field_values.get(key)
+            if isinstance(value, str) and value.strip():
+                return value
+        parts = []
+        for item in detail:
+            if isinstance(item, dict):
+                parts.append(_detail_text({"detail": item}))
+            elif isinstance(item, str):
+                parts.append(item)
+        return " ".join(part for part in parts if part)
+    if isinstance(detail, dict):
+        for key in ("content", "description", "desc", "text"):
+            value = detail.get(key)
+            if isinstance(value, str) and value.strip():
+                return value
+        for key in ("data", "note", "result"):
+            if key in detail:
+                return _detail_text({"detail": detail[key]})
+    return ""
+
+
+def _structured_reference_summary(content: str, titles: list[str]) -> str:
+    """Turn source prose into compact decision-oriented evidence."""
+    content = re.sub(r"\s+", " ", content).strip()
+    if not content:
+        topic_titles = "；".join(dict.fromkeys(titles[:4]))
+        return (
+            "本平台检索到相关内容，主题集中在：{}。\n"
+            "当前只有标题证据，详细行程仍需在生成阶段核验正文。"
+        ).format(topic_titles or "暂无可读主题")
+
+    sentences = [
+        part.strip()
+        for part in re.split(r"(?<=[。！？!?])\s+|\n+", content)
+        if len(part.strip()) >= 12
+    ]
+    groups = [
+        ("路线共识", ("day", "路线", "上午", "下午", "晚上", "→")),
+        ("预约提醒", ("预约", "抢票", "门票", "提前")),
+        ("住宿线索", ("住宿", "酒店", "住在", "入住")),
+        ("美食线索", ("美食", "餐厅", "小吃", "必点", "火锅")),
+        ("避坑提醒", ("建议", "注意", "避坑", "交通", "不要", "提醒")),
+    ]
+    lines = []
+    used = set()
+    for label, keywords in groups:
+        matches = []
+        for sentence in sentences:
+            if sentence in used:
+                continue
+            if any(keyword.lower() in sentence.lower() for keyword in keywords):
+                matches.append(sentence)
+                used.add(sentence)
+            if len(matches) == 2:
+                break
+        if matches:
+            lines.append("{}：{}".format(label, " ".join(matches)[:260]))
+    if not lines:
+        lines.append("内容摘要：{}".format(" ".join(sentences[:3])[:520]))
+    return "\n".join(lines)[:900]
+
+
+def _reference_summaries(result: dict[str, Any]) -> list[dict[str, Any]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for platform, note in _reference_notes(result):
+        grouped.setdefault(platform, []).append(note)
+
+    summaries = []
+    for platform, notes in grouped.items():
+        titles = []
+        first_url = ""
+        first_source_id = ""
+        content_parts = []
+        for note in notes:
+            content = re.sub(r"\s+", " ", _detail_text(note)).strip()
+            if content:
+                content_parts.append(content)
+            if note.get("title"):
+                titles.append(str(note["title"]).strip())
+            first_url = first_url or note.get("url", "")
+            first_source_id = first_source_id or note.get("source_id", "")
+
+        summary = _structured_reference_summary(" ".join(content_parts), titles)
+
+        summaries.append(
+            {
+                "platform": platform,
+                "title": "{} 参考共识".format(platform),
+                "summary": summary,
+                "url": first_url,
+                "source_id": first_source_id,
+            }
+        )
+    return summaries
+
+
+def _transport_conclusion(result: dict[str, Any]) -> dict[str, Any]:
+    transport = result.get("transport", {})
+    outbound = transport.get("outbound", {})
+    return_leg = transport.get("return", {})
+    outbound_train = outbound.get("recommended") or (_records(outbound)[:1] or [None])[0]
+    return_train = return_leg.get("recommended") or (_records(return_leg)[:1] or [None])[0]
+    if not outbound_train or not return_train:
+        return {
+            "headline": "交通不适合直接纳入三天两夜",
+            "reason": "当前日期没有完整的直达去返车次样本，需要另查中转换乘或更换日期。",
+            "detail": "12306 没有返回完整直达结果，不把缺失数据当成有票。",
+        }
+
+    outbound_minutes = _minutes(outbound_train.get("duration"))
+    return_minutes = _minutes(return_train.get("duration"))
+    total_minutes = (outbound_minutes or 0) + (return_minutes or 0)
+    if total_minutes <= 360:
+        headline = "优先候选：往返交通对三天两夜友好"
+        reason = "往返首选车次样本的总乘车时间约 {} 小时，抵达后仍有完整游玩时间。".format(
+            round(total_minutes / 60, 1)
+        )
+    elif total_minutes <= 720:
+        headline = "可选：行程需要压缩首尾两天"
+        reason = "往返首选车次样本的总乘车时间约 {} 小时，第一天和返程日不要排太满。".format(
+            round(total_minutes / 60, 1)
+        )
+    else:
+        headline = "时间成本高：不建议作为轻松三天两夜"
+        reason = "往返首选车次样本的总乘车时间约 {} 小时，交通会吃掉大量行程。".format(
+            round(total_minutes / 60, 1)
+        )
+    detail = "去程 {} {}-{}；返程 {} {}-{}。".format(
+        outbound_train.get("code", ""),
+        outbound_train.get("start_time", ""),
+        outbound_train.get("arrive_time", ""),
+        return_train.get("code", ""),
+        return_train.get("start_time", ""),
+        return_train.get("arrive_time", ""),
+    )
+    return {"headline": headline, "reason": reason, "detail": detail}
+
+
 def _leg_text(leg: dict[str, Any]) -> str:
     trains = _records(leg)
     if not trains:
@@ -83,6 +230,8 @@ def summarize(research: dict[str, Any]) -> list[dict[str, Any]]:
                 "outbound_count": len(_records(outbound)),
                 "return_count": len(_records(return_leg)),
                 "reference_count": len(_reference_notes(result)),
+                "reference_summary": _reference_summaries(result),
+                "transport_conclusion": _transport_conclusion(result),
                 "warnings": result.get("warnings", []),
                 "status": transport.get("status", "unknown"),
             }
@@ -119,6 +268,13 @@ def render_html(research: dict[str, Any]) -> str:
             for platform, note in notes[:5]
             if note.get("url")
         )
+        reference_summary = "".join(
+                '<li><b>{}</b><div class="insight">{}</div></li>'.format(
+                _text(item.get("platform", "")),
+                _text(item.get("summary", "")),
+            )
+            for item in summary["reference_summary"][:5]
+        )
         recommendation = "优先候选" if index == 0 else ""
         duration = (
             "{} 小时".format(round(summary["total_train_minutes"] / 60, 1))
@@ -141,13 +297,25 @@ def render_html(research: dict[str, Any]) -> str:
                 <div><b>{outbound}/{return_count}</b><span>去程/返程车次</span></div>
                 <div><b>{xhs_count}</b><span>参考平台证据</span></div>
               </div>
+              <section class="decision">
+                <span class="decision-label">先看结论</span>
+                <h3>{verdict}</h3>
+                <p>{reason}</p>
+                <p class="transport-conclusion">{transport_summary}</p>
+              </section>
               <section>
-                <h3>12306 车次样本</h3>
+                <h3>建议怎么走</h3>
                 <pre>{transport}</pre>
               </section>
               <section>
-                <h3>参考平台证据</h3>
-                <ul>{notes}</ul>
+                <h3>攻略内容总结</h3>
+                <ul>{reference_summary}</ul>
+              </section>
+              <section class="raw-sources">
+                <details>
+                  <summary>查看原始来源（用于核验）</summary>
+                  <ul>{notes}</ul>
+                </details>
               </section>
               {warning_block}
             </article>
@@ -160,13 +328,17 @@ def render_html(research: dict[str, Any]) -> str:
                 outbound=summary["outbound_count"],
                 return_count=summary["return_count"],
                 xhs_count=summary["reference_count"],
+                verdict=_text(summary["transport_conclusion"]["headline"]),
+                reason=_text(summary["transport_conclusion"]["reason"]),
+                transport_summary=_text(summary["transport_conclusion"]["detail"]),
                 transport=_text(
                     "{}\n\n返程:\n{}".format(
                         _leg_text(transport.get("outbound", {})),
                         _leg_text(transport.get("return", {})),
                     )
                 ),
-                notes=note_links or "<li>暂无小红书结果</li>",
+                notes=note_links or "<li>暂无原始来源</li>",
+                reference_summary=reference_summary or "<li>暂无可总结的正文内容</li>",
                 warning_block=(
                     "<section class=\"warnings\"><h3>需要补充</h3><ul>{}</ul></section>".format(warnings)
                     if warnings
@@ -198,6 +370,11 @@ def render_html(research: dict[str, Any]) -> str:
     .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; margin-top:24px; }}
     .candidate {{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:20px; box-shadow:0 4px 16px rgba(26,35,43,.04); }}
     .candidate.recommended {{ border:2px solid var(--accent); }}
+    .decision {{ background:#edf7f4; border:1px solid #b6ded1; border-radius:6px; padding:14px; }}
+    .decision-label {{ color:var(--accent); font-size:12px; font-weight:700; }}
+    .decision h3 {{ margin:4px 0 6px; font-size:18px; }}
+    .decision p {{ margin:4px 0; }}
+    .transport-conclusion {{ color:#40515b; font-size:13px; }}
     header {{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }}
     header h2 {{ margin:4px 0 0; font-size:26px; }}
     .badge {{ min-height:24px; color:var(--accent); background:var(--accent-soft); border-radius:999px; padding:3px 9px; font-size:12px; font-weight:700; }}
@@ -212,6 +389,9 @@ def render_html(research: dict[str, Any]) -> str:
     ul {{ padding-left:20px; margin:0; }}
     a {{ color:var(--accent); }}
     .warnings {{ color:#854d0e; background:#fff8e6; border:1px solid #f2d69b; padding:12px; border-radius:6px; }}
+    .raw-sources {{ color:var(--muted); font-size:13px; }}
+    .raw-sources summary {{ cursor:pointer; color:var(--accent); font-weight:600; }}
+    .insight {{ white-space:pre-line; margin-top:5px; color:#39434e; }}
     footer {{ margin-top:24px; color:var(--muted); font-size:13px; }}
     @media (max-width:600px) {{ main {{ padding:20px 14px 40px; }} .metrics {{ grid-template-columns:1fr; }} }}
   </style>
