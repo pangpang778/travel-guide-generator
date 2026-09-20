@@ -27,3 +27,7 @@ After the request is complete:
 5. Return the generated HTML first, followed by Markdown, ICS and GeoJSON.
 
 Read-only only. Do not book, pay, publish, comment, like, or manage accounts.
+
+Example:
+
+    /travel-guide 从杭州出发，2026-10-01，北京/上海候选，3天2夜，参考小红书，交通只用12306

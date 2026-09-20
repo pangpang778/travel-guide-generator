@@ -492,7 +492,7 @@ writing guide JSON:
 
 Example:
 
-    python scripts/plan_trip.py --origin Ningbo --destinations Suzhou,Chongqing,Chengdu,Fuzhou --start-date 2026-09-26 --days 3 --nights 2 --reference-platforms xiaohongshu --reference-details 2 --rail-details --output-dir generated/trip
+    python scripts/plan_trip.py --origin Hangzhou --destinations Beijing,Shanghai --start-date 2026-10-01 --days 3 --nights 2 --reference-platforms xiaohongshu --reference-details 2 --rail-details --output-dir generated/trip
 
 The collector is read-only. Booking, payment, publishing, comments, likes,
 and account management are intentionally outside this product.
@@ -521,7 +521,7 @@ accessibility needs.
 
 Example command:
 
-    /travel-guide 从宁波出发，2026-09-26，苏州/福州候选，3天2夜，参考小红书，交通只用12306
+    /travel-guide 从杭州出发，2026-10-01，北京/上海候选，3天2夜，参考小红书，交通只用12306
 
 Once the required fields are complete:
 

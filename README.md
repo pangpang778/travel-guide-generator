@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/ClawHub-Skill-blueviolet?style=for-the-badge">
-  <img src="https://img.shields.io/badge/version-2.0.0-green?style=for-the-badge">
+  <img src="https://img.shields.io/badge/version-2.2.0-green?style=for-the-badge">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge">
 </p>
 
@@ -39,7 +39,7 @@ a logged-in Chrome session available for XiaoHongShu.
 
 ### Collect a real trip research bundle
 
-    .\.venv\Scripts\python.exe scripts\plan_trip.py --origin 宁波 --destinations 苏州,重庆,成都,福州 --start-date 2026-09-26 --days 3 --nights 2 --reference-platforms xiaohongshu --reference-details 2 --rail-details --output-dir generated\ningbo-candidates
+    .\.venv\Scripts\python.exe scripts\plan_trip.py --origin 杭州 --destinations 北京,上海 --start-date 2026-10-01 --days 3 --nights 2 --reference-platforms xiaohongshu --reference-details 2 --rail-details --output-dir generated\hangzhou-candidates
 
 This one command writes research.json, comparison.html and comparison.json.
 
@@ -58,7 +58,13 @@ The Skill asks for missing required inputs before it calls any platform:
 
 Example:
 
-    /travel-guide 从宁波出发，2026-09-26，苏州/福州候选，3天2夜，参考小红书，交通只用12306
+    /travel-guide 从杭州出发，2026-10-01，北京/上海候选，3天2夜，参考小红书，交通只用12306
+
+### Beginner install prompt
+
+For a beginner, copy the complete prompt from BEGINNER-PROMPT.md into their
+AI assistant. It explains installation, first login, the single trigger
+command and the required-input questions.
 
 The research JSON is the handoff contract for an AI agent: synthesize one
 guide JSON per destination using the collected evidence, then run the existing
@@ -349,7 +355,7 @@ MIT License — 自由使用、修改和分发
 由 **GMMG55** 创建，发布到 ClawHub。
 
 - ClawHub: `clawhub install travel-guide-generator`
-- GitHub: https://github.com/GMMG55/travel-guide-generator
+- GitHub: https://github.com/pangpang778/travel-guide-generator
 - Issue 反馈：欢迎在 GitHub Issues 提出
 
 ---
