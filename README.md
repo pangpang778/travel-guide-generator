@@ -123,6 +123,8 @@ macOS/Linux：
 - GeoJSON：导入地图工具
 - JSON：机器可读的完整行程
 
+页面原型案例：打开 [examples/travel-guide-prototype.html](examples/travel-guide-prototype.html)，查看“宁波出发、苏州/重庆/成都/福州候选、3天2夜”的结论型攻略页面。
+
 ## 缺信息时怎么处理
 
 Skill 必须先拿到：
