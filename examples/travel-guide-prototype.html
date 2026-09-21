@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1d1d1f">
+  <script>document.documentElement.classList.add("js");</script>
   <title>页面原型 · 宁波出发三天两夜</title>
   <style>
     :root {
@@ -126,9 +127,9 @@
       grid-template-columns: minmax(0, 1.18fr) minmax(260px, .82fr);
       align-items: end;
       gap: 64px;
-      min-height: 520px;
-      padding-top: 92px;
-      padding-bottom: 84px;
+      min-height: 390px;
+      padding-top: 58px;
+      padding-bottom: 52px;
     }
     .hero-inner > * { width: 100%; min-width: 0; }
     .eyebrow {
@@ -199,6 +200,41 @@
     }
     .hero-stat strong { display: block; font-size: 24px; font-weight: 600; }
     .hero-stat span { color: var(--muted-dark); font-size: 13px; }
+
+    .mode-strip { background: var(--paper); border-bottom: 1px solid var(--line); }
+    .mode-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 16px 24px;
+    }
+    .mode-caption span { display: block; color: var(--muted); font-size: 12px; }
+    .mode-caption strong { font-size: 15px; font-weight: 600; }
+    .segmented {
+      display: flex;
+      gap: 2px;
+      padding: 3px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+    .segmented button {
+      min-height: 36px;
+      padding: 7px 15px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-radius: 999px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .segmented button[aria-selected="true"] { color: var(--white); background: var(--blue); }
+    .segmented button:active { transform: scale(.97); }
+    .js .guide-section { display: none; }
+    .js .guide-section.is-active { display: block; }
 
     .section-heading {
       display: flex;
@@ -489,10 +525,16 @@
       .budget-grid { gap: 34px; }
       .budget-table { min-width: 540px; }
       .budget-table-wrap { overflow-x: auto; }
+      .mode-inner { display: block; padding: 14px 16px; }
+      .mode-caption { margin-bottom: 10px; }
+      .segmented { width: 100%; overflow-x: auto; }
+      .segmented button { flex: 1 0 auto; }
     }
     @media print {
       .global-nav { position: static; }
       .nav-links, .nav-action { display: none; }
+      .mode-strip { display: none; }
+      .js .guide-section { display: block; }
       .tile-inner { padding: 42px 0; }
       .hero-inner { min-height: 0; }
       .tile-dark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -508,12 +550,9 @@
     <div class="global-nav-inner">
       <a class="brand" href="#top">Travel Guide</a>
       <div class="nav-links">
-        <a href="#decision">结论</a>
-        <a href="#compare">候选</a>
-        <a href="#itinerary">行程</a>
-        <a href="#prepare">准备</a>
-        <a href="#budget">预算</a>
-        <a href="#sources">来源</a>
+        <a href="#decision" data-tab="overview">结论</a>
+        <a href="#itinerary" data-tab="plan">行程</a>
+        <a href="#prepare" data-tab="practical">准备</a>
       </div>
       <button class="nav-action" type="button" onclick="window.print()">打印 / PDF</button>
     </div>
@@ -549,7 +588,18 @@
       </div>
     </section>
 
-    <section class="tile tile-pearl" id="decision">
+    <section class="mode-strip" aria-label="攻略视图切换">
+      <div class="mode-inner">
+        <div class="mode-caption"><span>页面视图</span><strong>按需查看，不再一直向下滚</strong></div>
+        <div class="segmented" role="tablist" aria-label="攻略内容">
+          <button id="tab-overview" type="button" role="tab" aria-selected="true" aria-controls="decision compare" data-tab="overview">候选总览</button>
+          <button id="tab-plan" type="button" role="tab" aria-selected="false" aria-controls="itinerary" data-tab="plan">三天行程</button>
+          <button id="tab-practical" type="button" role="tab" aria-selected="false" aria-controls="prepare practical budget avoid sources" data-tab="practical">出发准备</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="tile tile-pearl guide-section is-active" data-panel="overview" id="decision">
       <div class="tile-inner">
         <div class="section-heading">
           <div><span class="section-kicker">01 · DECISION</span><h2>先看结论</h2></div>
@@ -574,7 +624,7 @@
       </div>
     </section>
 
-    <section class="tile tile-dark" id="compare">
+    <section class="tile tile-dark guide-section is-active" data-panel="overview" id="compare">
       <div class="tile-inner">
         <div class="section-heading">
           <div><span class="section-kicker">02 · SHORTLIST</span><h2>候选目的地对比</h2></div>
@@ -595,7 +645,7 @@
       </div>
     </section>
 
-    <section class="tile tile-paper" id="itinerary">
+    <section class="tile tile-paper guide-section" data-panel="plan" id="itinerary">
       <div class="tile-inner">
         <div class="section-heading">
           <div><span class="section-kicker">03 · SELECTED PLAN</span><h2>苏州三天路线</h2></div>
@@ -652,7 +702,7 @@
       </div>
     </section>
 
-    <section class="tile tile-pearl" id="prepare">
+    <section class="tile tile-pearl guide-section" data-panel="practical" id="prepare">
       <div class="tile-inner">
         <div class="section-heading">
           <div><span class="section-kicker">04 · BEFORE YOU GO</span><h2>出发前只做这几件事</h2></div>
@@ -684,7 +734,7 @@
       </div>
     </section>
 
-    <section class="tile tile-paper" id="practical">
+    <section class="tile tile-paper guide-section" data-panel="practical" id="practical">
       <div class="tile-inner">
         <div class="section-heading">
           <div><span class="section-kicker">05 · PRACTICAL</span><h2>住哪里、吃什么、怎么取舍</h2></div>
@@ -698,7 +748,7 @@
       </div>
     </section>
 
-    <section class="tile tile-dark" id="budget">
+    <section class="tile tile-dark guide-section" data-panel="practical" id="budget">
       <div class="tile-inner">
         <div class="section-heading">
           <div><span class="section-kicker">06 · BUDGET</span><h2>预算先说清楚哪些是真数据</h2></div>
@@ -725,7 +775,7 @@
       </div>
     </section>
 
-    <section class="tile tile-pearl" id="avoid">
+    <section class="tile tile-pearl guide-section" data-panel="practical" id="avoid">
       <div class="tile-inner">
         <div class="section-heading">
           <div><span class="section-kicker">07 · WATCH OUT</span><h2>这次最容易踩的坑</h2></div>
@@ -739,7 +789,7 @@
       </div>
     </section>
 
-    <section class="tile tile-paper sources" id="sources">
+    <section class="tile tile-paper sources guide-section" data-panel="practical" id="sources">
       <div class="tile-inner">
         <div class="section-heading">
           <div><span class="section-kicker">08 · EVIDENCE</span><h2>原始来源</h2></div>
@@ -760,5 +810,28 @@
   </main>
 
   <footer class="footer"><p>Travel Guide · decision-first prototype · 研究快照：2026-09-20</p></footer>
+  <script>
+    (() => {
+      const sections = [...document.querySelectorAll("[data-panel]")];
+      const controls = [...document.querySelectorAll("[data-tab]")];
+      const validTabs = new Set(sections.map((section) => section.dataset.panel));
+      const setTab = (name, updateUrl = true) => {
+        const tab = validTabs.has(name) ? name : "overview";
+        sections.forEach((section) => section.classList.toggle("is-active", section.dataset.panel === tab));
+        controls.forEach((control) => {
+          const selected = control.dataset.tab === tab;
+          if (control.getAttribute("role") === "tab") control.setAttribute("aria-selected", String(selected));
+        });
+        if (updateUrl) history.replaceState(null, "", `#${tab}`);
+        document.querySelector(".mode-strip")?.scrollIntoView({ block: "start" });
+      };
+      controls.forEach((control) => control.addEventListener("click", (event) => {
+        event.preventDefault();
+        setTab(control.dataset.tab);
+      }));
+      const initial = location.hash === "#itinerary" ? "plan" : location.hash === "#prepare" ? "practical" : location.hash.slice(1);
+      setTab(initial, false);
+    })();
+  </script>
 </body>
 </html>
