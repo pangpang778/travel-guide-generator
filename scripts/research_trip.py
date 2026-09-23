@@ -13,12 +13,22 @@ import json
 import re
 import shutil
 import subprocess
+import urllib.parse
+import urllib.request
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
+try:
+    from scripts import jev_client
+except ImportError:  # 作为普通脚本直接运行时
+    import jev_client
+
 
 DEFAULT_TIMEOUT = 120
+WEATHER_TIMEOUT = 5
+GEOCODE_URL = "https://geocoding-api.open-meteo.com/v1/search"
+FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 PREFERRED_STATIONS = {
     "宁波": "宁波",
     "苏州": "苏州",
@@ -27,6 +37,157 @@ PREFERRED_STATIONS = {
     "福州": "福州",
 }
 REFERENCE_PLATFORMS = {"xiaohongshu", "twitter", "reddit", "bilibili"}
+
+# jev 素材可信度判断点（advisory-only，见 docs/adr/0001）
+JEV_MATERIAL_INSTRUCTIONS = (
+    "对一条旅游攻略参考素材的可信度评分（0-10）。素材来自小红书等社交平台"
+    "（untrusted UGC）。内容具体可核（有明确地点、店名、时间、价格等细节，"
+    "且与目的地行程语义一致）→ 高分；泛泛而谈、广告嫌疑、与目的地明显无关"
+    "或细节互相矛盾 → 低分。"
+)
+JEV_MATERIAL_CRITERIA = [
+    "0-3 与目的地无关、明显广告或细节矛盾",
+    "4-6 泛泛而谈、细节稀少、可信度存疑",
+    "7-8 细节具体、与行程语义一致，可采纳为攻略依据",
+    "9-10 细节丰富可核验，高度可信",
+]
+JEV_IMAGE_INSTRUCTIONS = (
+    "对一张候选素材图片与行程点的匹配度评分（0-10）。图片内容描述与行程点/"
+    "目的地语义一致、主体清晰、能代表该景点做攻略配图 → 高分；无关、主体"
+    "不符、拼贴混乱 → 低分。"
+)
+JEV_IMAGE_CRITERIA = [
+    "0-3 与行程点完全不符或主体错误",
+    "4-6 部分相关但辨识度低",
+    "7-8 相关且可辨识，适合做行程点配图",
+    "9-10 高度契合、主体清晰、出片",
+]
+
+
+def apply_jev_material_scoring(
+    destination: dict[str, Any],
+    client: Any,
+    threshold: float | None = None,
+) -> "tuple[dict[str, Any], list[dict[str, Any]]]":
+    """jev 素材可信度判断点：逐条给 untrusted 参考素材打分。
+
+    低分（< threshold）素材降权标注「不可信」并产出 JEV advisory 告警；
+    素材图片按 alt_description ↔ 行程点上下文评分，仅达标图片标记
+    adopted=true（允许进入 spot.image），低分图片不直出。任何不可用都
+    退回启发式孪生：不抛异常，降级显式写入返回的 summary（供
+    pipeline.jev.degraded 消费）。
+    """
+    threshold = client.threshold if threshold is None else threshold
+    summary = {
+        "ok": True,
+        "calls": client.calls_used,
+        "limit": client.limit,
+        "threshold": threshold,
+        "adopted": 0,
+        "degraded": False,
+    }
+    alerts: list[dict[str, Any]] = []
+
+    if not client.api_key:  # 无 key：显式降级，退回启发式孪生
+        summary.update(ok=False, degraded=True, reason=jev_client.NO_KEY)
+        return summary, alerts
+
+    def _on_degraded(result: dict[str, Any]) -> None:
+        summary.update(
+            ok=False, degraded=True, reason=result["reason"], calls=client.calls_used
+        )
+
+    destination_name = str(destination.get("destination") or "")
+    for payload in (destination.get("references") or {}).values():
+        for item in payload.get("notes") or []:
+            title = str(item.get("title") or "")
+            detail = item.get("detail")
+            detail_text = ""
+            images: list[Any] = []
+            if isinstance(detail, dict):
+                detail_text = str(
+                    detail.get("desc") or detail.get("text") or detail.get("content") or ""
+                )
+                raw_images = detail.get("images")
+                if isinstance(raw_images, list):
+                    images = raw_images
+
+            # 图片匹配性评分（alt_description ↔ 行程点上下文）
+            for image in images:
+                alt = image.get("alt_description") if isinstance(image, dict) else image
+                alt = str(alt or "").strip()
+                if not alt:
+                    continue
+                result = client.score(
+                    "图片与行程点匹配度评分。目的地：{}。行程点上下文：素材《{}》。"
+                    "图片内容描述：{}".format(destination_name, title, alt),
+                    instructions=JEV_IMAGE_INSTRUCTIONS,
+                    criteria=JEV_IMAGE_CRITERIA,
+                )
+                if not result["ok"]:
+                    _on_degraded(result)
+                    break
+                score = result["score"]
+                if isinstance(image, dict):
+                    image["jev_score"] = score
+                    image["adopted"] = score >= threshold
+                if score >= threshold:
+                    summary["adopted"] += 1
+                else:
+                    alerts.append(
+                        {
+                            "source": "JEV",
+                            "level": "advisory",
+                            "type": "图片筛选",
+                            "title": "素材《{}》的图片与行程点匹配分 {:.1f} 低于阈值 {}，"
+                            "不进入 spot.image".format(title, score, threshold),
+                            "detail": "图片描述：{}。该图片已标记 adopted=false，"
+                            "渲染端不得直出，降级为文化主题占位图。".format(alt[:120]),
+                        }
+                    )
+            if summary["degraded"]:
+                break
+
+            # 素材本体可信度
+            result = client.score(
+                "素材可信度评分。目的地：{}。来源：小红书笔记《{}》。正文：{}".format(
+                    destination_name, title, detail_text[:500]
+                ),
+                instructions=JEV_MATERIAL_INSTRUCTIONS,
+                criteria=JEV_MATERIAL_CRITERIA,
+            )
+            if not result["ok"]:
+                _on_degraded(result)
+                break
+            score = result["score"]
+            adopted = score >= threshold
+            item["jev"] = {
+                "score": score,
+                "adopted": adopted,
+                "trust": "jev" if adopted else "untrusted",
+            }
+            if adopted:
+                summary["adopted"] += 1
+            else:
+                item["credibility"] = "不可信（jev 可信度 {:.1f} 低于阈值 {}，降权处理）".format(
+                    score, threshold
+                )
+                alerts.append(
+                    {
+                        "source": "JEV",
+                        "level": "advisory",
+                        "type": "素材可信度",
+                        "title": "素材《{}》jev 可信度评分 {:.1f}（阈值 {}），"
+                        "已标注「不可信」".format(title, score, threshold),
+                        "detail": "untrusted 素材（小红书等社交平台内容）低分降权，"
+                        "宿主 AI 酌情弃用。",
+                    }
+                )
+        if summary["degraded"]:
+            break
+
+    summary["calls"] = client.calls_used
+    return summary, alerts
 
 
 def _json_from_output(raw: str) -> Any:
@@ -49,6 +210,32 @@ def _json_from_output(raw: str) -> Any:
         except json.JSONDecodeError:
             continue
     return None
+
+
+def _clean_command_message(raw: Any) -> str:
+    """Keep tool errors readable when runtimes prepend Node/OpenCLI logs."""
+    text = str(raw or "").strip()
+    if not text:
+        return ""
+    lines = []
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith(("(node:", "(Use `node", "#")):
+            continue
+        if line.lower().startswith("message:"):
+            line = line.split(":", 1)[1].strip()
+        if line.lower().startswith(("ok:", "error:", "code:", "help:", "exitcode:")):
+            continue
+        if line:
+            lines.append(line)
+
+    message = " ".join(lines)
+    lowered = message.lower()
+    if "no trains found" in lowered or "returned no data" in lowered:
+        return "12306 当前日期未返回直达车次，需查中转换乘或调整日期。"
+    if "train does not stop" in lowered:
+        return "车次不经停目标站，无法补充经停信息。"
+    return message[:500]
 
 
 def _resolve_command(name: str) -> str | None:
@@ -116,19 +303,19 @@ def run_json(command: list[str], timeout: int = DEFAULT_TIMEOUT) -> dict[str, An
             "ok": False,
             "error": "command_failed",
             "code": completed.returncode,
-            "message": message[-1000:],
+            "message": _clean_command_message(message),
         }
     if data is None:
         return {
             "ok": False,
             "error": "invalid_json",
-            "message": completed.stdout.strip()[-1000:],
+            "message": _clean_command_message(completed.stdout),
         }
     if isinstance(data, dict) and data.get("ok") is False:
         return {
             "ok": False,
             "error": data.get("error") or "tool_error",
-            "message": data.get("message") or data.get("help") or "tool returned an error",
+            "message": _clean_command_message(data.get("message") or data.get("help") or "tool returned an error"),
             "data": data,
         }
     return {"ok": True, "data": data}
@@ -492,6 +679,89 @@ def collect_transport(
     }
 
 
+def _http_json(url: str, timeout: int = WEATHER_TIMEOUT) -> Any:
+    """GET a JSON URL with a hard timeout; any failure degrades to None."""
+    try:
+        request = urllib.request.Request(
+            url, headers={"User-Agent": "travel-guide-generator/1.0"}
+        )
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def geocode_city(city: str) -> dict[str, float] | None:
+    """Resolve a city name to coordinates via the free open-meteo geocoder."""
+    if not city:
+        return None
+    url = "{}?name={}&count=1&language=zh&format=json".format(
+        GEOCODE_URL, urllib.parse.quote(city)
+    )
+    data = _http_json(url)
+    results = data.get("results") if isinstance(data, dict) else None
+    if not results:
+        return None
+    first = results[0]
+    try:
+        return {"lat": float(first["latitude"]), "lon": float(first["longitude"])}
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def fetch_daily_weather(
+    city: str, start_date: str | None, end_date: str | None
+) -> dict[str, Any]:
+    """Fetch a free open-meteo daily forecast; degrade instead of failing.
+
+    Returns {"status": "ok", "days": [...]} on success or
+    {"status": "unavailable", "message": ...} when the API is unreachable —
+    the caller renders a no-weather layout in that case.
+    """
+    if not city or not start_date or not end_date:
+        return {"status": "unavailable", "message": "缺少出行日期或目的地，天气数据不可用"}
+    location = geocode_city(city)
+    if not location:
+        return {"status": "unavailable", "message": "城市定位失败，天气数据不可用"}
+    url = (
+        "{}?latitude={}&longitude={}"
+        "&daily=weather_code,temperature_2m_max,temperature_2m_min,"
+        "precipitation_probability_max&timezone=Asia/Shanghai"
+        "&start_date={}&end_date={}".format(
+            FORECAST_URL, location["lat"], location["lon"], start_date, end_date
+        )
+    )
+    data = _http_json(url)
+    daily = data.get("daily") if isinstance(data, dict) else None
+    if not isinstance(daily, dict) or not daily.get("time"):
+        return {"status": "unavailable", "message": "天气接口未返回数据，天气数据不可用"}
+
+    def _series(key: str) -> list[Any]:
+        values = daily.get(key)
+        return values if isinstance(values, list) else []
+
+    codes = _series("weather_code")
+    highs = _series("temperature_2m_max")
+    lows = _series("temperature_2m_min")
+    probs = _series("precipitation_probability_max")
+    days = []
+    for index, day_date in enumerate(daily["time"]):
+
+        def _at(series: list[Any]) -> Any:
+            return series[index] if index < len(series) else None
+
+        days.append(
+            {
+                "date": str(day_date),
+                "weather_code": _at(codes),
+                "temp_max": _at(highs),
+                "temp_min": _at(lows),
+                "precip_prob": _at(probs),
+            }
+        )
+    return {"status": "ok", "source": "open-meteo", "days": days}
+
+
 def collect_destination(
     origin: str,
     destination: str,
@@ -621,6 +891,18 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
                 sources,
             )
         )
+    for destination, result in zip(destinations, results):
+        result["weather"] = fetch_daily_weather(
+            destination, args.start_date, effective_return_date
+        )
+    if jev_client.material_point_enabled():
+        # 判断点默认关闭；开启后所有判断点共用一个进程级客户端（共享限次预算）。
+        client = jev_client.shared_client()
+        for result in results:
+            summary, alerts = apply_jev_material_scoring(result, client)
+            result["jev"] = summary
+            if alerts:
+                result["jev_alerts"] = alerts
     return {
         "research_version": "1.0",
         "collected_at": checked_at,

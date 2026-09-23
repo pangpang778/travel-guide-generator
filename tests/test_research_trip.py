@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 
 from scripts.research_trip import (
+    _clean_command_message,
     _json_from_output,
     choose_station,
     collect_transport,
@@ -9,6 +10,18 @@ from scripts.research_trip import (
 
 
 class ResearchTripTests(unittest.TestCase):
+    def test_clean_command_message_removes_runtime_noise(self):
+        raw = """(node:123) [UNDICI-EHPA] warning
+(Use `node --trace-warnings ...` to show where the warning was created)
+ok: false
+error:
+  code: EMPTY_RESULT
+  message: No trains found from 宁波 to 成都东 returned no data
+  exitCode: 66"""
+        message = _clean_command_message(raw)
+        self.assertEqual(message, "12306 当前日期未返回直达车次，需查中转换乘或调整日期。")
+        self.assertNotIn("node:", message)
+
     def test_json_parser_skips_runtime_warning(self):
         self.assertEqual(_json_from_output("warning\n[{\"code\":\"G1\"}]"), [{"code": "G1"}])
 
