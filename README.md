@@ -102,7 +102,7 @@ macOS/Linux：
 
 ## 会生成什么
 
-每次规划会先生成候选对比，再生成最终攻略：
+每次规划会先生成候选对比，再为每个候选生成独立攻略：
 
 - 候选目的地优缺点
 - 去程/返程交通比较
@@ -122,8 +122,9 @@ macOS/Linux：
 - ICS：导入日历
 - GeoJSON：导入地图工具
 - JSON：机器可读的完整行程
+- 多候选时：`guides/` 下每个目的地都有独立的 HTML、Markdown、ICS、GeoJSON 和 JSON
 
-页面原型案例：打开 [examples/travel-guide-prototype.html](examples/travel-guide-prototype.html)，查看“宁波出发、苏州/重庆/成都/福州候选、3天2夜”的结论型攻略页面。
+页面原型案例：打开 [examples/travel-guide-prototype.html](examples/travel-guide-prototype.html)，切换查看“宁波出发、苏州/重庆/成都/福州候选、3天2夜”的四份独立候选攻略。
 
 ## 缺信息时怎么处理
 
@@ -169,10 +170,10 @@ Skill 只会反问：
 普通用户不需要使用下面的命令。它们是 Skill 内部实现：
 
 ~~~text
-scripts/plan_trip.py       采集并生成候选对比
+scripts/plan_trip.py       采集并生成候选对比及每个候选的攻略
 scripts/research_trip.py   调用参考平台和 12306
 scripts/compare_trip.py    生成候选对比 HTML
-scripts/build_guide.py     生成单城市 HTML/Markdown/ICS/GeoJSON
+scripts/build_guide.py     生成单个候选的 HTML/Markdown/ICS/GeoJSON
 ~~~
 
 ## 许可证

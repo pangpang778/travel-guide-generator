@@ -4,6 +4,8 @@
 import argparse
 import copy
 import json
+import shutil
+import subprocess
 from pathlib import Path
 
 try:
@@ -44,8 +46,33 @@ def enrich_routes(guide):
     return count
 
 
-def build(guide, output_base, template=None, allow_invalid=False):
-    """Enrich, validate, render and export a guide."""
+def export_pdf(html_path, pdf_path, paper_format="A4"):
+    """T10：无头 Chromium 走 @media print 排版产出 PDF（npx playwright pdf）。"""
+    html_path, pdf_path = Path(html_path), Path(pdf_path)
+    npx = shutil.which("npx") or "npx"
+    command = [
+        npx, "--no-install", "playwright", "pdf",
+        "--paper-format", paper_format,
+        "--wait-for-timeout", "1500",
+        html_path.resolve().as_uri(),
+        str(pdf_path.resolve()),
+    ]
+    result = subprocess.run(command, capture_output=True, text=True, timeout=300)
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()[-300:]
+        raise RuntimeError("playwright pdf 失败: {}".format(detail))
+    data = pdf_path.read_bytes()
+    if not data.startswith(b"%PDF-"):
+        raise RuntimeError("PDF 产物缺失或魔数不符: {}".format(pdf_path))
+    return pdf_path
+
+
+def build(guide, output_base, template=None, allow_invalid=False, pdf=False):
+    """Enrich, validate, render and export a guide.
+
+    pdf=True 时额外产出 PDF（可选步骤：依赖无头浏览器，缺 playwright 的环境
+    不应阻断常规构建，故默认关闭、产物计数保持 6 不变）。
+    """
     enriched = copy.deepcopy(guide)
     route_count = enrich_routes(enriched)
     enriched["season_tips"] = build_season_tips(enriched)
@@ -63,12 +90,19 @@ def build(guide, output_base, template=None, allow_invalid=False):
     write_json(normalized_path, enriched)
     render_file(enriched, html_path, template, allow_invalid=allow_invalid)
     files = [str(normalized_path), str(html_path)] + export_all(enriched, base)
-    return {
+    result = {
         "status": "ok",
         "routes_estimated": route_count,
         "report": report,
         "files": files,
     }
+    if pdf:
+        try:
+            export_pdf(html_path, base.with_suffix(".pdf"))
+            result["files"].append(str(base.with_suffix(".pdf")))
+        except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+            result["pdf_error"] = str(error)
+    return result
 
 
 def main():
@@ -77,6 +111,7 @@ def main():
     parser.add_argument("--output-base", help="输出基础路径（不含扩展名）")
     parser.add_argument("--template", help="自定义 HTML 模板")
     parser.add_argument("--allow-invalid", action="store_true")
+    parser.add_argument("--pdf", action="store_true", help="额外用无头 Chromium 产出 PDF（需 playwright）")
     args = parser.parse_args()
     output_base = args.output_base or str(Path(args.input).with_suffix(""))
     try:
@@ -85,6 +120,7 @@ def main():
             output_base,
             args.template,
             args.allow_invalid,
+            pdf=args.pdf,
         )
     except (OSError, ValueError, json.JSONDecodeError) as error:
         result = {"status": "error", "message": str(error), "files": []}

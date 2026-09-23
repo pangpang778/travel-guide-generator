@@ -341,6 +341,16 @@
     .row-status.warn { color: #e9bf6a; }
     .row-status.bad { color: #ef927f; }
     .row-status.muted { color: #a8c9df; }
+    .guide-open {
+      padding: 7px 10px;
+      color: var(--white);
+      background: var(--blue);
+      border: 0;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .guide-open:hover { background: var(--blue-dark); }
     .compare-note { margin: 18px 0 0; color: var(--muted-dark); font-size: 13px; }
 
     .route-flow {
@@ -366,6 +376,38 @@
       font-size: 24px;
     }
     .day-list { display: grid; gap: 56px; }
+    .candidate-guide-switch {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .candidate-guide-switch button {
+      min-height: 40px;
+      padding: 8px 16px;
+      color: var(--muted);
+      background: var(--canvas);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .candidate-guide-switch button[aria-selected="true"] {
+      color: var(--white);
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+    .candidate-plan[hidden] { display: none; }
+    .candidate-plan-summary {
+      margin-bottom: 34px;
+      padding: 20px 22px;
+      background: var(--pearl);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+    }
+    .candidate-plan-summary h3 { margin: 10px 0 8px; font-size: 25px; }
+    .candidate-plan-summary p { max-width: 760px; margin: 0; color: var(--ink-soft); }
+    .candidate-plan .route-flow { margin-bottom: 42px; }
+    .candidate-plan-practical { margin-top: 42px; }
     .day-plan {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 260px;
@@ -632,12 +674,12 @@
         </div>
         <div class="compare-table-wrap">
           <table class="compare-table">
-            <thead><tr><th>目的地</th><th>12306 往返样本</th><th>三天两夜适配</th><th>攻略共识</th><th>建议动作</th></tr></thead>
+            <thead><tr><th>目的地</th><th>12306 往返样本</th><th>三天两夜适配</th><th>攻略共识</th><th>建议动作</th><th>独立攻略</th></tr></thead>
             <tbody>
-              <tr><td>苏州<span class="row-status good">优先候选</span></td><td><strong>5.3 小时</strong><span>去 G1866 · 返 G3059</span></td><td><strong>高</strong><span>交通短，首尾可留白</span></td><td><span>园林、苏博、平江路集中，适合地铁加步行</span></td><td><span>锁去程；返程重新筛选下午车次</span></td></tr>
-              <tr><td>福州<span class="row-status warn">备选</span></td><td><strong>8.0 小时</strong><span>去 D3219 · 返 D3170</span></td><td><strong>中</strong><span>首尾较紧，需要压缩</span></td><td><span>老城、美食、闽江夜景，适合慢逛</span></td><td><span>把兴趣放在吃和城市漫游</span></td></tr>
-              <tr><td>重庆<span class="row-status bad">不建议</span></td><td><strong>26.1 小时</strong><span>去 D656 · 返 D658</span></td><td><strong>低</strong><span>交通吃掉大量行程</span></td><td><span>景点分散，市内移动也需要时间</span></td><td><span>改飞机或至少增加天数</span></td></tr>
-              <tr><td>成都<span class="row-status muted">待核实</span></td><td><strong>无完整直达样本</strong><span>当前日期未返回可比结果</span></td><td><strong>未知</strong><span>缺少硬数据</span></td><td><span>平台有三日游内容，但不能替代交通可行性</span></td><td><span>查中转换乘或调整日期</span></td></tr>
+              <tr><td>苏州<span class="row-status good">优先候选</span></td><td><strong>5.3 小时</strong><span>去 G1866 · 返 G3059</span></td><td><strong>高</strong><span>交通短，首尾可留白</span></td><td><span>园林、苏博、平江路集中，适合地铁加步行</span></td><td><span>锁去程；返程重新筛选下午车次</span></td><td><button type="button" class="guide-open" data-open-candidate="suzhou">查看苏州攻略</button></td></tr>
+              <tr><td>福州<span class="row-status warn">备选</span></td><td><strong>8.0 小时</strong><span>去 D3219 · 返 D3170</span></td><td><strong>中</strong><span>首尾较紧，需要压缩</span></td><td><span>老城、美食、闽江夜景，适合慢逛</span></td><td><span>把兴趣放在吃和城市漫游</span></td><td><button type="button" class="guide-open" data-open-candidate="fuzhou">查看福州攻略</button></td></tr>
+              <tr><td>重庆<span class="row-status bad">不建议</span></td><td><strong>26.1 小时</strong><span>去 D656 · 返 D658</span></td><td><strong>低</strong><span>交通吃掉大量行程</span></td><td><span>景点分散，市内移动也需要时间</span></td><td><span>改飞机或至少增加天数</span></td><td><button type="button" class="guide-open" data-open-candidate="chongqing">查看重庆攻略</button></td></tr>
+              <tr><td>成都<span class="row-status muted">待核实</span></td><td><strong>无完整直达样本</strong><span>当前日期未返回可比结果</span></td><td><strong>未知</strong><span>缺少硬数据</span></td><td><span>平台有三日游内容，但不能替代交通可行性</span></td><td><span>查中转换乘或调整日期</span></td><td><button type="button" class="guide-open" data-open-candidate="chengdu">查看成都攻略</button></td></tr>
             </tbody>
           </table>
         </div>
@@ -648,57 +690,16 @@
     <section class="tile tile-paper guide-section" data-panel="plan" id="itinerary">
       <div class="tile-inner">
         <div class="section-heading">
-          <div><span class="section-kicker">03 · SELECTED PLAN</span><h2>苏州三天路线</h2></div>
-          <p>按同片区连续安排，减少折返；每天给预约、排队和体力留出余量。</p>
+          <div><span class="section-kicker">03 · CANDIDATE PLANS</span><h2>每个候选都有独立路线</h2></div>
+          <p>先看推荐不等于只给一个答案。切换候选，分别查看交通、三天安排、住宿逻辑和仍需核验的部分。</p>
         </div>
-        <div class="route-flow" aria-label="三天路线总览">
-          <span class="route-node">宁波</span><span class="route-arrow">→</span>
-          <span class="route-node">苏州北</span><span class="route-arrow">→</span>
-          <span class="route-node">姑苏区</span><span class="route-arrow">→</span>
-          <span class="route-node">宁波</span>
+        <div class="candidate-guide-switch" role="tablist" aria-label="候选目的地攻略">
+          <button id="candidate-tab-suzhou" type="button" role="tab" aria-selected="true" aria-controls="candidate-plan-suzhou" data-candidate-tab="suzhou">苏州 · 优先</button>
+          <button id="candidate-tab-fuzhou" type="button" role="tab" aria-selected="false" aria-controls="candidate-plan-fuzhou" data-candidate-tab="fuzhou">福州 · 备选</button>
+          <button id="candidate-tab-chongqing" type="button" role="tab" aria-selected="false" aria-controls="candidate-plan-chongqing" data-candidate-tab="chongqing">重庆 · 不建议</button>
+          <button id="candidate-tab-chengdu" type="button" role="tab" aria-selected="false" aria-controls="candidate-plan-chengdu" data-candidate-tab="chengdu">成都 · 待核实</button>
         </div>
-        <div class="day-list">
-          <article class="day-plan">
-            <div>
-              <span class="day-label">DAY 1 · 古城初见</span>
-              <h3>抵达后先走一条古城线</h3>
-              <div class="timeline">
-                <div class="timeline-item"><span class="timeline-time">06:14 — 09:02</span><div><h4>G1866 宁波 → 苏州北</h4><p>到站后预留进城和寄存行李时间，不把第一站卡得太死。</p></div></div>
-                <div class="timeline-item"><span class="timeline-time">10:30 — 12:00</span><div><h4>狮子林</h4><p>小而精的园林，抵达当天先进入江南游览节奏。</p></div></div>
-                <div class="timeline-item"><span class="timeline-time">13:30 — 15:30</span><div><h4>苏州博物馆</h4><p>以预约成功为前置条件；没有预约就切换到拙政园外围和古城街巷。</p></div></div>
-                <div class="timeline-item"><span class="timeline-time">16:00 — 19:30</span><div><h4>平江路 + 晚餐</h4><p>傍晚再逛老街，晚上回姑苏区住宿，减少跨区折返。</p></div></div>
-              </div>
-            </div>
-            <aside class="day-side"><h4>今天要记住</h4><ul><li>园林和博物馆放在白天</li><li>苏博预约失败要有替代路线</li><li>夜景安排在住宿片区附近</li></ul></aside>
-          </article>
-
-          <article class="day-plan">
-            <div>
-              <span class="day-label">DAY 2 · 园林与夜色</span>
-              <h3>把园林和夜游放在同一侧</h3>
-              <div class="timeline">
-                <div class="timeline-item"><span class="timeline-time">09:00 — 11:30</span><div><h4>留园</h4><p>上午游览，避开下午人流；门票和开放时间出发前再次核验。</p></div></div>
-                <div class="timeline-item"><span class="timeline-time">12:00 — 14:00</span><div><h4>午餐 + 休息</h4><p>不安排第二个大景点，给步行、排队和天气留出缓冲。</p></div></div>
-                <div class="timeline-item"><span class="timeline-time">14:30 — 16:30</span><div><h4>寒山寺</h4><p>如果天气或体力一般，可替换为古城内咖啡店和小巷慢逛。</p></div></div>
-                <div class="timeline-item"><span class="timeline-time">17:00 — 20:00</span><div><h4>山塘街夜游</h4><p>把拍照和晚餐合并，结束后直接回姑苏区，不再安排远距离移动。</p></div></div>
-              </div>
-            </div>
-            <aside class="day-side"><h4>替代逻辑</h4><ul><li>雨天：苏博或室内茶馆</li><li>体力不足：删掉寒山寺</li><li>不为多打卡继续跨区</li></ul></aside>
-          </article>
-
-          <article class="day-plan">
-            <div>
-              <span class="day-label">DAY 3 · 慢收尾返程</span>
-              <h3>不赌早班车，留出返程余量</h3>
-              <div class="timeline">
-                <div class="timeline-item"><span class="timeline-time">09:00 — 10:30</span><div><h4>观前街早餐和伴手礼</h4><p>只安排住宿区附近的收尾活动，避免最后一天跨城赶景点。</p></div></div>
-                <div class="timeline-item"><span class="timeline-time">10:30 — 12:00</span><div><h4>回酒店取行李</h4><p>提前确认车站是苏州站还是苏州北，按车站重新估算进站时间。</p></div></div>
-                <div class="timeline-item"><span class="timeline-time">返程前</span><div><h4>12306 选择下午车次回宁波</h4><p>当前快照的 G3059 是 07:06 早班样本，不直接当作最终推荐；正式规划按返程偏好重新筛选。</p></div></div>
-              </div>
-            </div>
-            <aside class="day-side"><h4>返程原则</h4><ul><li>至少预留 90 分钟到站</li><li>不排远郊水乡</li><li>出发前复核余票和天气</li></ul></aside>
-          </article>
-        </div>
+        <div id="candidate-plans"><p>请启用 JavaScript 查看各候选攻略。</p></div>
       </div>
     </section>
 
@@ -810,6 +811,265 @@
   </main>
 
   <footer class="footer"><p>Travel Guide · decision-first prototype · 研究快照：2026-09-20</p></footer>
+  <script>
+    (() => {
+      const candidateGuideData = {
+        suzhou: {
+          status: "优先候选",
+          statusClass: "good",
+          title: "苏州三天路线",
+          summary: "往返首选样本约 5.3 小时，园林、苏博、平江路和山塘街可以按片区串起来，首尾都有缓冲。",
+          route: ["宁波", "苏州北", "姑苏区", "宁波"],
+          days: [
+            {
+              label: "DAY 1 · 古城初见",
+              title: "抵达后先走一条古城线",
+              items: [
+                ["06:14 — 09:02", "G1866 宁波 → 苏州北", "到站后预留进城和寄存行李时间，不把第一站卡得太死。"],
+                ["10:30 — 12:00", "狮子林", "小而精的园林，抵达当天先进入江南游览节奏。"],
+                ["13:30 — 15:30", "苏州博物馆", "以预约成功为前置条件；没有预约就切换到拙政园外围和古城街巷。"],
+                ["16:00 — 19:30", "平江路 + 晚餐", "傍晚再逛老街，晚上回姑苏区住宿，减少跨区折返。"]
+              ],
+              sideTitle: "今天要记住",
+              side: ["园林和博物馆放在白天", "苏博预约失败要有替代路线", "夜景安排在住宿片区附近"]
+            },
+            {
+              label: "DAY 2 · 园林与夜色",
+              title: "把园林和夜游放在同一侧",
+              items: [
+                ["09:00 — 11:30", "留园", "上午游览，避开下午人流；门票和开放时间出发前再次核验。"],
+                ["12:00 — 14:00", "午餐 + 休息", "不安排第二个大景点，给步行、排队和天气留出缓冲。"],
+                ["14:30 — 16:30", "寒山寺", "如果天气或体力一般，可替换为古城内咖啡店和小巷慢逛。"],
+                ["17:00 — 20:00", "山塘街夜游", "把拍照和晚餐合并，结束后直接回姑苏区，不再安排远距离移动。"]
+              ],
+              sideTitle: "替代逻辑",
+              side: ["雨天：苏博或室内茶馆", "体力不足：删掉寒山寺", "不为多打卡继续跨区"]
+            },
+            {
+              label: "DAY 3 · 慢收尾返程",
+              title: "不赌早班车，留出返程余量",
+              items: [
+                ["09:00 — 10:30", "观前街早餐和伴手礼", "只安排住宿区附近的收尾活动，避免最后一天跨城赶景点。"],
+                ["10:30 — 12:00", "回酒店取行李", "提前确认车站是苏州站还是苏州北，按车站重新估算进站时间。"],
+                ["返程前", "12306 选择下午车次回宁波", "当前快照的 G3059 是早班样本，不直接当作最终推荐；正式规划按返程偏好重新筛选。"]
+              ],
+              sideTitle: "返程原则",
+              side: ["至少预留 90 分钟到站", "不排远郊水乡", "出发前复核余票和天气"]
+            }
+          ],
+          practical: [
+            ["STAY", "姑苏区优先", "平江路和观前街之间是这版行程的平衡点：晚上有内容，白天去园林和博物馆也不需要反复穿城。", ["确认是否支持寄存行李", "按两晚价格实时比价"]],
+            ["MOBILITY", "地铁 + 步行", "景点按片区连续安排，每天只保留一个远距离移动，把时间留给园林和老街。", ["雨天切换室内备选", "不为多打卡继续跨区"]],
+            ["CHECK", "预约先于排队", "苏博、园林和返程车次都不能把当前快照当成确认结果，出发前逐项核验。", ["预约成功再锁当天路线", "返程优先筛下午车次"]]
+          ]
+        },
+        fuzhou: {
+          status: "备选",
+          statusClass: "warn",
+          title: "福州三天路线",
+          summary: "往返样本约 8 小时，适合老城、美食和城市慢逛；首尾偏紧，车次时刻和余票需要重新核验。",
+          route: ["宁波", "福州", "鼓楼老城", "宁波"],
+          days: [
+            {
+              label: "DAY 1 · 抵达与老城",
+              title: "先把活动压在鼓楼片区",
+              items: [
+                ["去程样本", "D3219 宁波 → 福州", "页面快照没有把具体时刻当成确认结果，出发前重新查车次、余票和到站交通。"],
+                ["抵达后", "寄存行李 + 三坊七巷", "先走集中片区，给进城和入住留出缓冲，不把首站排得过满。"],
+                ["傍晚", "上下杭 + 老城晚餐", "把晚餐安排在住宿片区附近，减少第一天跨区移动。"]
+              ],
+              sideTitle: "首日取舍",
+              side: ["车次确认后再锁景点", "老城片区优先", "晚餐不跨城"]
+            },
+            {
+              label: "DAY 2 · 城市慢逛",
+              title: "把时间留给街区和江边",
+              items: [
+                ["09:00 — 12:00", "鼓楼老城慢逛", "按当天开放状态选择街巷、博物馆或传统建筑，具体预约规则出发前核验。"],
+                ["12:00 — 14:00", "午餐 + 休息", "福州适合慢逛，不用用第二个远距离景点填满中午。"],
+                ["15:00 — 19:30", "烟台山或闽江夜景", "在天气和体力允许时二选一，避免同天同时塞入远端路线。"]
+              ],
+              sideTitle: "适配人群",
+              side: ["喜欢老城和美食", "接受首尾压缩", "不追求景点数量"]
+            },
+            {
+              label: "DAY 3 · 收尾返程",
+              title: "只安排车站可控范围内的收尾",
+              items: [
+                ["上午", "住宿区早餐 + 伴手礼", "不安排远郊景点，给退房、取行李和前往车站留余量。"],
+                ["返程前", "D3170 福州 → 宁波", "当前只保留车次样本，具体出发时间、票价和余票以12306临近出发查询为准。"]
+              ],
+              sideTitle: "返程原则",
+              side: ["至少预留 90 分钟到站", "不把远郊放在最后一天", "车次确认后再买门票"]
+            }
+          ],
+          practical: [
+            ["STAY", "鼓楼 / 东街口附近", "优先住在老城和地铁可达区域，兼顾三坊七巷、上下杭与返程移动。", ["先看车站通达性", "按两晚实时比价"]],
+            ["FOOD", "按街区就近解决", "把福州小吃和正餐放在当天路线附近，不把没有实时核验的店名写成必吃名单。", ["看当天营业状态", "给排队留缓冲"]],
+            ["CHECK", "首尾时间成本", "福州是可行备选，但首尾两天更紧；如果想慢游，应优先增加一天。", ["确认去返车次", "没有合适返程就换日期"]]
+          ]
+        },
+        chongqing: {
+          status: "不建议",
+          statusClass: "bad",
+          title: "重庆三天路线（不建议版本）",
+          summary: "往返火车样本约 26.1 小时，三天两夜会被交通吃掉大量时间。下面保留一份“如果坚持去”的压缩版，不能当作推荐。",
+          route: ["宁波", "D656 样本", "重庆", "D658 样本", "宁波"],
+          days: [
+            {
+              label: "DAY 1 · 长途去程",
+              title: "交通日只安排低成本活动",
+              items: [
+                ["去程样本", "D656 宁波 → 重庆", "长途车次的具体时刻和余票必须重新查询；抵达后不再安排跨区景点。"],
+                ["抵达后", "入住 + 解放碑附近短逛", "只在住宿片区恢复体力，避免第一天继续长距离移动。"]
+              ],
+              sideTitle: "为什么不推荐",
+              side: ["往返耗时过高", "景点分散", "三天不够留缓冲"]
+            },
+            {
+              label: "DAY 2 · 集中游玩",
+              title: "只选一个主片区",
+              items: [
+                ["09:00 — 12:00", "解放碑 / 山城步道", "重庆坡度和步行强度较高，上午只安排一个连续片区。"],
+                ["12:00 — 15:00", "午餐 + 休息", "把体力和市内交通时间算进去，不把打卡数量当完成度。"],
+                ["17:00 — 20:00", "洪崖洞夜景", "晚间人流和进出路线需现场判断，结束后直接回住宿区。"]
+              ],
+              sideTitle: "如果坚持去",
+              side: ["更适合飞机", "最好增加天数", "不再叠加远郊"]
+            },
+            {
+              label: "DAY 3 · 返程日",
+              title: "几乎没有完整游玩窗口",
+              items: [
+                ["返程前", "退房 + 前往车站", "按 D658 的实际发车时间倒推，至少预留 90 分钟进站。"],
+                ["返程样本", "D658 重庆 → 宁波", "当前只说明存在车次样本，不代表余票、价格或适合三天两夜。"]
+              ],
+              sideTitle: "结论",
+              side: ["不建议硬塞三天", "改飞机再重排", "或把行程增加到五天以上"]
+            }
+          ],
+          practical: [
+            ["TRANSPORT", "先换交通方式", "如果目的地必须是重庆，第一步不是排景点，而是重新比较飞机和增加天数后的交通成本。", ["不要按火车硬套三天", "确认抵达和返程窗口"]],
+            ["STAY", "只住一个片区", "不要为了便宜频繁换酒店；优先选择轨道交通和主要片区之间的中间位置。", ["减少搬行李", "晚间回程留余量"]],
+            ["DECISION", "这份不是推荐", "重庆保留在候选里是为了说明为什么排除，不要把这份压缩版误读为适配三天两夜。", ["改飞机再生成", "增加天数再生成"]]
+          ]
+        },
+        chengdu: {
+          status: "待核实",
+          statusClass: "muted",
+          title: "成都三天路线（交通待核实）",
+          summary: "当前日期没有完整直达样本。平台有三日游线索，但缺少交通硬数据，下面只能作为目的地玩法草案，不能当成可执行车次方案。",
+          route: ["宁波", "中转方案待核验", "成都东", "中转方案待核验", "宁波"],
+          days: [
+            {
+              label: "DAY 1 · 中转待定",
+              title: "先确认怎么到，再锁第一天",
+              items: [
+                ["交通待核验", "宁波 → 成都东", "当前没有完整直达样本；先查中转换乘或调整日期，不把缺数据当成有票。"],
+                ["抵达后", "入住 + 人民公园附近", "只有在到达时间确认后，才把第一天活动写死。"]
+              ],
+              sideTitle: "当前状态",
+              side: ["缺少完整直达样本", "不要先买景点票", "先确认交通链路"]
+            },
+            {
+              label: "DAY 2 · 城市体验",
+              title: "交通确认后再走一条市区线",
+              items: [
+                ["09:00 — 12:00", "宽窄巷子 + 人民公园", "作为市区慢逛草案，具体开放和人流情况出发前核验。"],
+                ["12:00 — 15:00", "午餐 + 休息", "留出排队和市内移动时间，不把平台三日游标题直接当路线。"],
+                ["15:00 — 19:00", "锦里 / 武侯祠二选一", "按预约和当天体力取舍，避免为了补景点跨区。"]
+              ],
+              sideTitle: "安排原则",
+              side: ["先交通后景点", "同片区连续安排", "预留换乘风险"]
+            },
+            {
+              label: "DAY 3 · 返程待定",
+              title: "没有返程硬数据就不能收口",
+              items: [
+                ["上午", "住宿区收尾", "只安排近处活动，保留改变返程方案的空间。"],
+                ["返程待核验", "成都东 → 宁波", "重新查询直达、中转和返程日期后，才决定是否适合三天两夜。"]
+              ],
+              sideTitle: "下一步",
+              side: ["查中转换乘", "换日期再比较", "必要时改飞机"]
+            }
+          ],
+          practical: [
+            ["TRANSPORT", "先补齐中转链路", "成都这份攻略的第一项待办是交通研究，不是景点扩充；没有去返方案就不能给出确定预算。", ["查去程和返程", "记录总耗时与换乘次数"]],
+            ["STAY", "先选交通友好区域", "只有抵达和返程车站确定后，住宿区域才有意义；先不要锁不可退房型。", ["优先可取消", "确认到站接驳"]],
+            ["EVIDENCE", "平台线索不等于可行性", "参考内容只能回答到了之后怎么玩，不能替代12306的车次、余票和中转换乘结果。", ["保留待核验状态", "数据齐全后再生成正式版"]]
+          ]
+        }
+      };
+
+      const escapeHtml = (value) => String(value).replace(/[&<>"]/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;"
+      }[char]));
+      const renderRoute = (route) => route.map((node, index) => (
+        '<span class="route-node">' + escapeHtml(node) + '</span>' +
+        (index < route.length - 1 ? '<span class="route-arrow">→</span>' : "")
+      )).join("");
+      const renderDay = (day) => (
+        '<article class="day-plan"><div>' +
+          '<span class="day-label">' + escapeHtml(day.label) + '</span>' +
+          '<h3>' + escapeHtml(day.title) + '</h3>' +
+          '<div class="timeline">' +
+            day.items.map((item) => (
+              '<div class="timeline-item"><span class="timeline-time">' + escapeHtml(item[0]) +
+              '</span><div><h4>' + escapeHtml(item[1]) + '</h4><p>' +
+              escapeHtml(item[2]) + '</p></div></div>'
+            )).join("") +
+          '</div>' +
+        '</div><aside class="day-side"><h4>' + escapeHtml(day.sideTitle) + '</h4><ul>' +
+          day.side.map((item) => '<li>' + escapeHtml(item) + '</li>').join("") +
+        '</ul></aside></article>'
+      );
+      const renderPractical = (item) => (
+        '<article class="utility-block"><span class="utility-label">' + escapeHtml(item[0]) +
+        '</span><h3>' + escapeHtml(item[1]) + '</h3><p>' + escapeHtml(item[2]) +
+        '</p><ul>' + item[3].map((tip) => '<li>' + escapeHtml(tip) + '</li>').join("") +
+        '</ul></article>'
+      );
+      const renderCandidate = (id, guide) => (
+        '<article class="candidate-plan" id="candidate-plan-' + id +
+        '" role="tabpanel" aria-labelledby="candidate-tab-' + id + '" tabindex="0">' +
+          '<div class="candidate-plan-summary"><span class="row-status ' + guide.statusClass +
+          '">' + escapeHtml(guide.status) + '</span><h3>' + escapeHtml(guide.title) +
+          '</h3><p>' + escapeHtml(guide.summary) + '</p></div>' +
+          '<div class="route-flow" aria-label="' + escapeHtml(guide.title) + '路线总览">' +
+            renderRoute(guide.route) +
+          '</div><div class="day-list">' + guide.days.map(renderDay).join("") +
+          '</div><div class="utility-grid candidate-plan-practical">' +
+            guide.practical.map(renderPractical).join("") +
+          '</div></article>'
+      );
+      const plans = document.querySelector("#candidate-plans");
+      const tabs = [...document.querySelectorAll("[data-candidate-tab]")];
+      plans.innerHTML = Object.entries(candidateGuideData)
+        .map(([id, guide]) => renderCandidate(id, guide)).join("");
+      const setCandidate = (name) => {
+        const selected = candidateGuideData[name] ? name : "suzhou";
+        tabs.forEach((tab) => {
+          const active = tab.dataset.candidateTab === selected;
+          tab.setAttribute("aria-selected", String(active));
+        });
+        Object.keys(candidateGuideData).forEach((id) => {
+          const panel = document.querySelector("#candidate-plan-" + id);
+          if (panel) panel.hidden = id !== selected;
+        });
+      };
+      tabs.forEach((tab) => tab.addEventListener("click", () => setCandidate(tab.dataset.candidateTab)));
+      document.querySelectorAll("[data-open-candidate]").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelector("#tab-plan")?.click();
+          setCandidate(button.dataset.openCandidate);
+        });
+      });
+      setCandidate("suzhou");
+    })();
+  </script>
   <script>
     (() => {
       const sections = [...document.querySelectorAll("[data-panel]")];

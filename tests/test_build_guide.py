@@ -16,7 +16,7 @@ class BuildGuideTests(unittest.TestCase):
 
             self.assertEqual(result["status"], "ok")
             self.assertEqual(result["routes_estimated"], 2)
-            self.assertEqual(len(result["files"]), 5)
+            self.assertEqual(len(result["files"]), 6)
             for output in result["files"]:
                 self.assertTrue(Path(output).exists(), output)
             html = output_base.with_suffix(".html").read_text(encoding="utf-8")
@@ -26,6 +26,8 @@ class BuildGuideTests(unittest.TestCase):
             self.assertIn('class="item-edit-controls" hidden', html)
             self.assertIn('class="cost-editor item-edit-controls" hidden', html)
             self.assertIn("localStorage", html)
+            self.assertIn("Decision-first visual system", html)
+            self.assertIn("background: var(--guide-dark)", html)
 
     def test_quality_section_only_appears_when_issues_exist(self):
         guide = load_json(Path("examples") / "sample-guide.json")

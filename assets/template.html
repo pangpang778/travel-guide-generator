@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html {{LANG_ATTR}}>
+<html {{LANG_ATTR}} data-theme="dark"{{BRAND_ATTR}}>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<noscript><style>.tab-nav{display:none!important}.tab-panel{display:block!important}</style></noscript>
 <title>{{TITLE}}</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -1053,7 +1054,7 @@ html {
   border: 1px solid #dfe2f1;
   border-radius: 7px;
   padding: 3px 9px;
-  background: #fff;
+  background: var(--gd-card);
   color: #626aa3;
   font: inherit;
   font-size: .72em;
@@ -1080,7 +1081,7 @@ html {
   border: 1px solid #dde1ef;
   border-radius: 7px;
   padding: 3px 6px;
-  background: #fff;
+  background: var(--gd-card);
   color: #555;
   font: inherit;
 }
@@ -1111,6 +1112,544 @@ html {
 }
 
 </style>
+<style>
+/* Decision-first visual system shared with the travel prototype. */
+/* 主题 token 层：默认主题（无/库外 destination_identity 回落）；品牌注册表 CSS 由文件末尾独立 style 块注入。 */
+:root {
+  /* 旧变量别名 → 主题 token（块内既有规则不动，色彩随主题走） */
+  --guide-blue: var(--gd-primary);
+  --guide-blue-dark: var(--gd-primary-active);
+  --guide-ink: var(--gd-ink);
+  --guide-soft: var(--gd-text);
+  --guide-muted: var(--gd-muted);
+  --guide-muted-dark: var(--gd-muted);
+  --guide-paper: var(--gd-soft);
+  --guide-line: var(--gd-line);
+  --guide-dark: var(--gd-hero);
+  /* 形状/字体基线：品牌注册表按 DESIGN.md 覆盖，默认回落 */
+  --gd-radius-card: 11px;
+  --gd-radius-item: 8px;
+  --gd-font: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --gd-font-display: var(--gd-font);
+  --gd-caps: 1.1px;
+  --gd-shadow: none;
+}
+/* 默认主题·亮色 */
+html[data-theme="light"] {
+  --gd-primary:#0066cc; --gd-primary-active:#0071e3;
+  --gd-bg:#ffffff; --gd-card:#ffffff; --gd-nav:rgba(255,255,255,.96);
+  --gd-ink:#1d1d1f; --gd-text:#424245; --gd-muted:#6e6e73;
+  --gd-line:#e0e0e0; --gd-soft:#f5f5f7; --gd-hero:#1d1d1f;
+  --gd-shadow:none;
+}
+/* 默认主题·暗色（页面默认态） */
+html[data-theme="dark"] {
+  --gd-primary:#3d9bff; --gd-primary-active:#66b2ff;
+  --gd-bg:#161618; --gd-card:#232326; --gd-nav:rgba(22,22,24,.96);
+  --gd-ink:#f5f5f7; --gd-text:#d6d6da; --gd-muted:#98989e;
+  --gd-line:#3a3a3c; --gd-soft:#2a2a2e; --gd-hero:#0e0e10;
+  --gd-shadow:none;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  color: var(--guide-ink);
+  background: var(--gd-bg);
+  font-size: 17px;
+  line-height: 1.47;
+  font-family: var(--gd-font);
+  -webkit-font-smoothing: antialiased;
+}
+/* 编辑感层级：展示字体用于 hero 大标与分区标题 */
+.hero h1, .day-header .day-title,
+.tool-card h2, .preferences-section h2, .weather-section h2, .quality-section h2,
+.confidence-section h2, .alerts-section h2, .sources-section h2,
+.transport-card h2, .hotel-section h2, .food-section h2, .avoid-section h2,
+.budget-card h2, .tips-card h2, .timeline-card h2, .map-card h2 {
+  font-family: var(--gd-font-display);
+}
+/* 眉题字距走 token（ferrari 1.4px 大写等品牌覆盖） */
+.day-header .day-num, .map-ctrl-row .ctrl-label { letter-spacing: var(--gd-caps); }
+.quick-nav { display: none; }
+.hero {
+  height: auto;
+  min-height: 380px;
+  display: block;
+  color: #fff;
+  text-align: left;
+  background: var(--guide-dark);
+  border-radius: 0;
+}
+.hero::before { display: none; }
+.hero-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 68px 24px 60px;
+  text-align: left;
+}
+.hero .emojis { display: none; }
+.hero h1 {
+  max-width: 820px;
+  margin-bottom: 18px;
+  color: #fff;
+  font-size: clamp(38px, 5.4vw, 68px);
+  font-weight: 600;
+  line-height: 1.08;
+  text-shadow: none;
+}
+.hero .subtitle {
+  max-width: 690px;
+  color: var(--guide-muted-dark);
+  font-size: 22px;
+  line-height: 1.45;
+}
+.hero .tag-row { justify-content: flex-start; margin-top: 30px; }
+.hero .tag {
+  color: #fff;
+  background: #2c2c2e;
+  border: 1px solid #454548;
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+.container {
+  max-width: 1080px;
+  padding: 0 24px 70px;
+}
+.tool-card,
+.preferences-section,
+.weather-section,
+.quality-section,
+.sources-section {
+  margin: 0;
+  padding: 22px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--guide-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+.tool-card {
+  position: sticky;
+  top: 49px;
+  z-index: 90;
+  background: var(--gd-nav);
+  backdrop-filter: saturate(180%) blur(18px);
+}
+.toolbar button {
+  color: var(--guide-blue);
+  background: transparent;
+  border: 1px solid var(--guide-line);
+  border-radius: 8px;
+}
+.toolbar button:hover { color: #fff; background: var(--guide-blue); border-color: var(--guide-blue); }
+.preferences-section h2,
+.weather-section h2,
+.quality-section h2,
+.sources-section h2,
+.transport-card h2,
+.hotel-section h2,
+.food-section h2,
+.avoid-section h2,
+.budget-card h2,
+.tips-card h2,
+.timeline-card h2 {
+  color: var(--guide-ink);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.meta-chip {
+  color: var(--guide-soft);
+  background: var(--guide-paper);
+  border: 1px solid var(--guide-line);
+  border-radius: 999px;
+}
+.transport-card,
+.hotel-section,
+.food-section,
+.avoid-section,
+.budget-card,
+.tips-card,
+.timeline-card,
+.day-card {
+  margin: 34px 0;
+  padding: 24px;
+  background: var(--gd-card);
+  border: 1px solid var(--guide-line);
+  border-radius: var(--gd-radius-card);
+  box-shadow: var(--gd-shadow);
+}
+.transport-card { margin-top: 34px; }
+.t-item {
+  background: var(--guide-paper);
+  border-radius: var(--gd-radius-item);
+}
+.t-item.recommend {
+  background: var(--guide-paper);
+  border: 2px solid var(--guide-blue);
+  background-image: none;
+}
+.t-item .badge { background: var(--guide-blue); border-radius: 999px; }
+.t-item .t-price { color: var(--guide-blue); }
+.day-card { overflow: hidden; padding: 0; }
+.day-header,
+.day-header.d1,
+.day-header.d2,
+.day-header.d3,
+.day-header.d4,
+.day-header.d5 {
+  color: var(--guide-ink);
+  background: var(--guide-paper);
+  border-bottom: 1px solid var(--guide-line);
+}
+.day-header .day-num {
+  color: var(--guide-blue);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.day-header .day-title { font-size: 24px; font-weight: 600; }
+.day-header .day-route { color: var(--guide-muted); }
+.spot-icon,
+.spot:nth-child(odd) .spot-icon,
+.spot:nth-child(even) .spot-icon {
+  background: var(--guide-paper);
+  border-radius: 8px;
+}
+.spot-title { color: var(--guide-ink); }
+.spot-desc, .spot-transit { color: var(--guide-soft); }
+.spot-price { color: var(--guide-blue); background: var(--gd-soft); }
+.route-bar { color: var(--guide-muted); background: var(--guide-paper); border-color: var(--guide-line); }
+.avoid-section,
+.budget-card,
+.tips-card,
+.hotel-section,
+.food-section { background: #fff; }
+.avoid-item,
+.hotel-item,
+.food-item { border-color: var(--guide-line); }
+.avoid-item .a-num { color: var(--guide-blue); background: var(--gd-soft); }
+.budget-row { border-color: var(--guide-line); }
+.budget-total { border-color: var(--guide-line); }
+.budget-total strong { color: var(--guide-ink); }
+.tips-card .tip-item { border-color: var(--guide-line); }
+.footer { color: var(--guide-muted); border-top-color: var(--guide-line); }
+.source-badge { color: var(--guide-blue); background: var(--gd-soft); border-radius: 999px; }
+.favorite-btn, .edit-btn { color: var(--guide-blue); }
+.item-check { accent-color: var(--guide-blue); }
+
+@media (max-width: 640px) {
+  .hero-inner { padding: 48px 18px 42px; }
+  .hero .subtitle { font-size: 18px; }
+  .container { padding: 0 16px 48px; }
+  .transport-card,
+  .hotel-section,
+  .food-section,
+  .avoid-section,
+  .budget-card,
+  .tips-card,
+  .timeline-card { padding: 18px; }
+  .day-card { margin-left: 0; margin-right: 0; }
+  .day-header { padding: 18px; }
+}
+
+/* ===== 行程地图（schema 单缝驱动；day 色由 dayColors 注入 --gd-day-N 变量） ===== */
+.map-card {
+  position: relative;
+  margin: 34px 0;
+  padding: 24px;
+  background: var(--gd-card);
+  border: 1px solid var(--guide-line);
+  border-radius: var(--gd-radius-card);
+}
+.map-card h2 { font-size: 28px; font-weight: 600; margin-bottom: 12px; }
+.map-area {
+  position: relative;
+  height: 380px;
+  background: var(--guide-paper);
+  border: 1px solid var(--guide-line);
+}
+.map-area svg { width: 100%; height: 100%; display: block; }
+.map-ok {
+  position: absolute; top: 12px; right: 12px; z-index: 6;
+  background: var(--gd-card); border: 1px solid var(--guide-line); border-radius: 999px;
+  padding: 4px 12px; font-size: 11px; font-weight: 600; color: var(--guide-ink);
+}
+/* key 引导卡片：浮于地图区之上 */
+.key-guide {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(245,245,247,.94);
+}
+.key-guide .key-inner {
+  max-width: 460px; margin: 0 16px; padding: 20px;
+  background: #fff; border: 1px solid var(--guide-line); border-radius: 8px;
+}
+.key-guide h3 { font-size: 17px; font-weight: 600; color: var(--guide-ink); margin-bottom: 6px; }
+.key-guide p { font-size: 13px; color: var(--guide-muted); margin-bottom: 12px; }
+.key-guide code {
+  font-size: 12px; background: var(--guide-paper); color: var(--guide-ink);
+  padding: 2px 6px; border-radius: 4px;
+}
+.key-guide .key-row { display: flex; gap: 8px; }
+.key-guide input {
+  flex: 1; min-width: 0; height: 44px; padding: 0 14px; font-size: 14px;
+  background: var(--gd-card); color: var(--guide-ink);
+  border: 1px solid var(--guide-line); border-radius: 6px;
+}
+.key-guide .key-go {
+  height: 44px; padding: 0 20px; border: none; cursor: pointer;
+  background: var(--gd-accent, var(--guide-blue)); color: #fff;
+  font-size: 14px; font-weight: 600; border-radius: 6px;
+}
+.key-guide .key-close {
+  display: block; margin-top: 10px; padding: 0; border: none; background: none;
+  font-size: 12px; color: var(--guide-muted); text-decoration: underline; cursor: pointer;
+}
+.key-guide .key-close:hover { color: var(--guide-ink); }
+/* 控件行：全程/Day N + 回放 + 标签开关 */
+.map-ctrl-row {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  padding: 12px 0 0;
+}
+.map-ctrl-row .ctrl-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 1.1px;
+  text-transform: uppercase; color: var(--guide-muted);
+}
+.map-ctrl-row .day-btn {
+  border: 1px solid var(--guide-line); background: var(--gd-card); color: var(--guide-soft);
+  border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.map-ctrl-row .day-btn:hover { border-color: var(--gd-accent, var(--guide-blue)); color: var(--gd-accent, var(--guide-blue)); }
+.map-ctrl-row .day-btn.active {
+  color: #fff; background: var(--gd-accent, var(--guide-blue));
+  border-color: var(--gd-accent, var(--guide-blue));
+}
+#label-toggle { margin-left: auto; }
+/* 图例与状态行 */
+.map-legend { display: flex; gap: 18px; flex-wrap: wrap; padding: 12px 0 0; font-size: 13px; color: var(--guide-muted); }
+.map-legend .legend-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.map-status { padding: 10px 0 0; font-size: 13px; color: var(--guide-muted); }
+/* 静态 SVG 降级图内元素 */
+.svg-block { fill: #e6e6ea; }
+.svg-river { fill: none; stroke: rgba(0,102,204,.16); stroke-width: 22; stroke-linecap: round; }
+.svg-grid { stroke: rgba(0,0,0,.05); stroke-width: 1; }
+.svg-label { font-size: 13px; font-weight: 600; }
+.svg-tw { font-size: 11px; font-weight: 600; opacity: .78; }
+/* 交互地图 marker / InfoWindow（AMap 自定义 DOM content） */
+.tw-label {
+  background: var(--gd-card); color: var(--guide-ink); border: 1px solid var(--guide-line);
+  padding: 2px 8px; white-space: nowrap; border-radius: 6px;
+  font-size: 11px; font-weight: 600; line-height: 1.4;
+}
+.tw-label b { color: var(--gd-accent, var(--guide-blue)); font-variant-numeric: tabular-nums; }
+.tw-label.big { font-size: 12px; padding: 4px 10px; border-color: var(--gd-accent, var(--guide-blue)); border-width: 2px; }
+.tw-label.dim { opacity: .18; pointer-events: none; }
+.tw-label.hl { border-color: var(--gd-accent, var(--guide-blue)); }
+.hsr-station {
+  background: var(--gd-accent, var(--guide-blue)); color: #fff; white-space: nowrap;
+  font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 6px;
+}
+.tw-info {
+  font-family: inherit; background: var(--gd-card); color: var(--guide-ink);
+  border: 1px solid var(--guide-line); padding: 10px 12px; min-width: 220px;
+  font-size: 12px; line-height: 1.6; border-radius: 8px;
+}
+.tw-info b.t { color: var(--gd-accent, var(--guide-blue)); font-size: 13px; }
+.tw-info .meta { color: var(--guide-muted); font-size: 11px; }
+.tw-info .tw-img { width: 100%; height: 96px; object-fit: cover; margin: 6px 0; border-radius: 6px; display: block; }
+.tw-info .img-ph {
+  width: 100%; height: 96px; margin: 6px 0; border-radius: 6px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--guide-paper); color: var(--guide-muted); font-size: 20px;
+}
+.tw-info .img-ph span { font-size: 10px; }
+.tw-info a { color: var(--gd-accent, var(--guide-blue)); font-weight: 600; text-decoration: none; }
+
+@media (max-width: 640px) {
+  .map-area { height: 300px; }
+  .map-card { padding: 18px; }
+  .map-ctrl-row .day-btn { padding: 5px 10px; }
+}
+
+@media print {
+  .map-ctrl-row, .key-guide, .map-ok { display: none !important; }
+  .map-area { height: auto; min-height: 300px; }
+}
+
+/* ===== T5：Tab 分区（总览/各天/预算/告警）=====
+   无 JS：noscript 强制全显；打印：媒体查询强制全显 */
+.tab-nav {
+  position: sticky; top: 0; z-index: 95;
+  background: var(--gd-nav);
+  backdrop-filter: saturate(180%) blur(18px);
+  border-bottom: 1px solid var(--gd-line);
+}
+.tab-nav .wrap {
+  display: flex; gap: 4px; overflow-x: auto;
+  max-width: 1080px; margin: 0 auto; padding: 0 24px;
+}
+.tab-btn {
+  border: 0; background: none; color: var(--gd-muted);
+  font: inherit; font-size: 14px; font-weight: 600;
+  padding: 14px 10px; border-bottom: 2px solid transparent;
+  cursor: pointer; white-space: nowrap;
+}
+.tab-btn:hover { color: var(--gd-ink); }
+.tab-btn.active { color: var(--gd-ink); border-bottom-color: var(--gd-ink); }
+.tab-panel { display: none; padding: 4px 0 0; }
+.tab-panel.active { display: block; }
+
+/* ===== T5：暗色/亮色切换钮 ===== */
+.theme-toggle {
+  position: fixed; right: 14px; top: 10px; z-index: 99;
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--gd-line); background: var(--gd-card);
+  color: var(--gd-ink); font-size: 16px; cursor: pointer;
+}
+
+/* ===== T5：confidence 徽章三类（三色三形）=====
+   realtime=圆形实心点（实时流）/ verified=药丸描边（校验章）/ estimated=虚线方块（草稿） */
+.confidence-section { border-bottom: 1px solid var(--gd-line); padding: 22px 0; }
+.conf-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.conf-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 4px 12px;
+}
+.conf-chip i { display: inline-block; width: 9px; height: 9px; }
+.conf-realtime { color: #03904a; background: rgba(3,144,74,.12); }
+.conf-realtime i { border-radius: 50%; background: #03904a; }
+.conf-verified { color: var(--gd-primary); background: var(--gd-soft); border: 1px solid var(--gd-primary); border-radius: 999px; }
+.conf-verified i { border-radius: 50%; background: var(--gd-primary); }
+.conf-estimated { color: var(--gd-muted); background: transparent; border: 1px dashed var(--gd-muted); }
+.conf-estimated i { border-radius: 2px; background: var(--gd-muted); transform: rotate(45deg); }
+
+/* ===== T5：告警披露分区 ===== */
+.alerts-section { padding: 22px 0; border-bottom: 1px solid var(--gd-line); }
+.alert-list { display: grid; gap: 10px; }
+.alert-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 12px 14px; border: 1px solid var(--gd-line);
+  border-radius: var(--gd-radius-item); background: var(--gd-soft);
+}
+.alert-item b { display: block; margin-bottom: 2px; }
+.alert-item span { font-size: .84em; color: var(--gd-muted); }
+.alert-src {
+  flex-shrink: 0; font-size: 11px; font-weight: 700;
+  padding: 2px 10px; border-radius: 999px; text-transform: uppercase;
+}
+.alert-jev { color: #fff; background: #f13a2c; }
+.alert-rule { color: #fff; background: #ad6800; }
+
+/* ===== T5：行程点详情面板（原生 details，无 JS/打印可用）===== */
+.item-detail { margin-top: 10px; border-top: 1px dashed var(--gd-line); padding-top: 8px; }
+.item-detail summary {
+  display: inline-block; cursor: pointer; user-select: none;
+  font-size: .76em; font-weight: 600; color: var(--gd-primary);
+  padding: 2px 10px; border: 1px solid var(--gd-line);
+  border-radius: 999px; background: var(--gd-soft);
+}
+.item-detail[open] summary { margin-bottom: 8px; }
+.detail-body dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 0; }
+.detail-body dt { font-size: .78em; color: var(--gd-muted); white-space: nowrap; }
+.detail-body dd { font-size: .84em; color: var(--gd-text); margin: 0; }
+.detail-body dd:last-child { margin-bottom: 4px; }
+.item-media { position: relative; margin: 8px 0; }
+.item-media img {
+  width: 100%; max-height: 220px; object-fit: cover; display: block;
+  border-radius: var(--gd-radius-item);
+}
+.item-media .src-mark {
+  font-size: 11px; color: var(--gd-muted); padding: 4px 2px 0;
+}
+.item-media .jev-mark {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 11px; font-weight: 700; color: #fff;
+  background: rgba(0,0,0,.65); border-radius: 999px; padding: 2px 9px;
+}
+.item-media .img-ph {
+  width: 100%; height: 120px; border-radius: var(--gd-radius-item);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  background: var(--gd-soft); color: var(--gd-muted); font-size: 26px;
+  border: 1px dashed var(--gd-line);
+}
+.item-media .img-ph span { font-size: 11px; }
+
+/* ===== T13：库外设计回落标注 ===== */
+.brand-fallback {
+  max-width: 1080px; margin: 12px auto 0; padding: 10px 24px;
+  font-size: 13px; color: #ad6800; background: rgba(250,173,20,.12);
+  border: 1px dashed #faad14; border-radius: var(--gd-radius-item);
+}
+
+/* ===== T5/#6：未校验通过水印 ===== */
+.unverified-watermark {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 98;
+  padding: 8px 16px; text-align: center;
+  font-size: 13px; font-weight: 700; color: #ad6800;
+  background: repeating-linear-gradient(-45deg, rgba(250,173,20,.14) 0 12px, rgba(250,173,20,.05) 12px 24px);
+  border-top: 2px dashed #faad14;
+  pointer-events: none;
+}
+
+/* ===== 暗色可用性补丁：块内遗留的浅色装饰底随主题走 ===== */
+html[data-theme="dark"] .hotel-item,
+html[data-theme="dark"] .food-item,
+html[data-theme="dark"] .avoid-item,
+html[data-theme="dark"] .hotel-tip,
+html[data-theme="dark"] .hotel-rec-section,
+html[data-theme="dark"] .hotel-route-bar,
+html[data-theme="dark"] .spot-romance,
+html[data-theme="dark"] .pitfall { background: var(--gd-soft); }
+html[data-theme="dark"] .weather-item,
+html[data-theme="dark"] .route-bar { border-color: var(--gd-line); }
+html[data-theme="dark"] .route-bar { background: var(--gd-soft); }
+html[data-theme="dark"] .spot-transit { background: var(--gd-soft); color: var(--gd-muted); }
+html[data-theme="dark"] .meta-chip { background: var(--gd-soft); }
+
+/* ===== 375px 单手可读：无横向溢出 ===== */
+html, body { max-width: 100%; overflow-x: hidden; }
+@media (max-width: 375px) {
+  .tab-nav .wrap { padding: 0 12px; }
+  .detail-body dl { grid-template-columns: 1fr; gap: 2px; }
+  .detail-body dt { white-space: normal; margin-top: 6px; }
+  .conf-chip { font-size: 11px; padding: 3px 9px; }
+}
+
+@media print {
+  .tab-nav, .theme-toggle, .item-detail summary { display: none !important; }
+  .tab-panel { display: block !important; }
+  .item-detail { border-top: 0; }
+  .detail-body { display: block; content-visibility: visible !important; }
+  .item-media img { max-height: 160px; }
+  .unverified-watermark { position: static; border: 2px dashed #faad14; margin-top: 12px; }
+  /* 打印强制浅色 token（无 JS 时 by CSS 兜底；--gd-hero 一并置白防 hero 大块深底费墨） */
+  html, html[data-theme="dark"], html[data-brand-id] {
+    --gd-bg:#fff; --gd-card:#fff; --gd-nav:#fff;
+    --gd-ink:#1d1d1f; --gd-text:#424245; --gd-muted:#6e6e73;
+    --gd-line:#e0e0e0; --gd-soft:#f5f5f7; --gd-hero:#fff;
+  }
+
+  /* ===== T10：分页与打印安全色（浅底深字） ===== */
+  @page { margin: 14mm; }
+  .transport-card, .avoid-section, .hotel-section, .food-section, .tips-card,
+  .budget-card, .map-card, .day-card, .weather-item, .alert-item,
+  .spot, .hotel-item, .avoid-item, .food-item { break-inside: avoid; }
+  h2 { break-after: avoid; }
+  * { text-shadow: none !important; box-shadow: none !important; }
+  .hero, .hero h1 { color: #1d1d1f; }
+  .hero .subtitle { color: #424245; }
+  .hero .tag { background: #f5f5f7; color: #1d1d1f; border-color: #e0e0e0; }
+  .budget-card { color: #1d1d1f; }
+  .alert-jev { background: #fdeceb; color: #b71c1c; }
+  .alert-rule { background: #fff7e6; color: #ad6800; }
+  .conf-chip i, .legend-dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+<style>
+/* 品牌主题注册表注入（render_guide.BRAND_THEMES；库外/无字段时为空 → 默认主题） */
+{{THEME_CSS}}
+</style>
 </head>
 <body>
 
@@ -1126,17 +1665,36 @@ html {
   </div>
 </div>
 
+{{BRAND_NOTICE}}
+
+<!-- T5：Tab 分区（总览/各天/预算/告警）；无 JS/打印时 noscript 与媒体查询强制全显 -->
+<nav class="tab-nav" aria-label="攻略分区">
+  <div class="wrap" id="tab-btns">
+    <button type="button" class="tab-btn active" data-tab="overview">总览</button>
+    <button type="button" class="tab-btn" data-tab="days">各天</button>
+    <button type="button" class="tab-btn" data-tab="budget">预算</button>
+    <button type="button" class="tab-btn" data-tab="alerts">告警</button>
+  </div>
+</nav>
+<button type="button" class="theme-toggle" id="theme-toggle" title="切换暗色/亮色模式">☀️</button>
+
 <div class="container">
 
-<!-- 偏好、天气、质量检查、来源与本地工具 -->
+<section class="tab-panel active" id="tab-overview">
+<!-- 偏好、天气、可信度与本地工具 -->
 {{META_SECTIONS}}
+
+<!-- 行程地图（数据只经 window.__GUIDE_SCHEMA__ 进出） -->
+{{MAP_SECTION}}
 
 <!-- 交通信息 -->
 {{TRANSPORT_SECTION}}
 
 <!-- 酒店推荐 -->
 {{HOTEL_SECTION}}
+</section>
 
+<section class="tab-panel" id="tab-days">
 <!-- 每日行程 -->
 {{DAILY_ITINERARY}}
 
@@ -1146,11 +1704,23 @@ html {
 <!-- 避坑清单 -->
 {{AVOID_SECTION}}
 
-<!-- 预算估算 -->
-{{BUDGET_SECTION}}
-
 <!-- 浪漫Tips -->
 {{TIPS_SECTION}}
+
+<!-- 信息来源 -->
+{{SOURCES_SECTION}}
+</section>
+
+<section class="tab-panel" id="tab-budget">
+<!-- 预算估算 -->
+{{BUDGET_SECTION}}
+</section>
+
+<section class="tab-panel" id="tab-alerts">
+<!-- 告警披露与质量检查 -->
+{{ALERTS_SECTION}}
+{{QUALITY_SECTION}}
+</section>
 
 <div class="footer">
   {{FOOTER_TEXT}}
@@ -1158,13 +1728,16 @@ html {
 
 </div><!-- /container -->
 
+{{WATERMARK}}
+
 <!-- 右侧快速导航 -->
 <div class="quick-nav" id="quickNav">
   <!-- 由JS动态生成 -->
 </div>
 
+<script>window.__GUIDE_SCHEMA__ = {{GUIDE_DATA}};</script>
 <script>
-const GUIDE_DATA = {{GUIDE_DATA}};
+const GUIDE_DATA = window.__GUIDE_SCHEMA__;
 
 // ===== 快速导航生成 =====
 (function() {
@@ -1442,6 +2015,498 @@ const GUIDE_DATA = {{GUIDE_DATA}};
     localStorage.removeItem(storageKey);
     window.location.reload();
   });
+})();
+</script>
+
+<script>
+// ===== 行程地图模块：数据只经 window.__GUIDE_SCHEMA__（攻略 schema 单缝）进出 =====
+// 已实锤高德 JSAPI 坑位对照：
+// 1) marker/polyline 构造时挂 map: amapMap（OverlayGroup.setMap 对未挂图 overlay 不渲染，getAllOverlays=0）
+// 2) setFitView 只收 overlay 数组，不收 OverlayGroup（getBounds is not a function）
+// 3) 隐藏容器初始化的地图 setFitView 失效 → 本页无 tab；applyDayView 每次切换都重新 fit，并留 resize 重框
+// 4) 不用 .setMap(m) 链式（返回 undefined），map 写进构造参数
+// 5) moveAlong 回放前必须 AMap.plugin("AMap.MoveAnimation")（缺插件静默不动）
+// 6) key 只取 localStorage('amap_key')，正式版不内置演示 key
+// 7) file:// 打开时图片相对路径 + window.__imgFail 兜底
+window.__imgFail = function (img) {
+  var p = img.parentElement;
+  if (p) p.innerHTML = '<div class="img-ph">🖼️<span>图片加载失败</span></div>';
+};
+(function () {
+  var S = window.__GUIDE_SCHEMA__ || {};
+  var spots = S.spots || [];
+  var routes = S.routes || [];
+  var dayColors = S.dayColors || {};
+  var hasCoords = spots.length > 0 && routes.length > 0;
+
+  // 排序去重的 day 列表（schema spots/routes 的 day 字段驱动）
+  var days = [];
+  routes.concat(spots).forEach(function (r) {
+    var d = r.day;
+    if (d && days.indexOf(d) < 0) days.push(d);
+  });
+  days.sort(function (a, b) { return a - b; });
+
+  // 验收 #6：CSS 变量可被 schema 字段驱动（dayColors → --gd-day-N，accent 取首个 day 色）；
+  // destination_identity 只挂 data-brand-id，主题切换实现留给 #15。
+  var root = document.documentElement;
+  var firstDay = days[0];
+  var accent = dayColors[firstDay] || dayColors[String(firstDay)] || "";
+  if (accent) root.style.setProperty("--gd-accent", accent);
+  Object.keys(dayColors).forEach(function (d) {
+    root.style.setProperty("--gd-day-" + d, dayColors[d]);
+  });
+  var di = (S.meta && S.meta.destination_identity) || {};
+  if (di.brand_id) root.setAttribute("data-brand-id", di.brand_id);
+
+  var mapArea = document.getElementById("map-area");
+  var statusEl = document.getElementById("map-status");
+  var guideEl = document.getElementById("key-guide");
+  var okEl = document.getElementById("map-ok");
+  var ctrlRow = document.getElementById("map-ctrl-row");
+  var legendEl = document.getElementById("map-legend");
+  var dayBtns = document.getElementById("day-btns");
+  var amapMap = null;
+  var twMarkers = {};
+  var dayOverlays = {};
+  var hsrOverlays = null;
+  var curDay = 0;
+  var twOn = true;
+
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function dayColor(day) {
+    return dayColors[day] || dayColors[String(day)] || "#0066cc";
+  }
+
+  function daySpots(day) {
+    return spots.filter(function (sp) { return sp.day === day; });
+  }
+
+  // marker 分级（交互增强）：游览时长 >=2h 的重点行程点放大描边
+  function isBigSpot(sp) {
+    var parts = String(sp.tw || "").split("-");
+    if (parts.length !== 2) return false;
+    function mins(t) {
+      var q = String(t).split(":");
+      return (parseInt(q[0], 10) || 0) * 60 + (parseInt(q[1], 10) || 0);
+    }
+    return mins(parts[1]) - mins(parts[0]) >= 120;
+  }
+
+  function markerContent(sp, index) {
+    return "<b>" + (index + 1) + "</b> · " + esc(sp.name) + (twOn ? " <b>" + esc(sp.tw || "") + "</b>" : "");
+  }
+
+  // 图例：dayColors 驱动
+  function renderLegend() {
+    if (!legendEl) return;
+    legendEl.innerHTML = days.map(function (d) {
+      return '<span><i class="legend-dot" style="background:' + dayColor(d) + '"></i>Day ' + esc(d) + "</span>";
+    }).join("");
+  }
+
+  // ===== 一等公民静态降级 SVG：街区块 + 网格 + 河流装饰 + 按天配色路线 + 时间窗标签 =====
+  function renderFallback() {
+    if (!mapArea) return;
+    if (!hasCoords) {
+      // 纯 v1（最小降级夹具）：无坐标数据——显式降级说明，不伪造路线
+      mapArea.innerHTML =
+        '<svg viewBox="0 0 840 380" preserveAspectRatio="xMidYMid slice" role="img" aria-label="行程示意图（无坐标数据）">' +
+        '<rect width="840" height="380" fill="#f5f5f7"/>' +
+        "</svg>";
+      if (statusEl) statusEl.textContent = "⚠ 本攻略未包含坐标与路线数据（v1 schema），静态路线图与交互地图均不可用";
+      return;
+    }
+    var xs = spots.map(function (sp) { return sp.x; }).filter(function (v) { return typeof v === "number"; });
+    var ys = spots.map(function (s2) { return s2.y; }).filter(function (v) { return typeof v === "number"; });
+    if (!xs.length || !ys.length) {
+      if (statusEl) statusEl.textContent = "⚠ spots 缺少 SVG 示意图坐标（x/y），静态路线图不可用";
+      return;
+    }
+    var minX = Math.min.apply(null, xs) - 90;
+    var maxX = Math.max.apply(null, xs) + 130;
+    var minY = Math.min.apply(null, ys) - 60;
+    var maxY = Math.max.apply(null, ys) + 60;
+    var w = maxX - minX;
+    var h = maxY - minY;
+    var blocks = "";
+    for (var i = 0; i < 14; i++) {
+      var bx = minX + ((i * 197) % w) * 0.82;
+      var by = minY + ((i * 131) % h) * 0.8;
+      blocks += '<rect class="svg-block" opacity="0.55" x="' + Math.round(bx) + '" y="' + Math.round(by) +
+        '" width="' + (46 + (i * 53) % 120) + '" height="' + (30 + (i * 37) % 80) + '"/>';
+    }
+    var lines = days.map(function (d) {
+      var pts = daySpots(d)
+        .filter(function (sp) { return typeof sp.x === "number" && typeof sp.y === "number"; })
+        .map(function (sp) { return sp.x + "," + sp.y; });
+      if (pts.length < 2) return "";
+      return '<polyline fill="none" stroke="' + dayColor(d) + ' \
+        " stroke-width="4" opacity="0.85" stroke-dasharray="9 6" stroke-linecap="round" stroke-linejoin="round" points="' + pts.join(" ") + '"/>';
+    }).join("");
+    var dots = spots.map(function (sp) {
+      if (typeof sp.x !== "number" || typeof sp.y !== "number") return "";
+      var c = dayColor(sp.day);
+      return '<circle cx="' + sp.x + '" cy="' + sp.y + '" r="8" fill="' + c + '" stroke="#fff" stroke-width="2.5"/>' +
+        '<text class="svg-label" x="' + (sp.x + 13) + '" y="' + (sp.y + 5) + '" fill="' + c + '">' + esc(sp.name) + "</text>" +
+        (twOn ? '<text class="svg-tw" x="' + (sp.x + 13) + '" y="' + (sp.y + 21) + '" fill="' + c + '">' + esc(sp.tw || "") + "</text>" : "");
+    }).join("");
+    mapArea.innerHTML =
+      '<svg viewBox="' + [minX, minY, w, h].join(" ") + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="行程静态路线图">' +
+      '<rect x="' + minX + '" y="' + minY + '" width="' + w + '" height="' + h + '" fill="#f5f5f7"/>' + blocks +
+      '<path class="svg-river" d="M' + minX + " " + (minY + h * 0.16) + " C " + (minX + w * 0.3) + " " + (minY + h * 0.05) + ", " +
+      (minX + w * 0.6) + " " + (minY + h * 0.28) + ", " + (minX + w) + " " + (minY + h * 0.1) + '"/>' +
+      '<g class="svg-grid"><path d="M' + minX + " " + (minY + h * 0.25) + " H" + maxX +
+      " M" + minX + " " + (minY + h * 0.5) + " H" + maxX +
+      " M" + minX + " " + (minY + h * 0.75) + " H" + maxX +
+      " M" + (minX + w * 0.25) + " " + minY + " V" + maxY +
+      " M" + (minX + w * 0.5) + " " + minY + " V" + maxY +
+      " M" + (minX + w * 0.75) + " " + minY + " V" + maxY + '"/></g>' + lines + dots + "</svg>";
+    if (statusEl) statusEl.textContent = "⚠ 未配置 AMAP_KEY — 静态路线图已就绪（填写 key 刷新即交互地图）";
+  }
+
+  // ===== 交互地图（高德 JSAPI 2.0）=====
+  var key = null;
+  try { key = localStorage.getItem("amap_key"); } catch (e) { key = null; }
+
+  function loadAMap() {
+    if (!hasCoords) {
+      if (statusEl) statusEl.textContent = "⚠ 本攻略未包含坐标数据，无法加载交互地图";
+      return;
+    }
+    var s = document.createElement("script");
+    s.src = "https://webapi.amap.com/maps?v=2.0&key=" + encodeURIComponent(key);
+    s.onload = function () {
+      try {
+        amapMap = new AMap.Map("map-area", { zoom: 11, viewMode: "2D" });
+        buildDayOverlays();
+        buildHsr();
+        applyDayView();
+        bindInfoWindows();
+        bindCardFly();
+        bindReplay();
+        if (okEl) okEl.hidden = false;
+        if (guideEl) guideEl.style.display = "none";
+        if (statusEl) statusEl.textContent = "✅ 高德地图加载成功 · " + spots.length + " 个行程点（真实 GCJ-02 经纬度）· 按天 setFitView";
+      } catch (e) {
+        amapMap = null;
+        renderFallback();
+      }
+    };
+    s.onerror = function () {
+      amapMap = null;
+      if (statusEl) statusEl.textContent = "⚠ 高德 SDK 加载失败（key 无效或网络受限）— 已降级为静态路线图";
+      renderFallback();
+    };
+    document.head.appendChild(s);
+  }
+
+  // markers/lines 按天分组：构造时直挂图（坑位 1/4），切换用 show()/hide() 直管
+  function buildDayOverlays() {
+    dayOverlays = {};
+    [0].concat(days).forEach(function (d) { dayOverlays[d] = []; });
+    spots.forEach(function (sp, index) {
+      var el = document.createElement("div");
+      el.className = "tw-label" + (isBigSpot(sp) ? " big" : "");
+      el.innerHTML = markerContent(sp, index);
+      var m = new AMap.Marker({
+        position: sp.ll,
+        content: el,
+        anchor: "bottom-center",
+        title: sp.name,
+        map: amapMap
+      });
+      twMarkers[sp.name] = m;
+      if (dayOverlays[sp.day]) dayOverlays[sp.day].push(m);
+      dayOverlays[0].push(m);
+      sp._marker = m;
+    });
+    routes.forEach(function (r) {
+      var line = new AMap.Polyline({
+        path: r.pts,
+        strokeColor: dayColor(r.day),
+        strokeWeight: 4,
+        strokeOpacity: 0.85,
+        strokeStyle: "dashed",
+        strokeDasharray: [9, 6],
+        lineJoin: "round",
+        lineCap: "round",
+        map: amapMap
+      });
+      if (dayOverlays[r.day]) dayOverlays[r.day].push(line);
+      dayOverlays[0].push(line);
+    });
+  }
+
+  // 验收「全程」= 跨城视野：intercity 高铁线（虚线 + showDir 流动箭头）+ 两端车站标（只经 schema intercity 字段）
+  function buildHsr() {
+    var ic = S.intercity;
+    if (!ic || !ic.from || !ic.to || !ic.from.ll || !ic.to.ll) return;
+    hsrOverlays = [
+      new AMap.Polyline({
+        path: [ic.from.ll, ic.to.ll],
+        strokeColor: accent || dayColor(days[0]),
+        strokeWeight: 3,
+        strokeOpacity: 0.85,
+        strokeStyle: "dashed",
+        strokeDasharray: [10, 6],
+        showDir: true,
+        lineJoin: "round",
+        lineCap: "round",
+        map: amapMap
+      }),
+      new AMap.Marker({
+        position: ic.from.ll,
+        map: amapMap,
+        content: (function () {
+          var d = document.createElement("div");
+          d.className = "hsr-station";
+          d.textContent = esc(ic.from.name || "") + (ic.from.time ? " " + ic.from.time + " 发" : "");
+          return d;
+        })()
+      }),
+      new AMap.Marker({
+        position: ic.to.ll,
+        map: amapMap,
+        content: (function () {
+          var d = document.createElement("div");
+          d.className = "hsr-station";
+          d.textContent = esc(ic.to.name || "") + (ic.to.time ? " " + ic.to.time + " 抵" : "");
+          return d;
+        })()
+      })
+    ];
+    hsrOverlays.forEach(function (o) { o.hide(); });
+  }
+
+  // 切换视图：只显当天 overlay 并框视野（overlay 数组传 setFitView，坑位 2）
+  function applyDayView() {
+    if (!amapMap) return;
+    days.concat([0]).forEach(function (d) {
+      (dayOverlays[d] || []).forEach(function (ov) {
+        if (d === curDay) { ov.show(); } else { ov.hide(); }
+      });
+    });
+    if (hsrOverlays) hsrOverlays.forEach(function (o) {
+      if (curDay === 0) { o.show(); } else { o.hide(); }
+    });
+    var fit = (dayOverlays[curDay] || []).slice();
+    if (curDay === 0 && hsrOverlays) fit = fit.concat(hsrOverlays);
+    if (fit.length) amapMap.setFitView(fit, false, [60, 60, 60, 60]);
+    applyZoomTier();
+  }
+
+  // zoom 分级显隐（交互增强）：zoom<9 时非重点标签变暗，每天首站保持醒目
+  function applyZoomTier() {
+    if (!amapMap) return;
+    var far = amapMap.getZoom() < 9;
+    days.forEach(function (d) {
+      var first = daySpots(d)[0];
+      if (!first) return;
+      spots.forEach(function (sp) {
+        if (sp.day !== d) return;
+        var m = twMarkers[sp.name];
+        var el = m && m.getContent && m.getContent();
+        if (el && el.classList) el.classList.toggle("dim", far && sp !== first);
+      });
+    });
+  }
+
+  // marker 点击 InfoWindow（交互增强）：时间窗/营业时间等 v1 详情/图片/高德导航 deep-link——全部 schema 字段
+  var infoWin = null;
+  function bindInfoWindows() {
+    infoWin = new AMap.InfoWindow({ isCustom: true, offset: new AMap.Pixel(0, -30) });
+    var byName = {};
+    (S.days || []).forEach(function (d) {
+      (d.items || []).forEach(function (it) {
+        if (it.name) byName[it.name] = it;
+      });
+    });
+    spots.forEach(function (sp) {
+      var m = twMarkers[sp.name];
+      if (!m) return;
+      m.on("click", function () {
+        var item = byName[sp.name];
+        var ll = sp.ll[0] + "," + sp.ll[1];
+        var html = '<div class="tw-info">' +
+          '<b class="t">' + esc(sp.name) + (sp.tw ? " " + esc(sp.tw) : "") + "</b>" +
+          '<div class="meta">Day ' + esc(sp.day) + (item && item.price ? " · 🎫 " + esc(item.price) : "") + "</div>" +
+          (item && item.description ? '<div class="meta">' + esc(item.description) + '</div>' : "") +
+          (sp.image && sp.image.url ? '<img class="tw-img" loading="lazy" src="' + esc(sp.image.url) + '" alt="' + esc(sp.image.alt_description || sp.name) + '" onerror="window.__imgFail(this)">' : "") +
+          '<a href="https://uri.amap.com/marker?position=' + ll + "&name=" + encodeURIComponent(sp.name) +
+          '" target="_blank" rel="noopener noreferrer">高德导航 →</a></div>';
+        infoWin.setContent(html);
+        infoWin.open(amapMap, sp.ll);
+      });
+    });
+  }
+
+  // 行程卡片点击 → 地图飞行到 marker + 弹窗（交互增强）
+  function bindCardFly() {
+    document.querySelectorAll(".itinerary-item").forEach(function (card) {
+      var titleEl = card.querySelector(".spot-title");
+      if (!titleEl) return;
+      var name = (titleEl.textContent || "").trim();
+      var sp = null;
+      spots.forEach(function (s2) { if (s2.name === name) sp = s2; });
+      if (!sp) return;
+      card.addEventListener("click", function (ev) {
+        if (ev.target.closest("input, button, label")) return;
+        var m = twMarkers[sp.name];
+        if (!m || !amapMap) return;
+        amapMap.setZoomAndCenter(13, sp.ll, false, 400);
+        var el = m.getContent && m.getContent();
+        if (el && el.classList) el.classList.remove("dim");
+        setTimeout(function () { if (m.emit) m.emit("click"); }, 450);
+      });
+    });
+  }
+
+  // ▶ 回放：当天首站 marker 沿动线 moveAlong，结束归位（坑位 5：先加载 MoveAnimation 插件）
+  function bindReplay() {
+    var btn = document.getElementById("replay-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var day = curDay === 0 ? days[0] : curDay;
+      var route = null;
+      routes.forEach(function (r) { if (r.day === day) route = r; });
+      var lead = daySpots(day)[0] && twMarkers[daySpots(day)[0].name];
+      if (!route || !lead) return;
+      AMap.plugin("AMap.MoveAnimation", function () {
+        lead.moveAlong(route.pts, { duration: 6000, autoRotation: false });
+      });
+      btn.textContent = "▶ 回放中…";
+      lead.on("movealong", function () {
+        lead.setPosition(daySpots(day)[0].ll);
+        btn.textContent = "▶ 回放";
+      });
+    });
+  }
+
+  // 按天切换 + 标签开关（静态/交互两态共用）
+  function applyDay(day) {
+    curDay = day;
+    if (dayBtns) {
+      dayBtns.querySelectorAll(".day-btn").forEach(function (b) {
+        b.classList.toggle("active", Number(b.dataset.day) === day);
+      });
+    }
+    if (amapMap) { applyDayView(); } else { renderFallback(); }
+  }
+
+  function bindControls() {
+    if (!hasCoords) {
+      if (ctrlRow) ctrlRow.hidden = true;
+      if (dayBtns) dayBtns.innerHTML = "";
+      return;
+    }
+    if (ctrlRow) ctrlRow.hidden = false;
+    if (dayBtns) {
+      var defs = [{ d: 0, label: "全程" }].concat(days.map(function (d) { return { d: d, label: "Day " + d }; }));
+      dayBtns.innerHTML = defs.map(function (def) {
+        return '<button type="button" class="day-btn' + (def.d === 0 ? " active" : "") +
+          '" data-day="' + def.d + '">' + esc(def.label) + "</button>";
+      }).join("");
+      dayBtns.addEventListener("click", function (ev) {
+        var b = ev.target.closest(".day-btn[data-day]");
+        if (b) applyDay(Number(b.dataset.day));
+      });
+    }
+    var labelToggle = document.getElementById("label-toggle");
+    if (labelToggle) {
+      labelToggle.addEventListener("click", function () {
+        twOn = !twOn;
+        labelToggle.textContent = "标签 " + (twOn ? "开" : "关");
+        spots.forEach(function (sp, index) {
+          var m = twMarkers[sp.name];
+          var el = m && m.getContent && m.getContent();
+          if (el) el.innerHTML = markerContent(sp, index);
+        });
+        if (!amapMap) renderFallback();
+      });
+    }
+  }
+
+  // key 引导卡片：localStorage('amap_key') 填写后刷新即交互地图（坑位 6：无演示 key）
+  function bindKeyGuide() {
+    var go = document.getElementById("amap-go");
+    var input = document.getElementById("amap-key-input");
+    var close = document.getElementById("key-guide-close");
+    if (go && input) {
+      go.addEventListener("click", function () {
+        var v = input.value.trim();
+        if (!v) { input.focus(); return; }
+        try { localStorage.setItem("amap_key", v); } catch (e) {}
+        key = v;
+        if (guideEl) guideEl.style.display = "none";
+        loadAMap();
+      });
+    }
+    if (close && guideEl) {
+      close.addEventListener("click", function () { guideEl.style.display = "none"; });
+    }
+  }
+
+  renderLegend();
+  bindControls();
+  bindKeyGuide();
+  if (key && hasCoords) {
+    if (guideEl) guideEl.style.display = "none";
+    loadAMap();
+  } else {
+    renderFallback();
+  }
+  window.addEventListener("resize", function () {
+    if (amapMap) { applyDayView(); }
+  });
+})();
+</script>
+
+<script>
+// ===== T5：主题切换（默认暗色；URL ?theme=light / 切换钮 / localStorage 持久化） =====
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById("theme-toggle");
+  function current() { return root.getAttribute("data-theme") === "light" ? "light" : "dark"; }
+  function apply(t) {
+    root.setAttribute("data-theme", t);
+    if (btn) btn.textContent = t === "dark" ? "☀️" : "🌙";
+  }
+  var wanted = "";
+  try { wanted = new URLSearchParams(location.search).get("theme") || localStorage.getItem("guide_theme") || ""; } catch (e) {}
+  apply(wanted === "light" ? "light" : "dark");
+  if (btn) btn.addEventListener("click", function () {
+    var next = current() === "dark" ? "light" : "dark";
+    apply(next);
+    try { localStorage.setItem("guide_theme", next); } catch (e) {}
+  });
+  window.addEventListener("beforeprint", function () { apply("light"); });
+})();
+// ===== T5：Tab 分区切换（总览/各天/预算/告警；URL ?tab= 深链） =====
+(function () {
+  var btns = document.querySelectorAll(".tab-btn");
+  var panels = document.querySelectorAll(".tab-panel");
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (x) { x.classList.remove("active"); });
+      panels.forEach(function (p) { p.classList.remove("active"); });
+      b.classList.add("active");
+      var panel = document.getElementById("tab-" + b.dataset.tab);
+      if (panel) panel.classList.add("active");
+      window.scrollTo({ top: 0 });
+    });
+  });
+  var want = "";
+  try { want = new URLSearchParams(location.search).get("tab") || ""; } catch (e) {}
+  if (want) {
+    var btn = document.querySelector('.tab-btn[data-tab="' + want + '"]');
+    if (btn) btn.click();
+  }
 })();
 </script>
 

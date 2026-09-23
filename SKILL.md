@@ -530,7 +530,9 @@ Once the required fields are complete:
 3. Use the internal plan_trip.py runner; users should not need to remember CLI
    flags.
 4. Generate the candidate comparison first, then detailed guide JSON and all
-   existing exports for the selected destination.
+   existing exports for every candidate destination. Do not stop after the
+   first or recommended destination; keep each candidate's evidence and
+   itinerary separate.
 
 The user-facing entry point is this Skill. Do not ask users to remember the
 collector commands; the commands above are internal execution steps.
