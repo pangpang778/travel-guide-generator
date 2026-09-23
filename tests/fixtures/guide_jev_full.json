@@ -1,0 +1,390 @@
+{
+  "schema_version": "2.0-draft",
+  "renderer": "prototype-v2",
+  "meta": {
+    "destination": "西安",
+    "origin": "郑州",
+    "days": "3 天 2 晚",
+    "budget": "人均 ¥2,400",
+    "party": "2 人 · 周末游",
+    "destination_identity": {
+      "brand_id": "ferrari",
+      "theme": "ferrari · Rosso Corsa",
+      "reason": "用户指定以 awesome-design-md 的 Ferrari 品牌设计系统为唯一视觉来源：近黑画布 #181818（禁纯黑）承载纯白展示型文字，唯一品牌电压 Rosso Corsa #da291c 稀缺用于主 CTA、时间轴节点与行程时间；尖角 0px 为品牌按钮与卡片形状（药丸几何仅限 badge-pill）；字体 FerrariSans（授权字体，文档替代 Inter 500），展示层级恒 500 不加粗；CTA 大写 + 1.4px 字距；8px 命名间距阶梯；无多层阴影（摄影深度 + 亮度分层，仅一层 hover soft drop）。hero 采用品牌签名组件 hero-band-cinema：全出血照片 + 标题浮于照片底部。"
+    }
+  },
+  "weather": [
+    {
+      "day": "Day 1 · 10/16",
+      "icon": "☀️",
+      "temp": "12–22℃",
+      "advice": "临潼户外多，防晒 + 带水；早晚温差大备外套"
+    },
+    {
+      "day": "Day 2 · 10/17",
+      "icon": "⛅",
+      "temp": "11–20℃",
+      "advice": "多云舒适 · 博物馆+夜游组合最宜"
+    },
+    {
+      "day": "Day 3 · 10/18",
+      "icon": "🌧️",
+      "temp": "10–17℃",
+      "advice": "有小雨 · 城墙骑行备雨衣，砖面湿滑注意慢行"
+    }
+  ],
+  "spots": [
+    {
+      "name": "兵马俑",
+      "day": 1,
+      "ll": [
+        109.2785,
+        34.3842
+      ],
+      "x": 770,
+      "y": 90,
+      "tw": "13:30-16:00",
+      "image": {
+        "url": "xhs-images/xian-bingmayong.jpg",
+        "source": "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记",
+        "credibility": "untrusted · 小红书 UGC（OpenCLI 采集）",
+        "alt_description": "兵马俑一号坑展厅拼贴：博物院正门、一号坑大棚下陶俑军阵俯瞰、跪姿与站姿陶俑特写",
+        "jev_score": 9.9
+      }
+    },
+    {
+      "name": "华清宫",
+      "day": 1,
+      "ll": [
+        109.2137,
+        34.3619
+      ],
+      "x": 720,
+      "y": 130,
+      "tw": "16:30-18:00",
+      "image": {
+        "url": "xhs-images/xian-huaqing-palace.jpg",
+        "source": "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记",
+        "credibility": "untrusted · 小红书 UGC（OpenCLI 采集）",
+        "alt_description": "华清宫贵妃出浴雕像喷泉、海棠汤遗址建筑与骊山园林池水倒影",
+        "jev_score": 9.8
+      }
+    },
+    {
+      "name": "回民街",
+      "day": 1,
+      "ll": [
+        108.9409,
+        34.263
+      ],
+      "x": 330,
+      "y": 150,
+      "tw": "19:30-21:00",
+      "image": {
+        "url": "xhs-images/xian-huiminjie.jpg",
+        "source": "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记",
+        "credibility": "untrusted · 小红书 UGC（OpenCLI 采集）",
+        "alt_description": "回民街老字号悬匾与 biangbiang 面招牌的美食街街景",
+        "jev_score": 9.67
+      }
+    },
+    {
+      "name": "陕历博",
+      "day": 2,
+      "ll": [
+        108.953,
+        34.2225
+      ],
+      "x": 420,
+      "y": 250,
+      "tw": "09:00-12:30",
+      "image": {
+        "url": "xhs-images/xian-shanxi-history-museum.jpg",
+        "source": "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记",
+        "credibility": "untrusted · 小红书 UGC（OpenCLI 采集）",
+        "alt_description": "陕西历史博物馆馆藏拼贴：舞马衔杯银壶、三彩武士俑、青釉提梁壶",
+        "jev_score": 8.6
+      }
+    },
+    {
+      "name": "大雁塔",
+      "day": 2,
+      "ll": [
+        108.964,
+        34.2225
+      ],
+      "x": 520,
+      "y": 280,
+      "tw": "14:00-17:00",
+      "image": {
+        "url": "xhs-images/xian-dayanta.jpg",
+        "source": "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记",
+        "credibility": "untrusted · 小红书 UGC（OpenCLI 采集）",
+        "alt_description": "大雁塔塔身与玄奘雕像同框、大慈恩寺匾额与檐角铜铃特写",
+        "jev_score": 9.8
+      }
+    },
+    {
+      "name": "大唐不夜城",
+      "day": 2,
+      "ll": [
+        108.958,
+        34.216
+      ],
+      "x": 540,
+      "y": 320,
+      "tw": "19:00-22:00",
+      "image": {
+        "url": "xhs-images/xian-datang-everbright.jpg",
+        "source": "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记",
+        "credibility": "untrusted · 小红书 UGC（OpenCLI 采集）",
+        "alt_description": "大唐不夜城夜景：西安年·最中国灯光牌坊、贞观之治群雕与金色雕塑灯光",
+        "jev_score": 9.93
+      }
+    },
+    {
+      "name": "城墙（永宁门）",
+      "day": 3,
+      "ll": [
+        108.9348,
+        34.2522
+      ],
+      "x": 380,
+      "y": 190,
+      "tw": "09:00-12:00",
+      "image": {
+        "url": "xhs-images/xian-citywall.jpg",
+        "source": "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记",
+        "credibility": "untrusted · 小红书 UGC（OpenCLI 采集）",
+        "alt_description": "西安城墙永宁门牌匾门楼、城墙砖石步道红灯笼旌旗与角楼箭楼",
+        "jev_score": 9.77
+      }
+    },
+    {
+      "name": "钟鼓楼",
+      "day": 3,
+      "ll": [
+        108.9424,
+        34.2611
+      ],
+      "x": 350,
+      "y": 120,
+      "tw": "12:30-13:30",
+      "image": {
+        "url": "xhs-images/xian-bell-drum-tower.jpg",
+        "source": "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记",
+        "credibility": "untrusted · 小红书 UGC（OpenCLI 采集）",
+        "alt_description": "钟楼鼓楼夜景拼贴：金顶绿瓦钟楼、文武盛地匾额鼓楼城台与车流灯光",
+        "jev_score": 9.3
+      }
+    },
+    {
+      "name": "洒金桥",
+      "day": 3,
+      "ll": [
+        108.932,
+        34.268
+      ],
+      "x": 280,
+      "y": 130,
+      "tw": "13:30-15:30",
+      "image": {
+        "url": "xhs-images/xian-sajinqiao.jpg",
+        "source": "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记",
+        "credibility": "untrusted · 小红书 UGC（OpenCLI 采集）",
+        "alt_description": "洒金桥牌匾浮雕、羊肉泡馍与酸汤饺子特写、特色美食街红色门头",
+        "jev_score": 9.1
+      }
+    }
+  ],
+  "routes": [
+    {
+      "day": 1,
+      "pts": [
+        [
+          109.2785,
+          34.3842
+        ],
+        [
+          109.2137,
+          34.3619
+        ],
+        [
+          108.9409,
+          34.263
+        ]
+      ]
+    },
+    {
+      "day": 2,
+      "pts": [
+        [
+          108.953,
+          34.2225
+        ],
+        [
+          108.964,
+          34.2225
+        ],
+        [
+          108.958,
+          34.216
+        ]
+      ]
+    },
+    {
+      "day": 3,
+      "pts": [
+        [
+          108.9348,
+          34.2522
+        ],
+        [
+          108.9424,
+          34.2611
+        ],
+        [
+          108.932,
+          34.268
+        ]
+      ]
+    }
+  ],
+  "dayColors": {
+    "1": "#da291c",
+    "2": "#ffffff",
+    "3": "#969696"
+  },
+  "days": [
+    {
+      "day": 1,
+      "date": "2026-10-16",
+      "title": "临潼初见 · 回民街夜宵",
+      "items": [
+        {
+          "type": "spot",
+          "name": "兵马俑",
+          "start": "13:30",
+          "end": "16:00"
+        },
+        {
+          "type": "spot",
+          "name": "华清宫",
+          "start": "16:30",
+          "end": "18:00"
+        },
+        {
+          "type": "spot",
+          "name": "回民街",
+          "start": "19:30",
+          "end": "21:00"
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2026-10-17",
+      "title": "博物馆与夜游大唐",
+      "items": [
+        {
+          "type": "spot",
+          "name": "陕历博",
+          "start": "09:00",
+          "end": "12:30"
+        },
+        {
+          "type": "spot",
+          "name": "大雁塔",
+          "start": "14:00",
+          "end": "17:00"
+        },
+        {
+          "type": "spot",
+          "name": "大唐不夜城",
+          "start": "19:00",
+          "end": "22:00"
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "date": "2026-10-18",
+      "title": "城墙骑行与美食收尾",
+      "items": [
+        {
+          "type": "spot",
+          "name": "城墙（永宁门）",
+          "start": "09:00",
+          "end": "12:00"
+        },
+        {
+          "type": "spot",
+          "name": "钟鼓楼",
+          "start": "12:30",
+          "end": "13:30"
+        },
+        {
+          "type": "spot",
+          "name": "洒金桥",
+          "start": "13:30",
+          "end": "15:30"
+        }
+      ]
+    }
+  ],
+  "intercity": {
+    "from": {
+      "name": "郑州东",
+      "time": "11:33",
+      "ll": [113.6604, 34.7516]
+    },
+    "to": {
+      "name": "西安北",
+      "time": "14:05",
+      "ll": [108.9304, 34.3795]
+    },
+    "line": "郑西高铁",
+    "duration": "2小时32分",
+    "price": 240,
+    "train_no": "G1836"
+  },
+  "alerts": [
+    {
+      "source": "JEV",
+      "type": "图片筛选",
+      "title": "9 处行程点图片 jev 匹配分 8.60–9.93，全部达标",
+      "detail": "候选池 10 次有效评分（上限 20），阈值 ≥7，每点位保留最高分 1 张；兵马俑双候选（9.90 主图 / 9.80 备选）取主图。原始分为 criteria 4 档插值（0–3），展示分 = 原始分 ÷3 ×10。"
+    },
+    {
+      "source": "JEV",
+      "type": "素材可信度",
+      "title": "「99 元游西安」类不实笔记已弃用",
+      "detail": "检索结果中的超低价引流笔记与实际门票/交通成本严重不符（兵马俑+华清宫联票即 ¥240），已从素材池剔除；其余行程点图片均为小红书 UGC（untrusted），出行前请核对官方渠道。"
+    },
+    {
+      "source": "RULE",
+      "type": "节奏提示",
+      "title": "Day 1 临潼往返市区 1.5h+，节奏紧",
+      "detail": "兵马俑与华清宫均位于临潼区，市区往返车程约 1.5 小时以上；建议 11:33 抵西安北后直接乘游 5（306）路赴临潼，行李寄存火车站或酒店，避免折返。"
+    }
+  ],
+  "blocking_count": 0,
+  "hard_rules_passed": 3,
+  "advisory_count": 3,
+  "pipeline": {
+    "collect": {
+      "ok": true,
+      "notes": 4,
+      "images": 43,
+      "tool": "opencli xiaohongshu search/note/download"
+    },
+    "jev": {
+      "ok": true,
+      "calls": 10,
+      "limit": 20,
+      "threshold": 7,
+      "adopted": 9,
+      "degraded": 0
+    }
+  }
+}
