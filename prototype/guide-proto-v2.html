@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-culture="airbnb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成都 3 日游 · AI 旅游攻略原型 v2（airbnb 品牌）</title>
+<style>
+/* ================================================================
+   视觉来源：airbnb.md（awesome-design-md Airbnb 品牌设计系统）
+   单一品牌色 Rausch #ff385c 承载全部 CTA；画布纯白 + 墨色 #222；
+   柔和圆角（按钮 8px / 卡片 14px / 药丸 9999px）；单一阴影层；
+   字体 Airbnb Cereal VF（回退 Circular → 系统栈，开源替代 Inter）。
+   所有 token 均标注 DESIGN.md 出处，未自行引入任何外部配色。
+   ================================================================ */
+:root{
+  /* --- colors（出处：airbnb.md colors 表）--- */
+  --primary:#ff385c;            /* {colors.primary} Rausch */
+  --primary-active:#e00b41;     /* {colors.primary-active} */
+  --primary-disabled:#ffd1da;   /* {colors.primary-disabled} */
+  --error-text:#c13515;         /* {colors.primary-error-text} */
+  --ink:#222222;                /* {colors.ink} 主文本，非纯黑 */
+  --body-ink:#3f3f3f;           /* {colors.body} 长文本 */
+  --muted:#6a6a6a;              /* {colors.muted} 次级文本 */
+  --muted-soft:#929292;         /* {colors.muted-soft} */
+  --hairline:#dddddd;           /* {colors.hairline} 1px 边线 */
+  --hairline-soft:#ebebeb;      /* {colors.hairline-soft} */
+  --border-strong:#c1c1c1;      /* {colors.border-strong} */
+  --canvas:#ffffff;             /* {colors.canvas} 页面底色 */
+  --surface-soft:#f7f7f7;       /* {colors.surface-soft} */
+  --surface-strong:#f2f2f2;     /* {colors.surface-strong} */
+  --on-primary:#ffffff;         /* {colors.on-primary} */
+  --legal-link:#428bff;         /* {colors.legal-link} 仅法务/辅助链接 */
+  --scrim:rgba(0,0,0,.5);       /* {colors.scrim} 遮罩 50% */
+  /* --- rounded（出处：airbnb.md rounded 表）--- */
+  --r-sm:8px; --r-md:14px; --r-lg:20px; --r-xl:32px; --r-full:9999px;
+  /* --- spacing（出处：airbnb.md spacing 表）--- */
+  --s-xs:4px; --s-sm:8px; --s-md:12px; --s-base:16px;
+  --s-lg:24px; --s-xl:32px; --s-xxl:48px; --s-section:64px;
+  /* --- 全系统唯一阴影层（出处：airbnb.md Elevation）--- */
+  --shadow-float:rgba(0,0,0,.02) 0 0 0 1px, rgba(0,0,0,.04) 0 2px 6px 0, rgba(0,0,0,.1) 0 4px 8px 0;
+  /* --- 字体（出处：airbnb.md typography.fontFamily + 替代说明）--- */
+  --font:"Airbnb Cereal VF","Circular",-apple-system,system-ui,Roboto,"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;
+  /* 地图装饰底色（取自 surface/ink token 推导，非新色） */
+  --map-block:#ebebeb; --map-river:rgba(66,139,255,.22); /* river 复用 {colors.legal-link} 低透明度装饰 */
+}
+/* 暗色模式：DESIGN.md 明示 Airbnb 公开站无暗色模式（canvas 无夜间变体），
+   以下暗色 token 为原型扩展——由 ink/scrim/surface 三个已文档 token 反转推导，不引入新色相。 */
+html[data-culture="dark"]{
+  --canvas:#141414; --surface-soft:#1f1f1f; --surface-strong:#282828;
+  --ink:#f7f7f7; --body-ink:#d8d8d8; --muted:#a8a8a8; --muted-soft:#7a7a7a;
+  --hairline:#333333; --hairline-soft:#262626; --border-strong:#555555;
+  --map-block:#242424; --map-river:rgba(66,139,255,.28);
+  --shadow-float:rgba(0,0,0,.4) 0 0 0 1px, rgba(0,0,0,.5) 0 2px 6px 0, rgba(0,0,0,.6) 0 4px 8px 0;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--canvas); color:var(--ink);
+  font-family:var(--font);
+  /* {typography.body-md} 16px/1.5 */
+  font-size:16px; line-height:1.5; font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1128px;margin:0 auto;padding:0 24px} /* Desktop 断点容器（airbnb.md Layout 1128px） */
+a{color:var(--ink)} /* Airbnb 链接为墨色（body links in ink） */
+button{font-family:inherit;cursor:pointer}
+
+/* ---------- masthead（{component.top-nav} 白底 + display-xl 28/700） ---------- */
+.masthead{padding:48px 0 32px;border-bottom:1px solid var(--hairline)}
+.kicker{
+  /* {typography.uppercase-tag} 8px/700 大写 + 0.32px 字距；按可读性放大至 12px */
+  font-size:12px;font-weight:700;letter-spacing:.32em;color:var(--muted);
+  text-transform:uppercase;
+}
+.brand-chip{
+  /* {component.guest-favorite-badge} 白色药丸 11px/600 */
+  display:inline-flex;align-items:center;gap:8px;margin-top:12px;
+  border:1px solid var(--hairline);background:var(--canvas);
+  border-radius:var(--r-full);padding:4px 12px;
+  font-size:12px;font-weight:600;color:var(--ink);
+}
+.brand-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--primary)}
+.masthead h1{
+  /* {typography.display-xl} 28px/700 — Airbnb 刻意克制的标题字重 */
+  font-size:28px;font-weight:700;line-height:1.43;margin:16px 0 8px;
+}
+.masthead .dek{font-size:16px;color:var(--muted);max-width:640px} /* {typography.body-md} muted */
+
+/* 招牌搜索药丸（{component.search-bar-pill} + {component.search-orb}，静态装饰） */
+.search-pill{
+  display:flex;align-items:center;margin-top:24px;
+  background:var(--canvas);border:1px solid var(--hairline);
+  border-radius:var(--r-full);height:64px;max-width:640px;
+  box-shadow:var(--shadow-float);
+}
+.search-pill .seg{flex:1;padding:8px 24px;border-right:1px solid var(--hairline)}
+.search-pill .seg .lbl{font-size:12px;font-weight:600;color:var(--ink)} /* {typography.caption} */
+.search-pill .seg .val{font-size:14px;color:var(--muted)} /* {typography.body-sm} */
+.search-orb{
+  width:48px;height:48px;border-radius:50%;background:var(--primary);
+  color:var(--on-primary);border:none;flex-shrink:0;margin-right:8px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.search-orb:active{background:var(--primary-active)} /* {component.button-primary-active} */
+
+.meta{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:24px;font-size:14px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:600}
+
+/* ---------- tab nav（{component.product-tab-active} 墨色下划线风格） ---------- */
+.tab-nav{
+  position:sticky;top:0;z-index:50;background:var(--canvas);
+  border-bottom:1px solid var(--hairline);
+}
+.tab-nav .wrap{display:flex;gap:24px;overflow-x:auto;padding:0 24px}
+.tab-btn{
+  border:none;background:transparent;color:var(--muted); /* {component.product-tab-inactive} */
+  padding:16px 2px;font-size:14px;font-weight:600;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:color .15s;
+}
+.tab-btn:hover{color:var(--ink)}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--ink)} /* {component.product-tab-active} 2px 墨色下划线 */
+.tab-panel{display:none;padding:40px 0 8px}
+.tab-panel.active{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- section head & cards（{component.property-card} 14px 圆角 + 1px hairline） ---------- */
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:24px}
+.sec-head h2{font-size:21px;font-weight:700;line-height:1.43} /* {typography.display-md} */
+.sec-head .no{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.2em} /* {typography.micro-label} */
+.card{
+  background:var(--canvas);border:1px solid var(--hairline);
+  border-radius:var(--r-md); /* {rounded.md} 14px */
+  transition:box-shadow .15s;
+}
+.card:hover{box-shadow:var(--shadow-float)} /* 唯一阴影层仅用于 hover 浮起 */
+
+/* ---------- map ---------- */
+.map-card{overflow:hidden;position:relative}
+.map-area{height:360px;position:relative;background:var(--surface-soft)}
+.map-area svg{width:100%;height:100%;display:block}
+.map-status{padding:12px 16px;font-size:13px;color:var(--muted);border-top:1px solid var(--hairline-soft)}
+.map-legend{display:flex;gap:18px;padding:12px 16px;font-size:13px;color:var(--muted);border-top:1px solid var(--hairline-soft)}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+
+/* key 引导卡片 — 浮在静态图上（text-input 风格：56px 高，focus 2px 墨色描边，无 glow） */
+.key-guide{
+  position:absolute;inset:0;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--scrim); /* {colors.scrim} 50% */
+}
+.key-guide .inner{
+  max-width:440px;margin:0 24px;padding:24px;border-radius:var(--r-md);
+  background:var(--canvas);border:1px solid var(--hairline);box-shadow:var(--shadow-float);
+}
+.key-guide h3{font-size:20px;font-weight:600;margin-bottom:8px} /* {typography.display-sm} */
+.key-guide p{font-size:14px;color:var(--muted);margin-bottom:16px}
+.key-guide code{font-size:13px;background:var(--surface-soft);color:var(--ink);padding:2px 6px;border-radius:var(--r-sm)}
+.key-guide .row{display:flex;gap:8px}
+.key-guide input{
+  flex:1;border:1px solid var(--hairline);border-radius:var(--r-sm);
+  padding:14px 12px;font-size:16px;background:var(--canvas);color:var(--ink);min-width:0;
+}
+.key-guide input:focus{outline:none;border:2px solid var(--ink);padding:13px 11px} /* {component.text-input} focus 无 ring */
+.key-guide .go{
+  border:none;background:var(--primary);color:var(--on-primary);
+  border-radius:var(--r-sm);padding:14px 24px; /* {component.button-primary} */
+  font-size:16px;font-weight:500;white-space:nowrap;
+}
+.key-guide .go:active{background:var(--primary-active)}
+.key-guide .close-link{
+  display:block;margin-top:12px;font-size:14px;color:var(--muted);
+  background:none;border:none;text-decoration:underline;
+}
+.key-guide .close-link:hover{color:var(--ink)}
+.map-ok{
+  position:absolute;top:12px;right:12px;z-index:6;
+  background:var(--canvas);color:var(--ink);border:1px solid var(--hairline);
+  border-radius:var(--r-full);padding:4px 12px;font-size:11px;font-weight:600;
+  box-shadow:var(--shadow-float); /* {component.guest-favorite-badge} 样式 */
+}
+
+/* 地图区控件（按天切换 + 标签开关 + 总览/交通视图切换）——白底药丸（{component.icon-button-outline}） */
+.map-ctrl{
+  position:absolute;top:12px;left:12px;z-index:6;
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+.map-ctrl button{
+  border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);
+  border-radius:var(--r-full);padding:4px 12px;font-size:12px;font-weight:600;
+  box-shadow:var(--shadow-float);
+}
+.map-ctrl button.active{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+.map-ctrl button:active{background:var(--primary-active);color:var(--on-primary)}
+
+/* 交通视图静态 SVG 端点 marker（参考：chenxuan520/roadbook 车站 marker 样式） */
+.ic-node{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid var(--canvas);box-shadow:0 0 0 1px var(--primary)}
+
+/* AMap Marker 自定义 DOM：序号气泡 + 时间窗标签（参考：itskovacs/trip 序号气泡 + 时间窗直显） */
+.spot-marker{position:relative;text-align:center}
+.spot-pin{
+  width:24px;height:24px;border-radius:50%;margin:0 auto;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--on-primary);font-size:12px;font-weight:700;
+  border:2px solid var(--canvas);box-shadow:var(--shadow-float);
+  transition:transform .15s;
+}
+.spot-marker.spot-hl .spot-pin{transform:scale(1.35);box-shadow:0 0 0 2px var(--primary),var(--shadow-float)}
+.spot-tw{
+  margin-top:4px;white-space:nowrap;font-size:11px;font-weight:600;color:var(--ink);
+  background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-full);
+  padding:2px 8px;display:inline-block;box-shadow:var(--shadow-float);
+}
+.spot-marker.no-label .spot-tw{display:none}
+
+/* ---------- weather（{component.reservation-card} 24px 内边距变体） ---------- */
+.weather{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:0 0 8px}
+.w-card{padding:24px}
+.w-card .d{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.05em} /* {typography.micro-label} */
+.w-card .t{font-size:16px;font-weight:600;margin:8px 0 4px} /* {typography.title-md} */
+.w-card .a{font-size:14px;color:var(--muted)} /* {typography.body-sm} */
+
+/* ---------- timeline（{component.amenity-row} 行式布局 + hairline 分隔） ---------- */
+.tl{position:relative;margin:8px 0 0 8px;padding-left:24px}
+.tl::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:1px;background:var(--hairline)}
+.ev{position:relative;padding:0;margin-bottom:16px;overflow:hidden;cursor:pointer}
+.ev::before{
+  content:"";position:absolute;left:-30px;top:26px;width:11px;height:11px;
+  border-radius:50%;background:var(--primary);border:2px solid var(--canvas);
+  box-shadow:0 0 0 1px var(--primary);
+}
+.ev.transit::before{background:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.ev:hover{box-shadow:var(--shadow-float)}
+.ev-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:16px 24px 4px}
+.ev-time{font-weight:700;font-size:14px;color:var(--primary);font-variant-numeric:tabular-nums}
+.ev.transit .ev-time{color:var(--ink)}
+.ev-title{font-weight:600;font-size:16px} /* {typography.title-md} */
+.badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--r-full);white-space:nowrap} /* {component.guest-favorite-badge} */
+.b-check{background:var(--canvas);color:var(--ink);border:1px solid var(--hairline)}
+.b-est{background:var(--surface-soft);color:var(--muted);border:1px solid var(--hairline-soft)}
+.b-live{background:var(--primary);color:var(--on-primary)}
+.b-warn{background:var(--canvas);color:var(--error-text);border:1px solid var(--error-text)} /* {colors.primary-error-text} */
+.ev .sum{font-size:14px;color:var(--muted);margin:2px 24px 16px}
+.ev .toggle-hint{margin-left:auto;font-size:13px;color:var(--muted);flex-shrink:0}
+.ev.open .toggle-hint{color:var(--primary)}
+.ev .warn-row{margin:8px 24px 16px;font-size:14px;color:var(--error-text);background:var(--surface-soft);padding:8px 12px;border-radius:var(--r-sm)}
+
+.ev-detail{display:none;border-top:1px solid var(--hairline-soft);padding:16px 24px;background:var(--surface-soft)}
+.ev.open .ev-detail{display:grid;grid-template-columns:150px 1fr;gap:16px;animation:fadein .2s ease}
+.ev-img{width:150px;height:112px;border-radius:var(--r-sm);overflow:hidden;position:relative;background:var(--surface-strong)}
+.ev-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ev-img .ph{
+  width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:26px;color:var(--muted);gap:4px;background:var(--surface-strong);
+}
+.ev-img .ph span{font-size:10px;color:var(--muted);letter-spacing:.15em;text-align:center;padding:0 6px}
+.src-mark{
+  position:absolute;left:0;right:0;bottom:0;font-size:9px;padding:2px 5px;
+  background:var(--scrim);color:#fff;text-align:center;white-space:nowrap;overflow:hidden;
+}
+.jev-mark{
+  position:absolute;top:6px;right:6px;font-size:9px;font-weight:600;
+  background:var(--canvas);color:var(--ink);border:1px solid var(--hairline);
+  border-radius:var(--r-full);padding:1px 6px;
+}
+.ev-info dl{font-size:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:4px} /* {typography.body-sm} */
+.ev-info dt{color:var(--muted);white-space:nowrap}
+.ev-info dd{color:var(--ink);font-weight:500}
+.ev-info .why{grid-column:1/-1;color:var(--body-ink);margin-top:4px;line-height:1.5}
+.ev-info .why b{color:var(--primary)}
+.ev-info .note{grid-column:1/-1;color:var(--error-text);background:var(--surface-strong);border-radius:var(--r-sm);padding:8px 12px;margin-top:8px;font-size:13px}
+.day-head{margin:0 0 16px;font-size:16px;color:var(--muted)}
+.day-head .stars{color:var(--ink);letter-spacing:2px;font-size:14px;margin-left:8px} /* 评分用墨色（{colors.star-rating} 品牌决策：不用金色星星） */
+.day-head .badge{margin-left:8px}
+
+/* ---------- grid cards（预算/交通/住宿） ---------- */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid3 .card{padding:24px}
+.grid3 h3{font-size:16px;font-weight:600;margin-bottom:16px} /* {typography.title-md} */
+.bl{list-style:none;font-size:14px}
+.bl li{display:flex;justify-content:space-between;gap:8px;padding:12px 0;border-bottom:1px solid var(--hairline-soft)} /* {component.amenity-row} 12px 行距 */
+.bl li:last-child{border-bottom:none}
+.bl li b{font-variant-numeric:tabular-nums;color:var(--ink)}
+.rec{color:var(--primary);font-weight:600} /* 推荐标记用 Rausch（品牌唯一强调色） */
+.bar{height:8px;border-radius:var(--r-full);background:var(--surface-strong);margin-top:16px;overflow:hidden}
+.bar i{display:block;height:100%;width:92%;border-radius:var(--r-full);background:var(--primary)} /* 进度条 Rausch */
+.bar-note{font-size:13px;color:var(--muted);margin-top:8px;text-align:right}
+
+/* ---------- alerts ---------- */
+.alert{display:flex;gap:12px;padding:16px 24px;margin-bottom:12px;align-items:flex-start}
+.alert .txt{font-size:14px}
+.alert .txt b{display:block;font-size:16px;font-weight:600}
+.alert .txt span{color:var(--muted)}
+.chip{font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--r-full);letter-spacing:.05em;flex-shrink:0;margin-top:2px}
+.chip.jev{background:var(--primary-disabled);color:var(--error-text)} /* {colors.primary-disabled} 淡 Rausch 底 + 错误红字 */
+.chip.rule{background:var(--surface-strong);color:var(--ink)}
+.chip.info{background:var(--surface-soft);color:var(--muted)}
+
+/* ---------- export bar（{component.icon-button-outline} 白底药丸按钮） ---------- */
+.export-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:var(--canvas);border-top:1px solid var(--hairline);
+}
+.export-bar .wrap{display:flex;gap:10px;padding:12px 24px;align-items:center;flex-wrap:wrap}
+.export-bar button{
+  border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);
+  padding:8px 16px;border-radius:var(--r-full);height:40px; /* {component.icon-button-outline} */
+  font-size:14px;font-weight:500;
+  transition:box-shadow .15s;
+}
+.export-bar button:hover{box-shadow:var(--shadow-float)}
+.export-bar button:active{background:var(--surface-soft)}
+.export-bar button.cta{background:var(--primary);color:var(--on-primary);border-color:var(--primary);font-weight:600}
+.export-bar button.cta:active{background:var(--primary-active)}
+.export-bar .hint{font-size:13px;color:var(--muted);margin-left:auto}
+
+/* ---------- theme toggle & footer ---------- */
+.theme-toggle{
+  position:fixed;right:18px;bottom:64px;z-index:60;width:48px;height:48px;border-radius:50%; /* 48px 触控目标 */
+  border:1px solid var(--hairline);background:var(--canvas);box-shadow:var(--shadow-float);
+  font-size:18px;display:flex;align-items:center;justify-content:center;
+}
+footer{padding:48px 0 96px;border-top:1px solid var(--hairline-soft);background:var(--canvas)}
+footer .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:24px}
+footer h4{font-size:16px;font-weight:500;margin-bottom:8px} /* {typography.title-sm} footer 栏目标题 */
+footer .cols p{font-size:14px;color:var(--ink);line-height:1.6}
+footer .cols .m{color:var(--muted)}
+footer .legal{font-size:13px;color:var(--muted);border-top:1px solid var(--hairline-soft);padding-top:16px;line-height:1.7} /* {component.legal-band} */
+footer .ok{color:var(--ink);font-weight:600}
+footer .legal a{color:var(--legal-link)} /* {colors.legal-link} 仅法务带链接 */
+
+/* ---------- print & mobile ---------- */
+@media print{
+  .tab-nav,.theme-toggle,.export-bar{display:none!important}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;border-color:#ccc}
+  .tab-panel{display:block!important;page-break-before:always}
+  .ev{cursor:auto}
+}
+@media (max-width:744px){ /* Mobile 断点（airbnb.md Responsive <744px） */
+  .masthead{padding:32px 0 24px}
+  .search-pill{max-width:100%;height:56px}
+  .search-pill .seg:nth-child(2){display:none}
+  .weather,.grid3,footer .cols{grid-template-columns:1fr}
+  .map-area{height:300px}
+  .tab-btn{padding:12px 2px;font-size:13px}
+  .export-bar .hint{display:none}
+  .ev.open .ev-detail{grid-template-columns:1fr}
+  .ev-img{width:100%;height:140px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ MASTHEAD（airbnb 品牌主题展示） ============ -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="kicker">Travel Guide · Chengdu</div>
+    <div class="brand-chip" id="brand-chip">
+      <span class="dot"></span><span id="brand-name">主题：airbnb · Rausch 珊瑚红</span>
+    </div>
+    <h1>成都三日：<br>市井烟火与慢时光</h1>
+    <p class="dek">从春熙路的爬墙熊猫到鹤鸣茶社的盖碗茶，一份兼顾节奏与松弛的周末短途攻略——高铁直达、步行友好、下雨也有 Plan B。</p>
+    <!-- {component.search-bar-pill} 静态展示（品牌签名组件） -->
+    <div class="search-pill" aria-hidden="true">
+      <div class="seg"><div class="lbl">目的地</div><div class="val">成都</div></div>
+      <div class="seg"><div class="lbl">日期</div><div class="val">4/12 – 4/14 · 3 天 2 晚</div></div>
+      <div class="seg" style="border-right:none"><div class="lbl">出行人</div><div class="val">2 人</div></div>
+      <button class="search-orb" tabindex="-1" aria-label="搜索">🔍</button>
+    </div>
+    <div class="meta" id="meta-row"></div>
+  </div>
+</header>
+
+<!-- ============ TAB NAV ============ -->
+<nav class="tab-nav">
+  <div class="wrap" id="tab-btns">
+    <button class="tab-btn active" data-tab="overview">总览</button>
+    <button class="tab-btn" data-tab="transit">交通</button>
+    <button class="tab-btn" data-tab="d1">Day 1</button>
+    <button class="tab-btn" data-tab="d2">Day 2</button>
+    <button class="tab-btn" data-tab="d3">Day 3</button>
+    <button class="tab-btn" data-tab="budget">预算</button>
+    <button class="tab-btn" data-tab="alerts">告警</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ============ TAB: 总览 ============ -->
+  <section class="tab-panel active" id="tab-overview">
+    <div class="sec-head"><span class="no">01</span><h2>行程总览图</h2></div>
+    <div class="card map-card">
+      <div class="map-area" id="map-area">
+        <!-- 降级静态 SVG 路线图（一等公民设计）由 JS 注入 -->
+      </div>
+      <!-- 地图区控件：总览/交通视图切换 + 按天切换 + 时间窗标签开关（由 JS 注入按钮） -->
+      <div class="map-ctrl" id="map-ctrl"></div>
+      <div class="map-ok" id="map-ok" style="display:none">✅ 交互地图已启用</div>
+      <!-- key 引导卡片：浮在静态图上，填 key 或关闭后才露出静态图 -->
+      <div class="key-guide" id="key-guide">
+        <div class="inner">
+          <h3>🗺️ 启用交互地图</h3>
+          <p>当前未配置高德地图 Key。填入你的 AMAP_KEY（申请地址 <a href="https://lbs.amap.com" target="_blank" rel="noopener">lbs.amap.com</a>），Key 只保存在本地 <code>localStorage('amap_key')</code>，不会上传。也可先关闭此卡片查看静态路线图。</p>
+          <div class="row">
+            <input type="text" id="amap-key-input" placeholder="粘贴 AMAP_WEB Key…" autocomplete="off">
+            <input type="text" id="amap-scode-input" placeholder="安全密钥 securityJsCode（控制台 key 旁可见）" autocomplete="off">
+            <button class="go" id="amap-go">启用交互地图</button>
+          </div>
+          <button class="close-link" id="key-guide-close">先看看静态路线图 →</button>
+        </div>
+      </div>
+      <div class="map-legend" id="map-legend"></div>
+      <div class="map-status" id="map-status">地图加载中…</div>
+    </div>
+
+    <div class="sec-head" style="margin-top:48px"><span class="no">WX</span><h2>三天气预报</h2></div>
+    <div class="weather" id="weather-row"></div>
+  </section>
+
+  <!-- ============ TAB: 交通（跨城/市内分层：本视图承载跨城视野，总览图专注市内动线） ============ -->
+  <section class="tab-panel" id="tab-transit">
+    <div class="sec-head"><span class="no">TR</span><h2>跨城交通 · 成渝高铁</h2></div>
+    <div class="card map-card">
+      <div class="map-area" id="transit-map-area" style="height:300px">
+        <!-- 交互地图（AMap）或降级静态 SVG 由 JS 注入 -->
+      </div>
+      <div class="map-ctrl" id="transit-map-ctrl"></div>
+      <div class="map-legend" id="transit-legend"></div>
+      <div class="map-status" id="transit-status">交通视图加载中…</div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: Day 1 ============ -->
+  <section class="tab-panel" id="tab-d1">
+    <div class="sec-head"><span class="no">Day 1</span><h2>抵达日 · 市区经典线</h2></div>
+    <div class="day-head">
+      强度 <span class="stars">★★☆☆☆</span>
+      <span class="badge b-check">jev 合理性 8.5/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev transit card">
+        <div class="ev-head">
+          <span class="ev-time">08:06</span>
+          <span class="ev-title">G8506 · 重庆北 → 成都东</span>
+          <span class="badge b-live">12306 实时</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">08:06 发车 — 09:58 抵达，二等座 <b>¥154</b>，<span class="badge b-check">有票</span>。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/chengdu-day1-chunxi-taikoo.jpg" data-jev="8.45" data-src="来源：小红书笔记《🌟成都旅游攻略 3天2夜 人均800+》@Herocuii（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">10:40</span>
+          <span class="ev-title">春熙路 · IFS 爬墙熊猫</span>
+          <span class="badge b-check">jev 图片匹配 8.45</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">坐电梯上 IFS 七楼和爬墙大熊猫合影，是来成都必打卡的地标。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/chengdu-hotpot.jpg" data-jev="8.36" data-src="来源：小红书笔记《成都📍五天四夜懒人版》@小面包嘟嘟（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">12:30</span>
+          <span class="ev-title">翠孃孃火锅午餐</span>
+          <span class="badge b-check">jev 图片匹配 8.36</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">辣锅正宗，对微辣人士友好——第一天就用一顿鸳鸯锅开局。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/chengdu-day1-chunxi-taikoo.jpg" data-jev="8.26" data-src="来源：小红书笔记《成都 4天｜不绕路保姆级攻略》@大牛叔叔（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">14:30</span>
+          <span class="ev-title">太古里 · 大慈寺</span>
+          <span class="badge b-check">jev 图片匹配 8.26</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">古典与现代混搭的开放式街区，重点逛千年大慈寺，拍飞檐与古树禅意大片。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/chengdu-kuanzhai.jpg" data-jev="8.26" data-src="来源：小红书笔记《成都📍五天四夜懒人版》@小面包嘟嘟（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">16:30</span>
+          <span class="ev-title">宽窄巷子</span>
+          <span class="badge b-check">jev 图片匹配 8.26</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">清代川西民居街巷，拍照 + 采耳 + 糖油果子一条龙，晚上有川剧变脸。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/chengdu-day1-chunxi-taikoo.jpg" data-jev="8.66" data-src="来源：小红书笔记《🌟成都旅游攻略 3天2夜 人均800+》@Herocuii（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">19:30</span>
+          <span class="ev-title">九眼桥夜景</span>
+          <span class="badge b-check">jev 图片匹配 8.66</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">锦江两岸灯光带，桥下灯光倒映江面——成都夜色的代表。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: Day 2 ============ -->
+  <section class="tab-panel" id="tab-d2">
+    <div class="sec-head"><span class="no">Day 2</span><h2>熊猫与人文 · 精华日</h2></div>
+    <div class="day-head">
+      强度 <span class="stars">★★★☆☆</span>
+      <span class="badge b-check">jev 合理性 8.0/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev card" data-img="xhs-images/chengdu-panda-base.jpg" data-jev="7.87" data-src="来源：小红书笔记《成都待了6年，亲测不绕路四日游路线》@糖醋排骨不要糖醋（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">07:30</span>
+          <span class="ev-title">大熊猫繁育研究基地</span>
+          <span class="badge b-check">jev 图片匹配 7.87</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">早到 = 熊猫在吃早餐 = 出片巅峰。建议走「西门进—月亮产房—大熊猫别墅区—南门出」。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/chengdu-museum.jpg" data-jev="8.69" data-src="来源：小红书笔记《成都📍五天四夜懒人版》@小面包嘟嘟（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">13:30</span>
+          <span class="ev-title">成都博物馆</span>
+          <span class="badge b-check">jev 图片匹配 8.69</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">藏品从先秦到近代，镇馆的东汉陶俳优说唱俑笑了两千年。免费但需提前预约。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/chengdu-dongjiao-memory.jpg" data-jev="8.07" data-src="来源：小红书笔记《成都📍五天四夜懒人版》@小面包嘟嘟（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">16:00</span>
+          <span class="ev-title">东郊记忆</span>
+          <span class="badge b-check">jev 图片匹配 8.07</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">老厂房改造的工业风文创园区，红砖墙「成都」大字、复古火车头、涂鸦墙超好拍。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/chengdu-chuanchuan.jpg" data-jev="8.36" data-src="来源：小红书笔记《🌟成都旅游攻略 3天2夜 人均800+》@Herocuii（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">18:30</span>
+          <span class="ev-title">玉林串串香晚餐（春熙店）</span>
+          <span class="badge b-check">jev 图片匹配 8.36</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">牛肉串串二十多种，锅底每天新鲜熬制，串串都是嬢嬢手工现穿。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: Day 3 ============ -->
+  <section class="tab-panel" id="tab-d3">
+    <div class="sec-head"><span class="no">Day 3</span><h2>慢收尾 · 草堂与归途</h2></div>
+    <div class="day-head">
+      强度 <span class="stars">★☆☆☆☆</span>
+      <span class="badge b-check">jev 合理性 9.0/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev card" data-img="xhs-images/chengdu-dufu-caotang.jpg" data-jev="8.74" data-src="来源：小红书笔记《成都📍五天四夜懒人版》@小面包嘟嘟（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">09:00</span>
+          <span class="ev-title">杜甫草堂</span>
+          <span class="badge b-check">jev 图片匹配 8.74</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">唐代诗人杜甫流寓成都的故居，红墙竹影是必打卡机位，散步吸氧超治愈。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/chengdu-wenshuyuan.jpg" data-jev="8.72" data-src="来源：小红书笔记《成都📍五天四夜懒人版》@小面包嘟嘟（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">11:30</span>
+          <span class="ev-title">文殊院</span>
+          <span class="badge b-check">jev 图片匹配 8.72</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">长江流域四大禅林之一，始建于隋。红墙「幸/乐」字墙最出片，院外宫廷糕点顺路带一盒。</p>
+      </div>
+      <div class="ev transit card">
+        <div class="ev-head">
+          <span class="ev-time">16:20</span>
+          <span class="ev-title">G8533 · 成都东 → 重庆北</span>
+          <span class="badge b-warn">余票紧张</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">16:20 发车 — 18:12 抵达，二等座 <b>¥154</b>。</p>
+        <div class="warn-row">⚠ 余票紧张，建议尽快购票或备选 17:05 G8535（有票）</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: 预算 ============ -->
+  <section class="tab-panel" id="tab-budget">
+    <div class="sec-head"><span class="no">02</span><h2>预算 · 交通 · 住宿</h2></div>
+    <div class="grid3">
+      <div class="card">
+        <h3>💰 预算明细</h3>
+        <ul class="bl">
+          <li>高铁往返 <b>¥308</b></li>
+          <li>门票 <b>¥135</b></li>
+          <li>餐饮 <b>¥530</b></li>
+          <li>住宿 2 晚 <b>¥500</b></li>
+          <li><strong>合计</strong> <b>¥1,473 / ¥1,600</b></li>
+        </ul>
+        <div class="bar"><i></i></div>
+        <div class="bar-note">已用 92% · 余 ¥127</div>
+      </div>
+      <div class="card">
+        <h3>🚄 交通比较</h3>
+        <ul class="bl">
+          <li>🚄 高铁 <b>¥308 · 1h52m</b> <span class="rec">推荐</span></li>
+          <li>✈️ 飞机 <b>¥650+ · 4h 门到门</b></li>
+          <li>🚗 自驾 <b>¥560 · 3.5h</b></li>
+          <li>🚌 大巴 <b>¥220 · 5h</b></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🏨 住宿建议</h3>
+        <ul class="bl">
+          <li>首选 <b>春熙路 / 太古里</b></li>
+          <li>地铁 2/3 号线交汇 <b>步行友好</b></li>
+          <li>性价比 <b>骡马市</b></li>
+          <li>避免 <b>天府新区</b>（离主城太远）</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: 告警 ============ -->
+  <section class="tab-panel" id="tab-alerts">
+    <div class="sec-head"><span class="no">03</span><h2>告警与提示</h2></div>
+    <div id="alerts-list"></div>
+  </section>
+
+</main>
+
+<!-- ============ EXPORT BAR ============ -->
+<div class="export-bar">
+  <div class="wrap">
+    <button class="cta" onclick="alert('导出 .ics 日历（原型演示）')">📅 导出日历 (.ics)</button>
+    <button onclick="alert('生成小红书图文（原型演示）')">📕 小红书图文</button>
+    <button onclick="window.print()">🖨 打印 / PDF</button>
+    <span class="hint">数据由 window.__GUIDE_SCHEMA__ 驱动 · 单文件原型 v2 · airbnb 品牌</span>
+  </div>
+</div>
+
+<!-- ============ 暗色模式切换钮 ============ -->
+<button class="theme-toggle" id="theme-toggle" title="切换暗色模式">🌙</button>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>图片管线</h4>
+        <p><span class="ok">✔ OpenCLI 采集成功</span>：小红书 4 篇笔记 · 36 张素材图<br>
+        <span class="m">《成都待了6年四日游》@糖醋排骨不要糖醋、《成都4天保姆级攻略》@大牛叔叔、《五天四夜懒人版》@小面包嘟嘟、《3天2夜人均800+》@Herocuii</span></p>
+      </div>
+      <div>
+        <h4>jev 筛选（TypeSafe System One）</h4>
+        <p>17 次调用（上限 20）· 阈值 ≥7 保留最高分 1 张<br>
+        <span class="m">11 处行程点引用采用真图 · 1 点位降级占位（都江堰·南桥 6.6 &lt; 7，页面不展示该图）</span></p>
+      </div>
+      <div>
+        <h4>视觉系统</h4>
+        <p><span class="m">全部视觉 token 来自 awesome-design-md 的 airbnb 品牌规范（Rausch #ff385c 单强调色 · Cereal VF 字体栈 · 8/14/9999px 圆角 · 单一阴影层）。暗色模式为原型推导扩展（DESIGN.md 未定义夜间 token）。</span></p>
+      </div>
+    </div>
+    <div class="legal">
+      <p><span class="ok">✔ 硬规则 3 条全部通过</span> · jev advisory 3 条 · 均江堰点位图片未达阈值已降级</p>
+      <p>行程点图片为小红书 UGC（untrusted），仅原型演示用途，版权属于原作者 · 数据为模拟 schema，非真实攻略 · 原型 v2 · © 2026 Guide Proto</p>
+      <p>地图交互参考：liketrek/TREK · itskovacs/trip · chenxuan520/roadbook（GitHub，MIT）</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ================= MOCK SCHEMA ================= */
+window.__GUIDE_SCHEMA__ = {
+  meta: {
+    origin: "重庆", days: "3 天 2 晚", budget: "人均 ¥1,600", party: "2 人 · 周末游",
+    destination_identity: {
+      brand_id: "airbnb",
+      theme: "airbnb · Rausch 珊瑚红",
+      reason: "用户指定以 awesome-design-md 的 Airbnb 品牌设计系统为唯一视觉来源：纯白画布 + 墨色 #222 文本 + 单一 Rausch #ff385c 强调色承载全部 CTA，字体 Airbnb Cereal VF（Circular/系统栈回退），柔和圆角（按钮 8px、卡片 14px、搜索药丸 9999px），全系统仅一层阴影。"
+    }
+  },
+  weather: [
+    { day: "Day 1 · 4/12", icon: "⛅", temp: "18–25℃", advice: "早晚微凉，带一件外套" },
+    { day: "Day 2 · 4/13", icon: "🌧️", temp: "16–22℃", advice: "有雨 · 已排室内替代预案（成都博物馆）" },
+    { day: "Day 3 · 4/14", icon: "☀️", temp: "17–26℃", advice: "紫外线中等，注意防晒" }
+  ],
+  /* spot.image：真实采集 + jev 筛选结果（阈值 ≥7，每点取最高分 1 张）。
+     url 为 OpenCLI 下载的本地文件；credibility 标记 untrusted UGC 来源。 */
+  /* spot.tw：时间窗（与各 Day 时间轴文字衔接对齐）——地图 marker 直显标签用（参考：itskovacs/trip） */
+  spots: [
+    { name: "春熙路", ll: [104.0812, 30.6570], day: 1, x: 520, y: 230, tw: "10:40-12:00",
+      image: { url: "xhs-images/chengdu-day1-chunxi-taikoo.jpg", source: "小红书《🌟成都旅游攻略 3天2夜 人均800+》@Herocuii", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "春熙路街景路牌人流与 IFS 爬墙大熊猫雕塑拼贴", jev_score: 8.45 } },
+    { name: "宽窄巷子", ll: [104.0532, 30.6638], day: 1, x: 260, y: 150, tw: "14:30-16:30",
+      image: { url: "xhs-images/chengdu-kuanzhai.jpg", source: "小红书《成都📍五天四夜懒人版》@小面包嘟嘟", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "宽窄巷子石碑刻字、老街店铺与川剧变脸舞台拼贴", jev_score: 8.26 } },
+    { name: "九眼桥", ll: [104.0845, 30.6398], day: 1, x: 600, y: 320, tw: "19:30-21:30",
+      image: { url: "xhs-images/chengdu-day1-chunxi-taikoo.jpg", source: "小红书《🌟成都旅游攻略 3天2夜 人均800+》@Herocuii", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "九眼桥夜景金色灯光倒映锦江", jev_score: 8.66 } },
+    { name: "熊猫基地", ll: [104.1441, 30.7327], day: 2, x: 640, y: 80, tw: "07:30-11:00",
+      image: { url: "xhs-images/chengdu-panda-base.jpg", source: "小红书《成都待了6年，亲测不绕路四日游路线》@糖醋排骨不要糖醋", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "大熊猫正面特写与熊猫基地标识拼贴", jev_score: 7.87 } },
+    { name: "成都博物馆", ll: [104.0655, 30.6570], day: 2, x: 360, y: 180, tw: "13:30-15:30",
+      image: { url: "xhs-images/chengdu-museum.jpg", source: "小红书《成都📍五天四夜懒人版》@小面包嘟嘟", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "成都博物馆展厅与东汉陶俳优说唱俑", jev_score: 8.69 } },
+    { name: "东郊记忆", ll: [104.1328, 30.6896], day: 2, x: 700, y: 140, tw: "16:00-18:00",
+      image: { url: "xhs-images/chengdu-dongjiao-memory.jpg", source: "小红书《成都📍五天四夜懒人版》@小面包嘟嘟", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "东郊记忆红砖厂房墙成都大字与工业风街区", jev_score: 8.07 } },
+    { name: "杜甫草堂", ll: [104.0278, 30.6598], day: 3, x: 300, y: 220, tw: "09:00-11:00",
+      image: { url: "xhs-images/chengdu-dufu-caotang.jpg", source: "小红书《成都📍五天四夜懒人版》@小面包嘟嘟", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "杜甫草堂正门匾额、园林水榭与红墙竹影夹道", jev_score: 8.74 } },
+    { name: "文殊院", ll: [104.0745, 30.6710], day: 3, x: 420, y: 110, tw: "11:30-15:30",
+      image: { url: "xhs-images/chengdu-wenshuyuan.jpg", source: "小红书《成都📍五天四夜懒人版》@小面包嘟嘟", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "文殊院宸经宝楼匾额、寺院回廊与红墙金字", jev_score: 8.72 } }
+  ],
+  routes: [
+    { day: 1, pts: [[520,230],[260,150],[600,320]] },
+    { day: 2, pts: [[640,80],[360,180],[700,140]] },
+    { day: 3, pts: [[300,220],[420,110]] }
+  ],
+  /* 日线路色：Rausch / ink / muted（DESIGN.md 无多色系统，仅单强调色，故以中性墨阶补足） */
+  dayColors: { 1: "#ff385c", 2: "#222222", 3: "#6a6a6a" },
+  /* 跨城交通段（决策：跨城/市内分层呈现，总览图不混画）——交通视图单独承载。
+     参考：chenxuan520/roadbook 车站两端 marker + showDir 虚线高铁线。 */
+  intercity: {
+    from: { name: "重庆北", ll: [106.5516, 29.5628], time: "08:06 发车" },
+    to: { name: "成都东", ll: [104.1409, 30.6322], time: "09:58 抵达" },
+    line: "成渝高铁 G8506", duration: "1h52m", mode: "🚄 高铁"
+  },
+  alerts: [
+    { source: "JEV", type: "图片筛选", title: "都江堰·南桥 图片未达阈值，已降级占位",
+      detail: "最高候选 6.6/10（阈值 7）。该点未纳入 3 日路线；若加天前往，页面将以文化占位色块渲染，不展示低分图片。" },
+    { source: "JEV", type: "图片筛选", title: "11 处行程点图片 jev 匹配分 7.87–8.74，全部达标",
+      detail: "候选池 17 次评分（上限 20），每点位保留最高分 1 张；同一笔记拼贴图可服务多个行程点。" },
+    { source: "JEV", type: "素材可信度", title: "行程点图片均为小红书 UGC（untrusted）",
+      detail: "4 篇笔记 36 张素材经 OpenCLI 采集，筛选后 9 张真图 11 处引用。攻略内容仅供参考，出行前请核对官方渠道。" },
+    { source: "RULE", type: "衔接提示", title: "Day 3 返程预留 3.5h",
+      detail: "16:20 发车前已留足取行李+地铁时间，符合硬规则「返程缓冲 ≥ 3h」。" }
+  ],
+  blocking_count: 0,
+  hard_rules_passed: 3,
+  advisory_count: 3,
+  pipeline: {
+    collect: { ok: true, notes: 4, images: 36, tool: "opencli xiaohongshu search/note/download" },
+    jev: { ok: true, calls: 17, limit: 20, threshold: 7, adopted: 11, degraded: 1 }
+  }
+};
+
+/* ================= 行程点详情数据（点开详情五段：图 + 时间/门票/推荐/注意） ================= */
+var EV_DETAILS = {
+  "G8506 · 重庆北 → 成都东": {
+    hours: "成渝高铁 06:30–22:30 运营，日均 80+ 班次",
+    ticket: "二等座 ¥154 / 一等座 ¥246",
+    why: "成都与重庆间最快的陆路方式，准点率高，随到随走。",
+    note: "12306 提前 15 天开售，节假日请提前 3 天以上购票。"
+  },
+  "春熙路 · IFS 爬墙熊猫": {
+    hours: "街区全天 · IFS 电梯至 7 楼平台 10:00–22:00",
+    ticket: "免费",
+    why: "坐直梯上 IFS 七楼可与爬墙大熊猫雕塑合影，是成都辨识度最高的打卡点。",
+    note: "正午逆光，下午 4 点后侧光更出片；楼顶平台排队约 10–20 分钟。"
+  },
+  "翠孃孃火锅午餐": {
+    hours: "11:00–次日 02:00",
+    ticket: "人均 ¥90",
+    why: "辣锅正宗、对微辣人士友好，鸳鸯锅照顾不吃辣的同行者。",
+    note: "微辣即川渝中辣，怕辣点菌汤/番茄侧；不要点炒饭（笔记原话）。"
+  },
+  "太古里 · 大慈寺": {
+    hours: "街区 10:00–22:00 · 大慈寺 08:00–17:00",
+    ticket: "街区免费 · 大慈寺免费",
+    why: "千年古刹与开放商业街无缝相接，拍飞檐与古树禅意大片后转身就是裸眼 3D 大屏。",
+    note: "大慈寺山门在街区东侧，从春熙路步行约 6 分钟。"
+  },
+  "宽窄巷子": {
+    hours: "全天开放 · 商铺 10:00–22:00",
+    ticket: "街区免费 · 采耳 ¥30–50",
+    why: "清代川西民居保存最完整的街区，下午 4 点后光线最出片。",
+    note: "游客密集，注意随身物品；糖油果子摊在窄巷子中段。"
+  },
+  "九眼桥夜景": {
+    hours: "灯光带 19:00–23:00",
+    ticket: "免费",
+    why: "锦江两岸灯光带是成都夜色的代表，安顺廊桥金色倒影不消费也值得一来。",
+    note: "河边酒吧街消费偏高，先看菜单再入座。"
+  },
+  "大熊猫繁育研究基地": {
+    hours: "07:30–18:00（17:00 停止入园）",
+    ticket: "成人 ¥55 · 学生半价",
+    why: "早上 7:30–9:30 是进食高峰，熊猫最活跃、最出片。看花花和和叶要赶早。",
+    note: "地铁 3 号线+景区摆渡车；推荐西门进南门出，园内步行较多穿舒适的鞋。"
+  },
+  "成都博物馆": {
+    hours: "09:00–17:00（周一闭馆）",
+    ticket: "免费 · 需提前预约",
+    why: "先秦到近代藏品齐全，东汉陶俳优说唱俑是镇馆之宝，还可体验皮影戏。",
+    note: "雨天完美替代方案；预约放票即抢，周末尤其紧俏。"
+  },
+  "东郊记忆": {
+    hours: "全天开放 · 店铺 10:00–22:00",
+    ticket: "免费",
+    why: "老厂房改造的工业风文创园区，红砖墙「成都」大字与复古火车头超好拍。",
+    note: "傍晚去光线柔和，园区大，安排 1.5–2 小时。"
+  },
+  "玉林串串香晚餐（春熙店）": {
+    hours: "11:00–23:30",
+    ticket: "人均 ¥60",
+    why: "开了十多年，牛肉串串二十多种，锅底每天新鲜熬制，嬢嬢手工现穿。",
+    note: "配干碟子更巴适；冰粉/醪糟解辣，总府路 23 号附 1 号。"
+  },
+  "杜甫草堂": {
+    hours: "08:00–18:30（18:00 停止售票）",
+    ticket: "成人 ¥50",
+    why: "杜甫流寓成都的故居，红墙竹影、万佛楼银杏门框是必打卡机位。",
+    note: "从南门进人少；园内竹林多，蚊子敏感者备驱蚊液。"
+  },
+  "文殊院": {
+    hours: "08:00–17:00",
+    ticket: "免费入园 · 茶位 ¥15 起",
+    why: "长江流域四大禅林之一，始建于隋；红墙金字最出片，香园茶座可以坐到天黑。",
+    note: "门口宫廷糕点、严太婆锅盔排队 15 分钟起，顺路带一份。"
+  },
+  "G8533 · 成都东 → 重庆北": {
+    hours: "16:20 发车 — 18:12 抵达",
+    ticket: "二等座 ¥154 · 备选 17:05 G8535（有票）",
+    why: "时间衔接 Day 3 行程最从容的一班。",
+    note: "余票紧张，建议尽快购票；务必预留 3.5h 取行李+地铁缓冲。"
+  }
+};
+
+/* ================= 品牌主题（destination_identity 驱动） ================= */
+var THEMES = {
+  airbnb: { name: "airbnb · Rausch 珊瑚红", data: "airbnb" },
+  dark:   { name: "airbnb · 暗色（推导扩展）", data: "dark" }
+};
+
+/* 图片加载失败 → 占位色块（禁止随机占位图冒充真图） */
+window.__imgFail = function (img) {
+  var p = img.parentElement;
+  p.innerHTML = '<div class="ph">🏛️<span>图片加载失败 · 占位色块</span></div>';
+};
+
+(function () {
+  var S = window.__GUIDE_SCHEMA__;
+
+  /* ---- masthead meta ---- */
+  document.getElementById("meta-row").innerHTML =
+    "<span>出发 <b>" + S.meta.origin + "</b></span>" +
+    "<span>日期 <b>4/12 – 4/14</b></span>" +
+    "<span>人均预算 <b>" + S.meta.budget + "</b></span>" +
+    "<span>出行人 <b>" + S.meta.party + "</b></span>" +
+    "<span>品牌 <b>brand_id: " + S.meta.destination_identity.brand_id + "</b></span>";
+  document.title = "成都 3 日游 · " + S.meta.destination_identity.theme + " · AI 旅游攻略原型 v2";
+
+  /* ---- weather ---- */
+  document.getElementById("weather-row").innerHTML = S.weather.map(function (w) {
+    return '<div class="card w-card"><div class="d">' + w.day +
+      '</div><div class="t">' + w.icon + " " + w.temp +
+      '</div><div class="a">' + w.advice + "</div></div>";
+  }).join("");
+
+  /* ---- alerts ---- */
+  document.getElementById("alerts-list").innerHTML = S.alerts.map(function (a) {
+    var cls = a.source === "JEV" ? "jev" : (a.source === "RULE" ? "rule" : "info");
+    return '<div class="alert card"><span class="chip ' + cls + '">' + a.source +
+      "</span><div class=\"txt\"><b>" + a.type + " · " + a.title +
+      "</b><span>" + a.detail + "</span></div></div>";
+  }).join("");
+
+  /* ---- tab 切换 ---- */
+  var btns = document.querySelectorAll(".tab-btn");
+  var panels = document.querySelectorAll(".tab-panel");
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (x) { x.classList.remove("active"); });
+      panels.forEach(function (p) { p.classList.remove("active"); });
+      b.classList.add("active");
+      document.getElementById("tab-" + b.dataset.tab).classList.add("active");
+    });
+  });
+
+  /* ---- 行程点：注入图片/占位 + jev 评分徽章 + untrusted 来源 + 详情面板 ---- */
+  document.querySelectorAll(".ev").forEach(function (ev) {
+    var title = ev.querySelector(".ev-title").textContent;
+    var det = EV_DETAILS[title] || {};
+    var head = ev.querySelector(".ev-head");
+
+    var panel = document.createElement("div");
+    panel.className = "ev-detail";
+    var imgHTML;
+    if (ev.dataset.img) {
+      var jevBadge = ev.dataset.jev ? '<div class="jev-mark">jev ' + ev.dataset.jev + "/10</div>" : "";
+      imgHTML = '<div class="ev-img"><img loading="lazy" src="' + ev.dataset.img +
+        '" alt="' + title + '" onerror="window.__imgFail(this)">' + jevBadge +
+        '<div class="src-mark">' + (ev.dataset.src || "来源：小红书笔记（untrusted）") + "</div></div>";
+    } else {
+      imgHTML = '<div class="ev-img"><div class="ph">🏛️<span>无达标图 · 占位</span></div></div>';
+    }
+    panel.innerHTML = imgHTML +
+      '<div class="ev-info"><dl>' +
+      "<dt>营业时间</dt><dd>" + (det.hours || "—") + "</dd>" +
+      "<dt>门票价格</dt><dd>" + (det.ticket || "—") + "</dd>" +
+      '<dd class="why"><b>为什么推荐：</b>' + (det.why || "—") + "</dd>" +
+      '<dd class="note">⚠ ' + (det.note || "暂无注意事项") + "</dd>" +
+      "</dl></div>";
+    ev.appendChild(panel);
+
+    var toggle = function () { ev.classList.toggle("open"); };
+    head.addEventListener("click", toggle);
+    ev.querySelector(".sum").addEventListener("click", toggle);
+  });
+
+  /* ---- 地图：key 引导 → AMAP SDK，降级为一等公民静态 SVG ----
+     地图交互参考（页脚已标注）：liketrek/TREK（按天 setFitView）· itskovacs/trip（序号气泡 + 时间窗标签）· chenxuan520/roadbook（showDir 虚线高铁线） */
+  var status = document.getElementById("map-status");
+  var guide = document.getElementById("key-guide");
+  var mapOk = document.getElementById("map-ok");
+  var key = null;
+  try { key = localStorage.getItem("amap_key"); } catch (e) {}
+
+  var labelOn = true;           /* 时间窗标签 开/关 */
+  var mapView = "overview";     /* 总览（市内动线）| 交通（跨城视野） */
+  var dayFilter = "all";        /* all | 1 | 2 | 3 */
+  var amap = null;              /* 交互地图实例（总览） */
+  var transitAMap = null;       /* 交互地图实例（交通） */
+  var dayOverlays = {};         /* day -> AMap.OverlayGroup */
+  var spotMarkers = {};         /* spot name -> marker（列表↔地图联动） */
+
+  function legend() {
+    document.getElementById("map-legend").innerHTML =
+      [1, 2, 3].map(function (d) {
+        return '<span><i class="legend-dot" style="background:' + S.dayColors[d] + '"></i>Day ' + d + "</span>";
+      }).join("");
+  }
+
+  /* 控件按钮：视图切换（总览/交通）+ 按天 + 标签开关 */
+  function renderCtrls() {
+    var overviewCtrl = document.getElementById("map-ctrl");
+    var html =
+      '<button data-view="overview" class="' + (mapView === "overview" ? "active" : "") + '">总览</button>' +
+      '<button data-view="transit" class="' + (mapView === "transit" ? "active" : "") + '">交通 🚄</button>' +
+      '<span style="width:1px;height:18px;background:var(--hairline)"></span>';
+    if (mapView === "overview") {
+      html += ["all", 1, 2, 3].map(function (d) {
+        var lbl = d === "all" ? "全程" : "Day " + d;
+        return '<button data-day="' + d + '" class="' + (dayFilter === d ? "active" : "") + '">' + lbl + "</button>";
+      }).join("");
+      html += '<button data-act="labels" class="' + (labelOn ? "active" : "") + '">标签 ' + (labelOn ? "开" : "关") + "</button>";
+    }
+    overviewCtrl.innerHTML = html;
+    overviewCtrl.querySelectorAll("button").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (b.dataset.view) { setMapView(b.dataset.view); }
+        else if (b.dataset.day) { setDayFilter(b.dataset.day); }
+        else if (b.dataset.act === "labels") { labelOn = !labelOn; applyLabels(); renderCtrls(); }
+      });
+    });
+    /* 交通 tab 内的地图区控件：视图切回总览 */
+    var tCtrl = document.getElementById("transit-map-ctrl");
+    tCtrl.innerHTML = '<button data-view="overview">← 返回总览视图</button>';
+    tCtrl.querySelectorAll("button").forEach(function (b) {
+      b.addEventListener("click", function () { setMapView("overview"); });
+    });
+  }
+
+  function applyLabels() {
+    Object.keys(spotMarkers).forEach(function (n) {
+      var m = spotMarkers[n];
+      var dom = m.getContent();
+      if (dom && dom.classList) { dom.classList.toggle("no-label", !labelOn); }
+    });
+  }
+
+  function setDayFilter(d) {
+    dayFilter = d;
+    if (amap) {
+      [1, 2, 3].forEach(function (k) {
+        if (dayFilter === "all" || String(k) === dayFilter) dayOverlays[k].show();
+        else dayOverlays[k].hide();
+      });
+      /* 切换时 setFitView 聚焦当天（参考：liketrek/TREK + itskovacs/trip） */
+      amap.setFitView(dayFilter === "all" ? [1, 2, 3].map(function (k) { return dayOverlays[k]; }) : dayOverlays[dayFilter], false, [60, 60, 60, 60]);
+    }
+    renderFallbackIfActive();
+    renderCtrls();
+  }
+
+  function setMapView(v) {
+    mapView = v;
+    /* 切 tab：交通视图 → 交通 tab；总览视图 → 总览 tab */
+    var btn = document.querySelector('.tab-btn[data-tab="' + (v === "transit" ? "transit" : "overview") + '"]');
+    if (btn) btn.click();
+    renderCtrls();
+    if (v === "transit") renderTransit();
+    else if (!key && !amap) renderFallback();
+  }
+
+  /* 一等公民降级静态图：浅色画布（airbnb 无深色地图）+ 街区块 + 按天三色路线 + 锦江装饰曲线
+     静态 SVG 同样支持时间窗标签与按天过滤（无 key 降级路径一等公民） */
+  function renderFallback() {
+    var cs = getComputedStyle(document.documentElement);
+    var block = cs.getPropertyValue("--map-block").trim();
+    var river = cs.getPropertyValue("--map-river").trim();
+    var ink = cs.getPropertyValue("--ink").trim();
+    var dayRoutes = S.routes.filter(function (r) { return dayFilter === "all" || String(r.day) === dayFilter; });
+    var daySpots = S.spots.filter(function (s) { return dayFilter === "all" || String(s.day) === dayFilter; });
+    var lines = dayRoutes.map(function (r) {
+      var c = S.dayColors[r.day];
+      return '<polyline points="' + r.pts.map(function (p) { return p.join(","); }).join(" ") +
+        '" fill="none" stroke="' + c + '" stroke-width="4" stroke-dasharray="9 6" opacity="0.85" stroke-linecap="round" stroke-linejoin="round"/>';
+    }).join("");
+    /* 时间窗标签直显（序号 + 时间窗一行小字，参考：itskovacs/trip 序号气泡） */
+    var dots = daySpots.map(function (s, i) {
+      var c = S.dayColors[s.day];
+      var no = daySpots.length > 1 ? (i + 1) + " " : "";
+      var tw = s.tw ? '<tspan font-weight="400" fill="' + cs.getPropertyValue("--muted").trim() + '"> ' + s.tw + "</tspan>" : "";
+      return '<circle cx="' + s.x + '" cy="' + s.y + '" r="8" fill="' + c + '" stroke="#fff" stroke-width="2.5"/>' +
+        '<text x="' + (s.x + 13) + '" y="' + (s.y + 5) + '" font-size="13" font-weight="600" fill="' + ink + '" opacity="0.92">' +
+        no + s.name + tw + "</text>";
+    }).join("");
+    var blocks = "";
+    [[30,20,180,120],[30,170,150,140],[240,60,200,150],[470,40,220,110],[460,220,180,130],[680,180,140,160],[230,270,200,90]]
+      .forEach(function (b) {
+        blocks += '<rect x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + b[3] +
+          '" rx="6" fill="' + block + '" opacity="0.8"/>';
+      });
+    document.getElementById("map-area").innerHTML =
+      '<svg viewBox="0 0 840 380" preserveAspectRatio="xMidYMid slice" role="img" aria-label="成都行程静态路线图">' +
+      '<rect width="840" height="380" fill="var(--surface-soft)"/>' + blocks +
+      '<path d="M40 366 C 200 322, 260 344, 380 322 S 620 280, 838 334" fill="none" stroke="' + river + '" stroke-width="30" stroke-linecap="round"/>' +
+      '<g stroke="rgba(34,34,34,.06)" stroke-width="1">' +
+      '<path d="M0 95 H840 M0 195 H840 M0 305 H840 M160 0 V380 M330 0 V380 M500 0 V380 M700 0 V380"/>' +
+      "</g>" + lines + dots + "</svg>";
+    if (!key) {
+      status.textContent = "⚠ 未配置 AMAP_KEY — 静态路线图已就绪（填 key 可切换交互地图）";
+    }
+  }
+  function renderFallbackIfActive() { if (!key && !amap && mapView === "overview") renderFallback(); }
+
+  /* 交通视图降级：跨城示意图（车站两端 + 虚线 + 1h52m 标注，参考：chenxuan520/roadbook） */
+  function renderTransitFallback() {
+    var cs = getComputedStyle(document.documentElement);
+    var ink = cs.getPropertyValue("--ink").trim();
+    var muted = cs.getPropertyValue("--muted").trim();
+    var ic = S.intercity;
+    document.getElementById("transit-map-area").innerHTML =
+      '<svg viewBox="0 0 840 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="成渝高铁跨城示意图">' +
+      '<rect width="840" height="300" fill="var(--surface-soft)"/>' +
+      '<g stroke="rgba(34,34,34,.06)" stroke-width="1"><path d="M0 75 H840 M0 150 H840 M0 225 H840 M210 0 V300 M420 0 V300 M630 0 V300"/></g>' +
+      /* 虚线高铁线（showDir 方向箭头用三角示意） */
+      '<line x1="120" y1="170" x2="720" y2="120" stroke="' + ink + '" stroke-width="3" stroke-dasharray="12 8"/>' +
+      '<polygon points="400,148 416,142 404,156" fill="' + ink + '"/>' +
+      '<polygon points="480,144 496,138 484,152" fill="' + ink + '"/>' +
+      /* 两端车站 marker */
+      '<circle cx="120" cy="170" r="11" fill="var(--primary)" stroke="#fff" stroke-width="3"/>' +
+      '<text x="120" y="205" text-anchor="middle" font-size="15" font-weight="700" fill="' + ink + '">' + ic.from.name + "</text>" +
+      '<text x="120" y="224" text-anchor="middle" font-size="12" fill="' + muted + '">' + ic.from.time + "</text>" +
+      '<circle cx="720" cy="120" r="11" fill="var(--primary)" stroke="#fff" stroke-width="3"/>' +
+      '<text x="720" y="95" text-anchor="middle" font-size="15" font-weight="700" fill="' + ink + '">' + ic.to.name + "</text>" +
+      '<text x="720" y="76" text-anchor="middle" font-size="12" fill="' + muted + '">' + ic.to.time + "</text>" +
+      /* 线路标注 */
+      '<text x="420" y="110" text-anchor="middle" font-size="14" font-weight="600" fill="var(--primary)">' + ic.line + " · " + ic.duration + "</text>" +
+      "</svg>";
+    document.getElementById("transit-status").textContent =
+      "⚠ 未配置 AMAP_KEY — 跨城静态示意图已就绪（" + ic.mode + " · " + ic.duration + "）";
+  }
+
+  function renderTransit() {
+    var ic = S.intercity;
+    if (!key || !window.AMap) { renderTransitFallback(); return; }
+    if (transitAMap) { transitAMap.setFitView(null, false, [80, 80, 80, 80]); return; }
+    try {
+      transitAMap = new AMap.Map("transit-map-area", { zoom: 5, viewMode: "2D", center: [105.3, 30.1] });
+      var markerStyle = function (name, time) {
+        return '<div style="text-align:center"><div style="width:16px;height:16px;border-radius:50%;background:#ff385c;border:3px solid #fff;box-shadow:0 0 0 1px #ff385c;margin:0 auto"></div>' +
+          '<div style="font-size:13px;font-weight:700;color:#222;margin-top:4px;text-shadow:0 0 3px #fff">' + name + "</div>" +
+          '<div style="font-size:11px;color:#6a6a6a;text-shadow:0 0 3px #fff">' + time + "</div></div>";
+      };
+      new AMap.Marker({ position: ic.from.ll, content: markerStyle(ic.from.name, ic.from.time), anchor: "bottom-center" }).setMap(transitAMap);
+      new AMap.Marker({ position: ic.to.ll, content: markerStyle(ic.to.name, ic.to.time), anchor: "bottom-center" }).setMap(transitAMap);
+      /* 虚线高铁线 + showDir 方向箭头沿线流动（参考：chenxuan520/roadbook） */
+      new AMap.Polyline({
+        path: [ic.from.ll, ic.to.ll],
+        strokeColor: "#222222", strokeWeight: 4, strokeStyle: "dashed",
+        showDir: true, strokeOpacity: 0.9, map: transitAMap
+      });
+      transitAMap.setFitView(null, false, [80, 80, 80, 80]);
+      document.getElementById("transit-status").textContent =
+        "✅ 交通视图（跨城视野）— " + ic.line + " · " + ic.duration;
+    } catch (e) { renderTransitFallback(); }
+  }
+
+  function renderAMap() {
+    var s = document.createElement("script");
+    s.src = "https://webapi.amap.com/maps?v=2.0&key=" + key;
+    s.onload = function () {
+      try {
+        amap = new AMap.Map("map-area", { zoom: 11, viewMode: "2D", center: [104.07, 30.67] });
+        var markerIdx = 0;
+        [1, 2, 3].forEach(function (d) {
+          var daySpots = S.spots.filter(function (s) { return s.day === d && s.ll; })
+            .sort(function (a, b) { return a.x - b.x; });
+          var overlays = [];
+          daySpots.forEach(function (sp) {
+            markerIdx++;
+            /* Marker 自定义 DOM content：序号 + 时间窗一行小字（参考：itskovacs/trip 序号气泡 + 时间窗标签） */
+            var dom = document.createElement("div");
+            dom.className = "spot-marker";
+            dom.innerHTML =
+              '<div class="spot-pin" style="background:' + S.dayColors[d] + '"><span>' + markerIdx + "</span></div>" +
+              (labelOn && sp.tw ? '<div class="spot-tw">' + sp.tw + " " + sp.name + "</div>" : "");
+            var m = new AMap.Marker({ position: sp.ll, content: dom, title: sp.name, anchor: "bottom-center" });
+            spotMarkers[sp.name] = m;
+            overlays.push(m);
+          });
+          /* 按天真实坐标路线 polyline */
+          var pts = daySpots.map(function (s) { return s.ll; });
+          if (pts.length > 1) {
+            overlays.push(new AMap.Polyline({ path: pts, strokeColor: S.dayColors[d], strokeWeight: 4,
+              strokeStyle: "dashed", strokeOpacity: 0.85 }));
+          }
+          dayOverlays[d] = new AMap.OverlayGroup(overlays);
+          amap.add(dayOverlays[d]); /* 按天 OverlayGroup（参考：liketrek/TREK + itskovacs/trip） */
+        });
+        amap.setFitView(dayFilter === "all" ? null : dayOverlays[dayFilter], false, [60, 60, 60, 60]);
+        if (dayFilter !== "all") setDayFilter(dayFilter);
+        status.textContent = "✅ 高德地图加载成功 · " + S.spots.length + " 个景点挂点已渲染";
+        mapOk.style.display = "inline-block";
+        guide.style.display = "none";
+        renderCtrls();
+        renderTransit();
+      } catch (e) { amap = null; renderFallback(); }
+    };
+    s.onerror = function () {
+      status.textContent = "⚠ 高德 SDK 加载失败（key 无效或网络受限）— 已降级为静态路线图";
+      renderFallback();
+      renderTransitFallback();
+    };
+    document.head.appendChild(s);
+  }
+
+  /* ---- 列表↔地图联动：行程点卡片 hover 时对应 marker 高亮 ---- */
+  document.querySelectorAll(".ev").forEach(function (ev) {
+    var title = ev.querySelector(".ev-title").textContent;
+    ev.addEventListener("mouseenter", function () {
+      var m = spotMarkers[title];
+      if (!m || !m.getContent()) return;
+      var dom = m.getContent();
+      if (dom.classList) dom.classList.add("spot-hl");
+    });
+    ev.addEventListener("mouseleave", function () {
+      var m = spotMarkers[title];
+      if (!m || !m.getContent()) return;
+      var dom = m.getContent();
+      if (dom.classList) dom.classList.remove("spot-hl");
+    });
+  });
+
+  guide.querySelector("#amap-go").addEventListener("click", function () {
+    var v = document.getElementById("amap-key-input").value.trim();
+    if (!v) { document.getElementById("amap-key-input").focus(); return; }
+    try { localStorage.setItem("amap_key", v); } catch (e) {}
+    key = v;
+    guide.style.display = "none";
+    renderAMap();
+  });
+  guide.querySelector("#key-guide-close").addEventListener("click", function () {
+    guide.style.display = "none";
+  });
+
+  legend();
+  renderCtrls();
+  if (key) { guide.style.display = "none"; renderAMap(); } else { renderFallback(); renderTransitFallback(); }
+
+  /* ---- 暗色模式切换钮 ---- */
+  var tbtn = document.getElementById("theme-toggle");
+  function setTheme(id) {
+    var t = THEMES[id];
+    if (!t) return;
+    document.documentElement.setAttribute("data-culture", t.data);
+    document.getElementById("brand-name").textContent = "主题：" + t.name;
+    tbtn.textContent = t.data === "dark" ? "☀️" : "🌙";
+    if (!key) renderFallback();
+  }
+  tbtn.addEventListener("click", function () {
+    var dark = document.documentElement.getAttribute("data-culture") === "dark";
+    setTheme(dark ? "airbnb" : "dark");
+  });
+})();
+</script>
+</body>
+</html>

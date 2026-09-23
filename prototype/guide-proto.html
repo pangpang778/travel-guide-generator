@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成都 3 日游 · AI 旅游攻略原型</title>
+<style>
+:root{
+  --bg:#faf7f2; --paper:#fffdf9; --ink:#2b2620; --ink-soft:#6b6157;
+  --line:#e8e0d4; --accent:#c2410c; --accent-soft:#fdece2;
+  --green:#15803d; --green-soft:#e8f5ec; --red:#b91c1c; --red-soft:#fdeaea;
+  --purple:#7c3aed; --yellow:#a16207; --yellow-soft:#fdf3d7;
+  --shadow:0 1px 3px rgba(43,38,32,.08),0 8px 24px rgba(43,38,32,.06);
+}
+html[data-theme="dark"]{
+  --bg:#191512; --paper:#221d18; --ink:#ece5da; --ink-soft:#a89d8e;
+  --line:#3a332b; --accent:#f97316; --accent-soft:#3a2417;
+  --green:#4ade80; --green-soft:#17301f; --red:#f87171; --red-soft:#3a1a1a;
+  --purple:#a78bfa; --yellow:#fbbf24; --yellow-soft:#332a12;
+  --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+  line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.serif{font-family:"Noto Serif SC","Songti SC",serif}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px}
+a{color:var(--accent)}
+
+/* ---------- masthead ---------- */
+.masthead{padding:56px 0 28px;border-bottom:3px double var(--line)}
+.kicker{font-size:12px;letter-spacing:.35em;color:var(--accent);text-transform:uppercase;font-weight:700}
+.masthead h1{font-size:clamp(34px,6vw,54px);font-weight:900;line-height:1.25;margin:14px 0 12px}
+.masthead .dek{font-size:17px;color:var(--ink-soft);max-width:620px}
+.meta{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:22px;font-size:13px;color:var(--ink-soft)}
+.meta b{color:var(--ink);font-weight:600}
+
+/* ---------- sticky nav ---------- */
+.day-nav{
+  position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+}
+.day-nav .wrap{display:flex;gap:4px;overflow-x:auto;padding:0 20px}
+.day-nav a{
+  padding:12px 14px;font-size:14px;color:var(--ink-soft);text-decoration:none;
+  white-space:nowrap;border-bottom:2px solid transparent;font-weight:500;
+}
+.day-nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ---------- sections ---------- */
+section{padding:44px 0 8px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
+.sec-head h2{font-size:26px;font-weight:800}
+.sec-head .no{font-family:"Noto Serif SC",serif;font-size:14px;color:var(--accent);letter-spacing:.2em;font-weight:700}
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+
+/* ---------- map ---------- */
+.map-card{overflow:hidden}
+.map-area{height:340px;position:relative;background:var(--accent-soft)}
+.map-area svg{width:100%;height:100%;display:block}
+.map-status{padding:10px 16px;font-size:13px;color:var(--ink-soft);border-top:1px solid var(--line)}
+.map-legend{display:flex;gap:18px;padding:10px 16px;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line)}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:1px}
+
+/* ---------- weather ---------- */
+.weather{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 8px}
+.w-card{padding:16px 18px}
+.w-card .d{font-size:12px;color:var(--ink-soft);letter-spacing:.1em;font-weight:700}
+.w-card .t{font-size:15px;font-weight:600;margin:6px 0 2px}
+.w-card .a{font-size:13px;color:var(--ink-soft)}
+
+/* ---------- timeline ---------- */
+.tl{position:relative;margin:8px 0 0 8px;padding-left:26px}
+.tl::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;background:var(--line)}
+.ev{position:relative;padding:14px 18px;margin-bottom:14px}
+.ev::before{
+  content:"";position:absolute;left:-33px;top:22px;width:11px;height:11px;
+  border-radius:50%;background:var(--accent);border:2px solid var(--paper);box-shadow:0 0 0 1px var(--accent);
+}
+.ev.transit::before{background:var(--green);box-shadow:0 0 0 1px var(--green)}
+.ev.transit{border-left:3px solid var(--green)}
+.ev-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.ev-time{font-family:"Noto Serif SC",serif;font-weight:700;font-size:15px;color:var(--accent);font-variant-numeric:tabular-nums}
+.ev.transit .ev-time{color:var(--green)}
+.ev-title{font-weight:600;font-size:16px}
+.badge{font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600;white-space:nowrap}
+.b-check{background:var(--green-soft);color:var(--green)}
+.b-est{background:var(--accent-soft);color:var(--accent)}
+.b-live{background:var(--green-soft);color:var(--green)}
+.b-warn{background:var(--red-soft);color:var(--red)}
+.ev p{font-size:14px;color:var(--ink-soft);margin-top:4px}
+.ev .warn-row{margin-top:8px;font-size:13px;color:var(--red);background:var(--red-soft);padding:6px 10px;border-radius:6px}
+.day-head{margin:0 0 16px}
+.day-head .stars{color:var(--accent);letter-spacing:2px;font-size:14px;margin-left:8px}
+.day-head .badge{margin-left:8px}
+
+/* ---------- grid cards ---------- */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid3 .card{padding:20px}
+.grid3 h3{font-size:17px;margin-bottom:12px}
+.bl{list-style:none;font-size:14px}
+.bl li{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--line)}
+.bl li:last-child{border-bottom:none}
+.bl li b{font-variant-numeric:tabular-nums}
+.rec{color:var(--green);font-weight:600}
+.bar{height:8px;border-radius:99px;background:var(--line);margin-top:14px;overflow:hidden}
+.bar i{display:block;height:100%;width:92%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#ea580c)}
+.bar-note{font-size:12px;color:var(--ink-soft);margin-top:6px;text-align:right}
+
+/* ---------- alerts ---------- */
+.alert{display:flex;gap:12px;padding:14px 16px;margin-bottom:12px;align-items:flex-start}
+.alert .txt{font-size:14px}
+.alert .txt b{display:block;font-size:15px}
+.alert .txt span{color:var(--ink-soft)}
+.chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;letter-spacing:.05em;flex-shrink:0;margin-top:2px}
+.chip.jev{background:var(--yellow-soft);color:var(--yellow)}
+.chip.rule{background:var(--red-soft);color:var(--red)}
+.blocking-mark{
+  display:none;border:2px dashed var(--red);border-radius:12px;padding:18px;
+  text-align:center;color:var(--red);font-weight:700;background:var(--red-soft);
+}
+.blocking-mark.show{display:block}
+
+/* ---------- export bar ---------- */
+.export-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+}
+.export-bar .wrap{display:flex;gap:10px;padding:10px 20px;align-items:center;flex-wrap:wrap}
+.export-bar button{
+  border:1px solid var(--line);background:var(--paper);color:var(--ink);
+  padding:8px 16px;border-radius:99px;font-size:13px;cursor:pointer;font-family:inherit;
+  transition:border-color .15s,transform .1s;
+}
+.export-bar button:hover{border-color:var(--accent);color:var(--accent)}
+.export-bar button:active{transform:scale(.97)}
+.export-bar .hint{font-size:12px;color:var(--ink-soft);margin-left:auto}
+
+/* ---------- theme toggle & footer ---------- */
+.theme-toggle{
+  position:fixed;right:18px;bottom:64px;z-index:60;width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--line);background:var(--paper);box-shadow:var(--shadow);
+  cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;
+}
+footer{padding:32px 0 96px;text-align:center;font-size:13px;color:var(--ink-soft)}
+footer .ok{color:var(--green)}
+
+/* ---------- print & mobile ---------- */
+@media print{
+  .day-nav,.theme-toggle,.export-bar{display:none!important}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;border-color:#ccc}
+  section{padding:20px 0}
+}
+@media (max-width:600px){
+  .masthead{padding:36px 0 20px}
+  .weather,.grid3{grid-template-columns:1fr}
+  .map-area{height:260px}
+  .day-nav a{padding:10px 10px;font-size:13px}
+  .export-bar .hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. MASTHEAD ============ -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="kicker">Travel Guide · 成都</div>
+    <h1>成都三日：<br>市井烟火与慢时光</h1>
+    <p class="dek">从春熙路的霓虹到鹤鸣茶社的盖碗茶，一份兼顾节奏与松弛的周末短途攻略——高铁直达、步行友好、下雨也有 Plan B。</p>
+    <div class="meta" id="meta-row"></div>
+  </div>
+</header>
+
+<!-- ============ 2. STICKY NAV ============ -->
+<nav class="day-nav">
+  <div class="wrap">
+    <a href="#map" data-spy>总览</a>
+    <a href="#d1" data-spy>Day 1</a>
+    <a href="#d2" data-spy>Day 2</a>
+    <a href="#d3" data-spy>Day 3</a>
+    <a href="#budget" data-spy>预算</a>
+    <a href="#alerts" data-spy>告警</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ============ 3. MAP HERO ============ -->
+  <section id="map">
+    <div class="sec-head"><span class="no">01</span><h2>行程总览图</h2></div>
+    <div class="card map-card">
+      <div class="map-area" id="map-area">
+        <!-- 降级静态 SVG 路线图由 JS 注入 -->
+      </div>
+      <div class="map-legend" id="map-legend"></div>
+      <div class="map-status" id="map-status">地图加载中…</div>
+    </div>
+  </section>
+
+  <!-- ============ 4. WEATHER ============ -->
+  <section>
+    <div class="sec-head"><span class="no">WX</span><h2>三天气预报</h2></div>
+    <div class="weather" id="weather-row"></div>
+  </section>
+
+  <!-- ============ 5. DAY TIMELINES ============ -->
+  <section id="d1">
+    <div class="sec-head"><span class="no">Day 1</span><h2>抵达日 · 从山城到蓉城</h2></div>
+    <div class="day-head serif">
+      强度 <span class="stars">★★☆☆☆</span>
+      <span class="badge b-check">jev 合理性 8.5/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev transit card">
+        <div class="ev-head">
+          <span class="ev-time">08:06</span>
+          <span class="ev-title">G8506 · 重庆北 → 成都东</span>
+          <span class="badge b-live">12306 实时</span>
+        </div>
+        <p>08:06 发车 — 09:58 抵达，二等座 <b>¥154</b>，<span class="badge b-check">有票</span>。成渝高铁日均 80+ 班次，随到随走。</p>
+      </div>
+      <div class="ev card">
+        <div class="ev-head">
+          <span class="ev-time">10:40</span>
+          <span class="ev-title">酒店寄存 + 春熙路午餐</span>
+          <span class="badge b-est">估算</span>
+        </div>
+        <p>地铁 2 号线直达，先放行李再觅食。钟水饺、龙抄手老字号扎堆，人均 30 元吃到扶墙。</p>
+      </div>
+      <div class="ev card">
+        <div class="ev-head">
+          <span class="ev-time">14:00</span>
+          <span class="ev-title">宽窄巷子</span>
+          <span class="badge b-check">校验通过</span>
+        </div>
+        <p>清代川西民居街巷，拍照+采耳+糖油果子一条龙。避开正午，下午 2 点光线最出片。</p>
+      </div>
+      <div class="ev card">
+        <div class="ev-head">
+          <span class="ev-time">18:30</span>
+          <span class="ev-title">火锅晚餐</span>
+          <span class="badge b-est">估算</span>
+        </div>
+        <p>窄巷子附近老码头火锅，鸳鸯锅照顾不吃辣的同行者，人均 90 元。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="d2">
+    <div class="sec-head"><span class="no">Day 2</span><h2>熊猫与茶馆 · 精华日</h2></div>
+    <div class="day-head serif">
+      强度 <span class="stars">★★★☆☆</span>
+      <span class="badge b-check">jev 合理性 8.0/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev card">
+        <div class="ev-head">
+          <span class="ev-time">07:30</span>
+          <span class="ev-title">熊猫繁育研究基地</span>
+          <span class="badge b-check">校验通过</span>
+        </div>
+        <p>早到 = 熊猫在吃早餐 = 出片巅峰。门票 55 元，地铁 3 号线+景区摆渡车直达。</p>
+      </div>
+      <div class="ev card">
+        <div class="ev-head">
+          <span class="ev-time">13:00</span>
+          <span class="ev-title">建设路小吃街午餐</span>
+          <span class="badge b-est">估算</span>
+        </div>
+        <p>本地人也排队的老牌小吃街：蛋烘糕、烤脑花、锅盔，人均 40 元。</p>
+      </div>
+      <div class="ev card">
+        <div class="ev-head">
+          <span class="ev-time">15:30</span>
+          <span class="ev-title">文殊院茶馆</span>
+          <span class="badge b-check">校验通过</span>
+        </div>
+        <p>千年古刹里 15 元一碗的茉莉花茶，可以坐到天黑。雨天完美替代方案。</p>
+      </div>
+      <div class="ev card">
+        <div class="ev-head">
+          <span class="ev-time">19:00</span>
+          <span class="ev-title">九眼桥夜景</span>
+          <span class="badge b-est">估算</span>
+        </div>
+        <p>锦江两岸灯光带，河边酒吧街随意逛逛，不消费也值得一来。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="d3">
+    <div class="sec-head"><span class="no">Day 3</span><h2>慢收尾 · 茶社与归途</h2></div>
+    <div class="day-head serif">
+      强度 <span class="stars">★☆☆☆☆</span>
+      <span class="badge b-check">jev 合理性 9.0/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev card">
+        <div class="ev-head">
+          <span class="ev-time">09:00</span>
+          <span class="ev-title">人民公园鹤鸣茶社</span>
+          <span class="badge b-check">校验通过</span>
+        </div>
+        <p>百年露天茶社，盖碗茶 20 元起，竹椅、掏耳、麻将——成都的精髓全在这里。</p>
+      </div>
+      <div class="ev card">
+        <div class="ev-head">
+          <span class="ev-time">11:30</span>
+          <span class="ev-title">西月城谭豆花</span>
+          <span class="badge b-est">估算</span>
+        </div>
+        <p>96 年老店，撒子豆花+冰醉豆花，人均 20 元，步行回酒店取行李顺路。</p>
+      </div>
+      <div class="ev transit card">
+        <div class="ev-head">
+          <span class="ev-time">16:20</span>
+          <span class="ev-title">G8533 · 成都东 → 重庆北</span>
+          <span class="badge b-warn">余票紧张</span>
+        </div>
+        <p>16:20 发车 — 18:12 抵达，二等座 <b>¥154</b>。</p>
+        <div class="warn-row">⚠ 余票紧张，建议尽快购票或备选 17:05 G8535（有票）</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6. BUDGET / TRANSPORT / LODGING ============ -->
+  <section id="budget">
+    <div class="sec-head"><span class="no">02</span><h2>预算 · 交通 · 住宿</h2></div>
+    <div class="grid3">
+      <div class="card">
+        <h3>💰 预算明细</h3>
+        <ul class="bl">
+          <li>高铁往返 <b>¥308</b></li>
+          <li>门票 <b>¥135</b></li>
+          <li>餐饮 <b>¥530</b></li>
+          <li>住宿 2 晚 <b>¥500</b></li>
+          <li><strong>合计</strong> <b>¥1,473 / ¥1,600</b></li>
+        </ul>
+        <div class="bar"><i></i></div>
+        <div class="bar-note">已用 92% · 余 ¥127</div>
+      </div>
+      <div class="card">
+        <h3>🚄 交通比较</h3>
+        <ul class="bl">
+          <li>🚄 高铁 <b>¥308 · 1h52m</b> <span class="rec">推荐</span></li>
+          <li>✈️ 飞机 <b>¥650+ · 4h 门到门</b></li>
+          <li>🚗 自驾 <b>¥560 · 3.5h</b></li>
+          <li>🚌 大巴 <b>¥220 · 5h</b></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🏨 住宿建议</h3>
+        <ul class="bl">
+          <li>首选 <b>春熙路 / 太古里</b></li>
+          <li><span></span>地铁 2/3 号线交汇 <b></b></li>
+          <li>性价比 <b>骡马市</b></li>
+          <li>避免 <b>天府新区</b>（离主城太远）</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7. ALERTS ============ -->
+  <section id="alerts">
+    <div class="sec-head"><span class="no">03</span><h2>告警与提示</h2></div>
+    <div class="blocking-mark" id="blocking-mark">
+      ⛔ 存在 blocking 告警：部分行程未通过硬规则校验，请先处理后再出行。
+    </div>
+    <div id="alerts-list"></div>
+  </section>
+
+</main>
+
+<!-- ============ 8. EXPORT BAR ============ -->
+<div class="export-bar">
+  <div class="wrap">
+    <button onclick="alert('导出 .ics 日历（原型演示）')">📅 导出日历 (.ics)</button>
+    <button onclick="alert('生成小红书图文（原型演示）')">📕 小红书图文</button>
+    <button onclick="alert('导出 PDF（原型演示）')">🖨 打印 / PDF</button>
+    <button onclick="window.print()">打印此页</button>
+    <span class="hint">单缝架构 · 全部内容由 window.__GUIDE_SCHEMA__ 驱动</span>
+  </div>
+</div>
+
+<!-- ============ 10. THEME TOGGLE ============ -->
+<button class="theme-toggle" id="theme-toggle" title="切换暗色模式">🌙</button>
+
+<!-- ============ 9. FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <p><span class="ok">✔ 硬规则 3 条全部通过</span> · jev advisory 2 条</p>
+    <p>数据为模拟 schema，非真实攻略 · AI 旅游攻略原型 v0.1</p>
+  </div>
+</footer>
+
+<script>
+/* ================= MOCK SCHEMA — 单缝架构演示 ================= */
+window.__GUIDE_SCHEMA__ = {
+  meta: {
+    origin: "重庆", days: "3 天 2 晚", budget: "人均 ¥1,600", party: "2 人 · 周末游"
+  },
+  weather: [
+    { day: "Day 1 · 4/12", icon: "⛅", temp: "18–25℃", advice: "早晚微凉，带一件外套" },
+    { day: "Day 2 · 4/13", icon: "🌧️", temp: "16–22℃", advice: "有雨 · 已排室内替代预案" },
+    { day: "Day 3 · 4/14", icon: "☀️", temp: "17–26℃", advice: "紫外线中等，注意防晒" }
+  ],
+  spots: [
+    { name: "宽窄巷子",  day: 1, x: 260, y: 150 },
+    { name: "春熙路",    day: 1, x: 520, y: 230 },
+    { name: "熊猫基地",  day: 2, x: 640, y: 80  },
+    { name: "文殊院",    day: 2, x: 420, y: 120 },
+    { name: "九眼桥",    day: 2, x: 600, y: 300 },
+    { name: "人民公园",  day: 3, x: 350, y: 200 }
+  ],
+  routes: [ // 按天连线的简化路线（挂点索引）
+    { day: 1, pts: [[260,150],[520,230]] },
+    { day: 2, pts: [[640,80],[420,120],[600,300]] },
+    { day: 3, pts: [[350,200],[420,120]] }
+  ],
+  dayColors: { 1: "#c2410c", 2: "#15803d", 3: "#7c3aed" },
+  alerts: [
+    { source: "JEV",  type: "素材可信度", title: "人均 500 的网红笔记建议弃用",
+      detail: "来源笔记可信度评分 3/10，图片疑似摆拍，行程密度与实测不符。" },
+    { source: "JEV",  type: "行程合理性", title: "Day 2 节奏偏紧",
+      detail: "熊猫基地到建设路实际通勤约 50 分钟，已预留缓冲；如赶时间可跳过文殊院。" },
+    { source: "RULE", type: "衔接提示",   title: "Day 3 返程预留 3.5h",
+      detail: "16:20 发车前已留足取行李+地铁时间，符合硬规则「返程缓冲 ≥ 3h」。" }
+  ],
+  blocking_count: 0,
+  hard_rules_passed: 3,
+  advisory_count: 2
+};
+
+(function () {
+  var S = window.__GUIDE_SCHEMA__;
+
+  /* ---- meta ---- */
+  document.getElementById("meta-row").innerHTML =
+    "<span>出发 <b>" + S.meta.origin + "</b></span>" +
+    "<span>日期 <b>4/12 – 4/14</b></span>" +
+    "<span>人均预算 <b>" + S.meta.budget + "</b></span>" +
+    "<span>出行人 <b>" + S.meta.party + "</b></span>";
+
+  /* ---- weather ---- */
+  document.getElementById("weather-row").innerHTML = S.weather.map(function (w) {
+    return '<div class="card w-card"><div class="d">' + w.day +
+      '</div><div class="t">' + w.icon + " " + w.temp +
+      '</div><div class="a">' + w.advice + "</div></div>";
+  }).join("");
+
+  /* ---- alerts ---- */
+  document.getElementById("alerts-list").innerHTML = S.alerts.map(function (a) {
+    var cls = a.source === "JEV" ? "jev" : "rule";
+    return '<div class="alert card"><span class="chip ' + cls + '">' + a.source +
+      "</span><div class=\"txt\"><b>" + a.type + " · " + a.title +
+      "</b><span>" + a.detail + "</span></div></div>";
+  }).join("");
+  if (S.blocking_count > 0) {
+    document.getElementById("blocking-mark").className = "blocking-mark show";
+  }
+
+  /* ---- map: AMAP if key present, else static SVG fallback ---- */
+  var status = document.getElementById("map-status");
+  var key = null;
+  try { key = localStorage.getItem("amap_key"); } catch (e) {}
+
+  function legend() {
+    document.getElementById("map-legend").innerHTML =
+      [1, 2, 3].map(function (d) {
+        return '<span><i class="legend-dot" style="background:' + S.dayColors[d] + '"></i>Day ' + d + "</span>";
+      }).join("");
+  }
+
+  function renderFallback() {
+    var lines = S.routes.map(function (r) {
+      var c = S.dayColors[r.day];
+      return '<polyline points="' + r.pts.map(function (p) { return p.join(","); }).join(" ") +
+        '" fill="none" stroke="' + c + '" stroke-width="3" stroke-dasharray="8 6" opacity="0.75"/>';
+    }).join("");
+    var dots = S.spots.map(function (s) {
+      var c = S.dayColors[s.day];
+      return '<circle cx="' + s.x + '" cy="' + s.y + '" r="7" fill="' + c + '" stroke="var(--paper)" stroke-width="2.5"/>' +
+        '<text x="' + (s.x + 12) + '" y="' + (s.y + 4) + '" font-size="13" font-weight="600" fill="var(--ink)">' + s.name + "</text>";
+    }).join("");
+    document.getElementById("map-area").innerHTML =
+      '<svg viewBox="0 0 840 380" preserveAspectRatio="xMidYMid slice" role="img" aria-label="成都行程静态路线图">' +
+      // 街区纹理
+      '<rect width="840" height="380" fill="none"/>' +
+      '<g stroke="var(--line)" stroke-width="1" opacity="0.6">' +
+      '<path d="M0 90 H840 M0 190 H840 M0 300 H840 M160 0 V380 M320 0 V380 M480 0 V380 M700 0 V380"/>' +
+      "</g>" +
+      // 锦江（装饰）
+      '<path d="M60 360 C 200 320, 260 340, 380 320 S 620 280, 830 330" fill="none" stroke="var(--accent-soft)" stroke-width="26" opacity="0.9" stroke-linecap="round"/>' +
+      lines + dots +
+      "</svg>";
+    status.textContent = "⚠ 未配置 AMAP_KEY — 已降级为静态路线图（可在 localStorage 写入 amap_key 启用交互地图）";
+  }
+
+  function renderAMap() {
+    var s = document.createElement("script");
+    s.src = "https://webapi.amap.com/maps?v=2.0&key=" + key;
+    s.onload = function () {
+      try {
+        var map = new AMap.Map("map-area", { zoom: 11, viewMode: "2D" });
+        S.spots.forEach(function (sp) {
+          new AMap.Marker({
+            position: [104.0 + sp.x / 840 * 0.35, 30.55 + (380 - sp.y) / 380 * 0.25],
+            title: sp.name,
+            label: { content: sp.name, direction: "top" }
+          }).setMap(map);
+        });
+        status.textContent = "✅ 高德地图加载成功 · 6 个景点挂点已渲染";
+      } catch (e) { renderFallback(); }
+    };
+    s.onerror = renderFallback;
+    document.head.appendChild(s);
+  }
+
+  legend();
+  if (key) { renderAMap(); } else { renderFallback(); }
+
+  /* ---- scrollspy ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("[data-spy]"));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  function spy() {
+    var cur = 0;
+    sections.forEach(function (sec, i) {
+      if (sec && sec.getBoundingClientRect().top < 120) cur = i;
+    });
+    links.forEach(function (a, i) { a.className = i === cur ? "active" : ""; });
+  }
+  window.addEventListener("scroll", spy, { passive: true });
+  spy();
+
+  /* ---- theme toggle ---- */
+  var btn = document.getElementById("theme-toggle");
+  var html = document.documentElement;
+  btn.addEventListener("click", function () {
+    var dark = html.getAttribute("data-theme") === "dark";
+    html.setAttribute("data-theme", dark ? "light" : "dark");
+    btn.textContent = dark ? "🌙" : "☀️";
+  });
+})();
+</script>
+</body>
+</html>

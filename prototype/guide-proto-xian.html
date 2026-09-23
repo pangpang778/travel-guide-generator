@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-culture="ferrari">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>西安 3 日游 · AI 旅游攻略原型 v2（ferrari 品牌）</title>
+<style>
+/* ================================================================
+   视觉来源：ferrari.md（awesome-design-md Ferrari 品牌设计系统）
+   近黑画布 #181818 承载纯白展示型文字；唯一品牌电压 Rosso Corsa
+   #da291c 严格稀缺用于主 CTA / 时间轴节点 / 行程时间；
+   尖角 0px 是品牌按钮与卡片形状（药丸几何仅限 badge-pill）；
+   字体 FerrariSans（授权字体，文档替代：Inter 500）；
+   8px 命名间距阶梯（xxxs 4px … super 128px）；
+   无多层阴影——摄影深度 + 亮度分层，仅一层 hover soft drop。
+   所有 token 均标注 ferrari.md 出处，未自行引入任何外部配色。
+   ================================================================ */
+:root{
+  /* --- colors（出处：ferrari.md colors 表）--- */
+  --primary:#da291c;            /* {colors.primary} Rosso Corsa */
+  --primary-active:#b01e0a;     /* {colors.primary-active} 按压态 */
+  --ink:#ffffff;                /* {colors.ink} 展示型文字 */
+  --body-ink:#969696;           /* {colors.body} 暗画布默认行文 */
+  --body-strong:#ffffff;        /* {colors.body-strong} 强调 */
+  --on-light:#181818;           /* {colors.on-light} / {colors.body-on-light} 亮带文字 */
+  --muted:#666666;              /* {colors.muted} 次级文本 */
+  --muted-soft:#8f8f8f;         /* {colors.muted-soft} 弱化链接 */
+  --hairline:#303030;           /* {colors.hairline} 暗画布 1px 分隔线 */
+  --hairline-on-light:#d2d2d2;  /* {colors.hairline-on-light} 亮带 1px 分隔线 */
+  --hairline-soft:#ebebeb;      /* {colors.hairline-soft} 更浅分隔线 */
+  --canvas:#181818;             /* {colors.canvas} 近黑页面底色（品牌禁纯黑） */
+  --canvas-elevated:#303030;    /* {colors.canvas-elevated} 暗画布卡片/面板 */
+  --canvas-light:#ffffff;       /* {colors.canvas-light} 白色编辑带 */
+  --surface-card:#303030;       /* {colors.surface-card} 与 elevated 同值 */
+  --surface-soft-light:#f7f7f7; /* {colors.surface-soft-light} 亮色交替带 */
+  --surface-strong-light:#ebebeb; /* {colors.surface-strong-light} 亮画布分隔/徽章 */
+  --on-primary:#ffffff;         /* {colors.on-primary} Rosso Corsa 上的白字 */
+  --focus-ring:#f6e500;         /* {colors.accent-yellow} 文档定位：全局 focus-ring 色 */
+  --semantic-warning:#f13a2c;   /* {colors.semantic-warning} 校验告警 */
+  --semantic-success:#03904a;   /* {colors.semantic-success} 确认 */
+  --semantic-info:#4c98b9;      /* {colors.semantic-info} 信息徽章 */
+  /* --- rounded（出处：ferrari.md rounded 表）---
+     品牌规则：CTA/卡片/带子一律 {rounded.none}=0px 尖角；
+     药丸 9999px 仅用于 badge-pill 徽章。 */
+  --r-none:0px; --r-sm:4px; --r-full:9999px;
+  /* --- spacing（出处：ferrari.md spacing 8px 命名阶梯）--- */
+  --s-xxxs:4px; --s-xxs:8px; --s-xs:16px; --s-sm:24px;
+  --s-md:32px; --s-lg:48px; --s-xl:64px; --s-xxl:96px; --s-super:128px;
+  /* --- elevation（出处：ferrari.md Elevation：唯一 soft drop，hover 卡片）--- */
+  --shadow-hover:0 4px 8px rgba(0,0,0,0.1);
+  /* --- 字体（出处：ferrari.md typography.fontFamily；授权字体，替代 Inter 500）--- */
+  --font:"FerrariSans","Inter",-apple-system,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  /* --- 渐变（出处：ferrari.md Decorative Depth，文档原文两支渐变）--- */
+  --grad-dark:linear-gradient(180deg,#3c3c3c,#030303 64%);   /* 暗灰大气渐变：段落过渡 */
+  --grad-rosso:linear-gradient(180deg,#a00c01,#da291c 64%);  /* Rosso 渐变：强调带 */
+  /* 地图装饰底色（由已文档 hairline / semantic-info 推导，非新色） */
+  --map-block:#242424; --map-river:rgba(76,152,185,.22); /* river 复用 {colors.semantic-info} 低透明度装饰 */
+}
+/* 主题模式：ferrari.md 默认即暗色画布（hero-band-cinema），故默认 data-culture="ferrari"。
+   亮色模式不是「暗色推导」，而是反向扩展——ferrari.md 自带完整亮带 token 组
+   （canvas-light / body-on-light / hairline-on-light / surface-soft-light /
+   surface-strong-light，即 preowned-listing-card / feature-card-light 语境），
+   本页亮色模式即整页套用该「白色编辑带」组件族，全部为文档 token，无自造色。 */
+html[data-culture="light"]{
+  --canvas:#ffffff;             /* {colors.canvas-light} */
+  --canvas-elevated:#f7f7f7;    /* {colors.surface-soft-light} 亮带卡片 */
+  --surface-card:#ffffff;       /* {colors.canvas-light} preowned-listing-card 语境 */
+  --ink:#181818;                /* {colors.body-on-light} */
+  --body-ink:#181818;           /* {colors.body-on-light} */
+  --body-strong:#181818;
+  --muted:#666666;              /* {colors.muted} 跨画布复用（captions） */
+  --hairline:#d2d2d2;           /* {colors.hairline-on-light} */
+  --hairline-soft:#ebebeb;      /* {colors.hairline-soft} */
+  --map-block:#ebebeb;          /* {colors.surface-strong-light} */
+  --map-river:rgba(76,152,185,.28);
+  --shadow-hover:0 4px 8px rgba(0,0,0,0.1); /* 同一文档 soft drop */
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--canvas); color:var(--body-ink);
+  font-family:var(--font);
+  /* {typography.body-md} 14px/1.5 —— Ferrari 正文基准 14px */
+  font-size:14px; line-height:1.5; font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px} /* {colors.accent-yellow} focus-ring */
+.wrap{max-width:1280px;margin:0 auto;padding:0 var(--s-sm)} /* Editorial body 上限 1280px（ferrari.md Layout） */
+a{color:var(--ink)}
+button{font-family:inherit;cursor:pointer}
+
+/* ---------- hero（{component.hero-band-cinema}：全出血摄影即页面骨架） ---------- */
+.hero{
+  position:relative;min-height:64vh;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  background:var(--canvas);overflow:hidden;
+}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%}
+/* 标题浮于照片底部：暗灰大气渐变压暗（{Decorative Depth} dark grey gradient 文档原文） */
+.hero-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(24,24,24,.15) 30%,rgba(3,3,3,.88) 82%)}
+.hero .wrap{position:relative;z-index:2;padding-bottom:var(--s-lg)}
+.kicker{
+  /* {typography.caption-uppercase} 11px/600/1.1px 大写 */
+  font-size:11px;font-weight:600;letter-spacing:1.1px;color:var(--body-ink);
+  text-transform:uppercase;
+}
+.brand-chip{
+  /* {component.badge-pill} canvas-elevated 底 + caption-uppercase + 9999px 药丸（徽章专用几何） */
+  display:inline-flex;align-items:center;gap:var(--s-xxs);margin-top:var(--s-xxs);
+  background:var(--canvas-elevated);color:var(--ink);
+  border-radius:var(--r-full);padding:4px 12px;
+  font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;
+}
+.brand-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--primary)} /* Cavallino 红 */
+.hero h1{
+  /* {typography.display-xl} 56px/500/-1.12px —— 展示层级恒 500，绝不加粗 */
+  font-size:56px;font-weight:500;line-height:1.1;letter-spacing:-1.12px;
+  color:var(--ink);margin:var(--s-xs) 0 var(--s-xxs);
+}
+.hero .dek{font-size:16px;color:var(--body-ink);max-width:640px} /* title 级辅助行文 */
+.hero-meta{display:flex;flex-wrap:wrap;gap:var(--s-xxs) var(--s-md);margin-top:var(--s-xs);font-size:13px;color:var(--body-ink)} /* {typography.body-sm} */
+.hero-meta b{color:var(--ink);font-weight:600}
+
+/* ---------- tab nav（{component.top-nav-on-dark} 64px 高 + nav-link 大写小字） ---------- */
+.tab-nav{
+  position:sticky;top:0;z-index:50;background:var(--canvas);
+  border-bottom:1px solid var(--hairline);
+}
+.tab-nav .wrap{display:flex;gap:var(--s-sm);overflow-x:auto;padding:0 var(--s-sm)}
+.tab-btn{
+  border:none;background:transparent;color:var(--body-ink);
+  /* {typography.nav-link} 13px/600/0.65px 大写 */
+  padding:0 2px;height:64px;font-size:13px;font-weight:600;letter-spacing:.65px;
+  text-transform:uppercase;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:color .15s;
+}
+.tab-btn:hover{color:var(--ink)}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--primary)} /* Rosso Corsa 高亮当前位 */
+.tab-panel{display:none;padding:var(--s-md) 0 var(--s-xs)}
+.tab-panel.active{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- section head & cards（{component.feature-card-photo/light} 尖角 0px + 1px hairline） ---------- */
+.sec-head{display:flex;align-items:baseline;gap:var(--s-xs);margin-bottom:var(--s-sm)}
+.sec-head h2{
+  /* {typography.display-lg} 36px/500/-0.36px 区块标题 */
+  font-size:36px;font-weight:500;line-height:1.2;letter-spacing:-.36px;color:var(--ink);
+}
+.sec-head .no{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:1.1px;text-transform:uppercase} /* {typography.caption-uppercase} */
+.card{
+  background:var(--canvas-elevated);border:1px solid var(--hairline);
+  border-radius:var(--r-none); /* {rounded.none} 尖角为品牌形状 */
+  transition:box-shadow .15s;
+}
+.card:hover{box-shadow:var(--shadow-hover)} /* 唯一 soft drop 仅 hover */
+
+/* ---------- map ---------- */
+.map-card{overflow:hidden;position:relative}
+.map-area{height:360px;position:relative;background:var(--canvas)}
+.map-area svg{width:100%;height:100%;display:block}
+.map-status{padding:12px 16px;font-size:13px;color:var(--body-ink);border-top:1px solid var(--hairline)}
+.map-legend{display:flex;gap:18px;padding:12px 16px;font-size:13px;color:var(--body-ink);border-top:1px solid var(--hairline)}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+/* 决策3 map 控件行（liketrek/TREK + itskovacs/trip）：按天切换 + 标签开关，全部品牌 token 尖角 */
+.map-ctrl-row{display:flex;gap:8px;align-items:center;padding:10px 16px;border-top:1px solid var(--hairline);flex-wrap:wrap}
+.map-ctrl-row .ctrl-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:1.1px;text-transform:uppercase} /* {typography.caption-uppercase} */
+.day-btn{
+  border:1px solid var(--hairline);background:transparent;color:var(--body-ink);
+  border-radius:var(--r-none);padding:6px 14px; /* {rounded.none} 尖角 */
+  font-size:12px;font-weight:600;letter-spacing:.65px;text-transform:uppercase; /* {typography.nav-link} */
+  transition:color .15s;
+}
+.day-btn:hover{color:var(--ink)}
+.day-btn.active{color:var(--on-primary);background:var(--primary);border-color:var(--primary)} /* Rosso Corsa 高亮当前天 */
+.day-btn#label-toggle{margin-left:auto}
+/* 决策2：marker 自定义 DOM 时间窗标签（itskovacs/trip 序号气泡交互），品牌 token */
+.tw-label{
+  background:var(--canvas);color:var(--ink);border:1px solid var(--hairline);
+  padding:2px 8px;white-space:nowrap;
+  font-size:11px;font-weight:600;line-height:1.4;letter-spacing:.4px;
+}
+.tw-label b{color:var(--primary);font-variant-numeric:tabular-nums;font-weight:600}
+.tw-label.hl{border-color:var(--primary)} /* 列表 hover 高亮（决策3 联动） */
+.tw-label.big{font-size:12px;padding:4px 10px;border-color:var(--primary);border-width:2px} /* marker 分级：>=2h 重点行程点放大（用户定案） */
+.tw-label.dim{opacity:.18;pointer-events:none} /* zoom 分级显隐：拉远只留重点标签（用户定案） */
+.hsr-station{background:var(--primary);color:var(--on-primary);font-size:11px;font-weight:600;letter-spacing:.4px;padding:3px 10px;white-space:nowrap} /* 跨城车站标（全程视图内的高铁线两端） */
+.tw-info{font-family:inherit;background:var(--canvas);color:var(--ink);border:1px solid var(--hairline);padding:10px 12px;min-width:220px;font-size:12px;line-height:1.6}
+.tw-info b.t{color:var(--primary);font-size:13px;letter-spacing:.4px}
+.tw-info .meta{color:var(--muted);font-size:11px}
+.tw-info a{color:var(--primary);font-weight:600;text-decoration:none} /* 点击弹窗（用户定案：时间窗/名称/tip/门票/导航） */
+
+/* key 引导卡片 — 浮于静态图上（{component.text-input-on-dark} + {component.button-primary}） */
+.key-guide{
+  position:absolute;inset:0;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(3,3,3,.72); /* 暗灰渐变的纯色近似（同段过渡深色，非新色相） */
+}
+.key-guide .inner{
+  max-width:440px;margin:0 var(--s-sm);padding:var(--s-sm);
+  background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-none);
+}
+.key-guide h3{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:var(--s-xxs)} /* {typography.title-md} */
+.key-guide p{font-size:14px;color:var(--body-ink);margin-bottom:var(--s-xs)}
+.key-guide code{font-size:13px;background:var(--canvas-elevated);color:var(--ink);padding:2px 6px;border-radius:var(--r-sm)} /* {rounded.sm} 表单内输入件 */
+.key-guide .row{display:flex;gap:var(--s-xxs)}
+.key-guide input{
+  flex:1;background:var(--canvas);color:var(--ink);min-width:0;
+  border:1px solid var(--hairline);border-radius:var(--r-sm); /* {component.text-input-on-dark} 4px */
+  padding:14px 16px;font-size:14px;height:48px;
+}
+.key-guide .go{
+  border:none;background:var(--primary);color:var(--on-primary);
+  border-radius:var(--r-none);height:48px;padding:0 var(--s-md);
+  font-size:14px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase; /* {typography.button} */
+  white-space:nowrap;
+}
+.key-guide .go:active{background:var(--primary-active)} /* {component.button-primary-active} */
+.key-guide .close-link{
+  display:block;margin-top:12px;font-size:13px;color:var(--muted-soft);
+  background:none;border:none;text-decoration:underline;text-transform:uppercase;letter-spacing:.65px;
+}
+.key-guide .close-link:hover{color:var(--ink)}
+.map-ok{
+  position:absolute;top:12px;right:12px;z-index:6;
+  background:var(--canvas-elevated);color:var(--ink);border:1px solid var(--hairline);
+  border-radius:var(--r-full);padding:4px 12px;
+  font-size:11px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase; /* {component.badge-pill} */
+}
+
+/* ---------- weather（feature-card 亮值三联，尖角 32px 内边距） ---------- */
+.weather{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-xs);margin:0 0 var(--s-xxs)}
+.w-card{padding:var(--s-md)}
+.w-card .d{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:1.1px;text-transform:uppercase} /* {typography.caption-uppercase} */
+.w-card .t{font-size:18px;font-weight:700;color:var(--ink);margin:var(--s-xxs) 0 4px} /* {typography.title-md} */
+.w-card .a{font-size:13px;color:var(--body-ink)} /* {typography.body-sm} */
+
+/* ---------- timeline（race-calendar-row 行式布局 + hairline 分隔） ---------- */
+.tl{position:relative;margin:var(--s-xxs) 0 0 var(--s-xxs);padding-left:var(--s-xs)}
+.tl::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:1px;background:var(--hairline)}
+.ev{position:relative;padding:0;margin-bottom:var(--s-xs);overflow:hidden;cursor:pointer}
+.ev::before{
+  content:"";position:absolute;left:-26px;top:26px;width:11px;height:11px;
+  border-radius:50%;background:var(--primary);border:2px solid var(--canvas);
+  box-shadow:0 0 0 1px var(--primary); /* Rosso Corsa 节点（F1 race-position 语境的稀缺红） */
+}
+.ev.transit::before{background:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.ev:hover{box-shadow:var(--shadow-hover)}
+.ev-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:16px var(--s-sm) 4px}
+.ev-time{
+  font-weight:700;font-size:18px;color:var(--primary);font-variant-numeric:tabular-nums; /* Rosso 数字高亮（race-position-cell） */
+}
+.ev.transit .ev-time{color:var(--ink)}
+.ev-title{font-weight:700;font-size:18px;color:var(--ink)} /* {typography.title-md} */
+.badge{
+  font-size:11px;font-weight:600;padding:4px 12px;white-space:nowrap;
+  background:var(--canvas-elevated);color:var(--ink);
+  border-radius:var(--r-full);letter-spacing:1.1px;text-transform:uppercase; /* {component.badge-pill} 唯一药丸 */
+}
+.b-check{border:1px solid var(--hairline)}
+.b-est{border:1px solid var(--hairline);color:var(--muted)}
+.b-live{background:var(--primary);color:var(--on-primary);border:1px solid var(--primary)}
+.b-warn{background:var(--canvas-elevated);color:var(--semantic-warning);border:1px solid var(--semantic-warning)} /* {colors.semantic-warning} */
+.ev .sum{font-size:14px;color:var(--body-ink);margin:2px var(--s-sm) 16px}
+.ev .toggle-hint{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted-soft);flex-shrink:0;letter-spacing:1.1px;text-transform:uppercase}
+.ev.open .toggle-hint{color:var(--primary)}
+.ev .warn-row{margin:8px var(--s-sm) 16px;font-size:13px;color:var(--semantic-warning);background:var(--canvas-elevated);padding:8px 12px;border-radius:var(--r-none)}
+
+.ev-detail{display:none;border-top:1px solid var(--hairline);padding:var(--s-xs) var(--s-sm);background:var(--canvas)}
+.ev.open .ev-detail{display:grid;grid-template-columns:150px 1fr;gap:var(--s-xs);animation:fadein .2s ease}
+.ev-img{width:150px;height:112px;border-radius:var(--r-none);overflow:hidden;position:relative;background:var(--canvas-elevated)}
+.ev-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ev-img .ph{
+  width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:26px;color:var(--muted);gap:4px;background:var(--canvas-elevated);
+}
+.ev-img .ph span{font-size:10px;color:var(--muted);letter-spacing:.15em;text-align:center;padding:0 6px}
+.src-mark{
+  position:absolute;left:0;right:0;bottom:0;font-size:9px;padding:2px 5px;
+  background:rgba(3,3,3,.72);color:#fff;text-align:center;white-space:nowrap;overflow:hidden;
+}
+.jev-mark{
+  position:absolute;top:6px;right:6px;font-size:9px;font-weight:600;
+  background:var(--canvas);color:var(--ink);border:1px solid var(--hairline);
+  border-radius:var(--r-full);padding:1px 6px; /* badge-pill 几何 */
+}
+.ev-info dl{font-size:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:4px} /* {typography.body-md} */
+.ev-info dt{color:var(--muted);white-space:nowrap}
+.ev-info dd{color:var(--ink);font-weight:500}
+.ev-info .why{grid-column:1/-1;color:var(--body-ink);margin-top:4px;line-height:1.5}
+.ev-info .why b{color:var(--primary)}
+.ev-info .note{grid-column:1/-1;color:var(--semantic-warning);background:var(--canvas-elevated);border-radius:var(--r-none);padding:8px 12px;margin-top:8px;font-size:13px}
+.day-head{margin:0 0 var(--s-xs);font-size:14px;color:var(--body-ink)}
+.day-head .stars{color:var(--ink);letter-spacing:2px;font-size:14px;margin-left:8px}
+.day-head .badge{margin-left:8px}
+
+/* ---------- grid cards（预算/交通/住宿） ---------- */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-xs)}
+.grid3 .card{padding:var(--s-md)} /* {component.feature-card-light} 32px padding 变体 */
+.grid3 h3{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:var(--s-xs)} /* {typography.title-md} */
+.bl{list-style:none;font-size:14px}
+.bl li{display:flex;justify-content:space-between;gap:8px;padding:16px 0;border-bottom:1px solid var(--hairline)} /* {component.race-calendar-row} 16px 行距 */
+.bl li:last-child{border-bottom:none}
+.bl li b{font-variant-numeric:tabular-nums;color:var(--ink)}
+.rec{color:var(--primary);font-weight:700} /* 推荐 = Rosso Corsa 稀缺强调 */
+.bar{height:8px;border-radius:var(--r-none);background:var(--canvas-elevated);margin-top:var(--s-xs);overflow:hidden}
+.bar i{display:block;height:100%;width:82%;background:var(--primary)} /* 进度条 Rosso Corsa（尖角） */
+.bar-note{font-size:13px;color:var(--muted);margin-top:var(--s-xxs);text-align:right}
+
+/* ---------- alerts ---------- */
+.alert{display:flex;gap:12px;padding:var(--s-xs) var(--s-sm);margin-bottom:12px;align-items:flex-start}
+.alert .txt{font-size:14px}
+.alert .txt b{display:block;font-size:18px;font-weight:700;color:var(--ink)} /* {typography.title-md} */
+.alert .txt span{color:var(--body-ink)}
+.chip{
+  font-size:11px;font-weight:600;padding:4px 12px;letter-spacing:1.1px;flex-shrink:0;margin-top:2px;
+  border-radius:var(--r-full);text-transform:uppercase; /* {component.badge-pill} */
+}
+.chip.jev{background:var(--canvas-elevated);color:var(--semantic-warning);border:1px solid var(--semantic-warning)} /* {colors.semantic-warning} */
+.chip.rule{background:var(--canvas-elevated);color:var(--ink);border:1px solid var(--hairline)}
+.chip.info{background:var(--canvas-elevated);color:var(--semantic-info);border:1px solid var(--semantic-info)} /* {colors.semantic-info} */
+
+/* ---------- export bar（{component.button-outline-on-dark}：透明底 1px 白边尖角大写） ---------- */
+.export-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:var(--canvas);border-top:1px solid var(--hairline);
+}
+.export-bar .wrap{display:flex;gap:10px;padding:12px var(--s-sm);align-items:center;flex-wrap:wrap}
+.export-bar button{
+  background:transparent;color:var(--ink);
+  border:1px solid var(--ink);border-radius:var(--r-none);
+  height:48px;padding:0 var(--s-md); /* {component.button-outline-on-dark} 48px 触控目标 */
+  font-size:14px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase; /* {typography.button} */
+  transition:box-shadow .15s;
+}
+.export-bar button:hover{box-shadow:var(--shadow-hover)}
+.export-bar button:active{background:var(--canvas-elevated)}
+.export-bar button.cta{background:var(--primary);color:var(--on-primary);border-color:var(--primary)} /* {component.button-primary} */
+.export-bar button.cta:active{background:var(--primary-active)}
+.export-bar .hint{font-size:13px;color:var(--muted-soft);margin-left:auto}
+
+/* ---------- theme toggle & footer ---------- */
+.theme-toggle{
+  position:fixed;right:18px;bottom:64px;z-index:60;width:48px;height:48px; /* 48px 触控目标（WCAG AAA） */
+  border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);
+  font-size:18px;display:flex;align-items:center;justify-content:center;
+}
+footer{padding:var(--s-lg) 0 var(--s-super);border-top:1px solid var(--hairline);background:var(--canvas)} /* {component.footer-dark} */
+footer .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-sm);margin-bottom:var(--s-sm)}
+footer h4{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:8px} /* {typography.title-sm} */
+footer .cols p{font-size:13px;color:var(--body-ink);line-height:1.6} /* {typography.body-sm} */
+footer .ok{color:var(--semantic-success);font-weight:600} /* {colors.semantic-success} */
+footer .warn{color:var(--semantic-warning);font-weight:600}
+footer .legal{font-size:13px;color:var(--body-ink);border-top:1px solid var(--hairline);padding-top:var(--s-xs);line-height:1.7}
+footer .legal a{color:var(--muted-soft)} /* {component.footer-link} */
+
+/* ---------- print & mobile ---------- */
+@media print{
+  .tab-nav,.theme-toggle,.export-bar{display:none!important}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;border-color:#ccc}
+  .tab-panel{display:block!important;page-break-before:always}
+  .ev{cursor:auto}
+}
+@media (max-width:640px){ /* Mobile 断点（ferrari.md Responsive <640px） */
+  .hero h1{font-size:32px} /* Hero h1 80→32px 文档规则（本页 56→32） */
+  .hero .wrap{padding-bottom:var(--s-md)}
+  .weather,.grid3,footer .cols{grid-template-columns:1fr}
+  .map-area{height:300px}
+  .tab-btn{height:52px;font-size:12px}
+  .export-bar .hint{display:none}
+  .ev.open .ev-detail{grid-template-columns:1fr}
+  .ev-img{width:100%;height:140px}
+  .sec-head h2{font-size:26px} /* display-md 级降级 */
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HERO（hero-band-cinema：全出血照片 + 标题浮底 + 亮带元数据） ============ -->
+<header class="hero">
+  <img class="hero-img" src="xhs-images/xian-bingmayong.jpg" alt="秦始皇兵马俑一号坑军阵全景" onerror="this.style.display='none'">
+  <div class="hero-scrim"></div>
+  <div class="wrap">
+    <div class="kicker">Travel Guide · Xi'an · Chang'an</div>
+    <div class="brand-chip" id="brand-chip">
+      <span class="dot"></span><span id="brand-name">主题：ferrari · Rosso Corsa</span>
+    </div>
+    <h1>西安三日：<br>一眼千年，盛世长安</h1>
+    <p class="dek">从兵马俑的地下军团到大唐不夜城的灯火，一份节奏与厚重兼得的周末短途攻略——高铁直达、地铁串联、周一闭馆已规避。</p>
+    <div class="hero-meta" id="meta-row"></div>
+  </div>
+</header>
+
+<!-- ============ TAB NAV ============ -->
+<nav class="tab-nav">
+  <div class="wrap" id="tab-btns">
+    <button class="tab-btn active" data-tab="overview">总览</button>
+    <button class="tab-btn" data-tab="transit">交通</button>
+    <button class="tab-btn" data-tab="d1">Day 1</button>
+    <button class="tab-btn" data-tab="d2">Day 2</button>
+    <button class="tab-btn" data-tab="d3">Day 3</button>
+    <button class="tab-btn" data-tab="budget">预算</button>
+    <button class="tab-btn" data-tab="alerts">告警</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ============ TAB: 总览 ============ -->
+  <section class="tab-panel active" id="tab-overview">
+    <div class="sec-head"><span class="no">01</span><h2>行程总览图</h2></div>
+    <div class="card map-card">
+      <div class="map-area" id="map-area">
+        <!-- 降级静态 SVG 路线图（一等公民设计）由 JS 注入 -->
+      </div>
+      <div class="map-ok" id="map-ok" style="display:none">✅ 交互地图已启用</div>
+      <div class="key-guide" id="key-guide">
+        <div class="inner">
+          <h3>🗺️ 启用交互地图</h3>
+          <p>当前未配置高德地图 Key。填入你的 AMAP_KEY（申请地址 <a href="https://lbs.amap.com" target="_blank" rel="noopener">lbs.amap.com</a>），Key 只保存在本地 <code>localStorage('amap_key')</code>，不会上传。也可先关闭此卡片查看静态路线图。</p>
+          <div class="row">
+            <input type="text" id="amap-key-input" placeholder="粘贴 AMAP_WEB Key…" autocomplete="off">
+            <button class="go" id="amap-go">启用</button>
+          </div>
+          <button class="close-link" id="key-guide-close">先看看静态路线图 →</button>
+        </div>
+      </div>
+      <!-- 决策3：按天切换 + setFitView 只框当天覆盖物（liketrek/TREK）；决策2：时间窗标签开关（itskovacs/trip） -->
+      <div class="map-ctrl-row">
+        <span class="ctrl-label">按天</span>
+        <button class="day-btn active" data-day="0">全程</button>
+        <button class="day-btn" data-day="1">Day 1</button>
+        <button class="day-btn" data-day="2">Day 2</button>
+        <button class="day-btn" data-day="3">Day 3</button>
+        <button class="day-btn" id="replay-btn" title="沿当天动线回放（小火车）">▶ 回放</button>
+        <button class="day-btn" id="label-toggle" title="时间窗标签 开/关">标签 开</button>
+      </div>
+      <div class="map-legend" id="map-legend"></div>
+      <div class="map-status" id="map-status">地图加载中…</div>
+    </div>
+
+    <div class="sec-head" style="margin-top:var(--s-lg)"><span class="no">WX</span><h2>三天气预报</h2></div>
+    <div class="weather" id="weather-row"></div>
+  </section>
+
+  <!-- ============ TAB: 交通（决策1：跨城+市内分层——总览图只画市内动线，高铁跨城段独立视图；来源 chenxuan520/roadbook 交通段交互） ============ -->
+  <section class="tab-panel" id="tab-transit">
+    <div class="sec-head"><span class="no">HSR</span><h2>跨城交通 · 高铁段</h2></div>
+    <div class="card map-card">
+      <div class="map-area" id="tmap-area">
+        <!-- 无 key 降级：跨城高铁示意图（一等公民）由 JS 注入 -->
+      </div>
+      <div class="map-legend">
+        <span><i class="legend-dot" style="background:var(--primary)"></i>郑州东 → 西安北 · 徐兰高铁（约 2h21m · 二等座 ¥239）</span>
+      </div>
+      <div class="map-status" id="tmap-status">跨城段示意 · 市内动线见「总览」tab</div>
+    </div>
+    <div class="weather" id="weather-row"></div>
+  </section>
+
+  <!-- ============ TAB: Day 1 ============ -->
+  <section class="tab-panel" id="tab-d1">
+    <div class="sec-head"><span class="no">Day 1</span><h2>抵达日 · 临潼秦风线</h2></div>
+    <div class="day-head">
+      强度 <span class="stars">★★★★☆</span>
+      <span class="badge b-check">jev 合理性 7.5/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev transit card">
+        <div class="ev-head">
+          <span class="ev-time">09:12</span>
+          <span class="ev-title">G1901 · 郑州东 → 西安北</span>
+          <span class="badge b-live">12306 实时</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">09:12 发车 — 11:33 抵达，二等座 <b>¥239</b>，<span class="badge b-check">有票</span>。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/xian-bingmayong.jpg" data-jev="9.90" data-src="来源：小红书笔记《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">13:30</span>
+          <span class="ev-title">秦始皇兵马俑博物馆</span>
+          <span class="badge b-check">jev 图片匹配 9.90</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">一号坑拱形大棚下的地下军团，与丽山园联票，摆渡车免费——世界第八大奇迹。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/xian-huaqing-palace.jpg" data-jev="9.80" data-src="来源：小红书笔记《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">16:30</span>
+          <span class="ev-title">华清宫</span>
+          <span class="badge b-check">jev 图片匹配 9.80</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">唐御汤遗址与五间厅西安事变旧址，贵妃池园林背靠骊山，日落前光线最柔。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/xian-huiminjie.jpg" data-jev="9.67" data-src="来源：小红书笔记《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">19:30</span>
+          <span class="ev-title">回民街晚餐</span>
+          <span class="badge b-check">jev 图片匹配 9.67</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">老字号招牌悬匾一条街：泡馍、肉夹馍、biangbiang 面，回市区后的第一顿碳水盛宴。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: Day 2 ============ -->
+  <section class="tab-panel" id="tab-d2">
+    <div class="sec-head"><span class="no">Day 2</span><h2>博物馆与盛唐夜 · 精华日</h2></div>
+    <div class="day-head">
+      强度 <span class="stars">★★★☆☆</span>
+      <span class="badge b-check">jev 合理性 9.0/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev card" data-img="xhs-images/xian-shanxi-history-museum.jpg" data-jev="8.60" data-src="来源：小红书笔记《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">09:00</span>
+          <span class="ev-title">陕西历史博物馆</span>
+          <span class="badge b-warn">周一闭馆</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">先周到周唐 170 万件馆藏，舞马衔杯银壶与三彩俑是必看镇馆之宝。免费但需提前预约。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/xian-dayanta.jpg" data-jev="9.80" data-src="来源：小红书笔记《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">14:00</span>
+          <span class="ev-title">大雁塔 · 大慈恩寺</span>
+          <span class="badge b-check">jev 图片匹配 9.80</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">玄奘译经之地，塔身与玄奘雕像同框是经典机位，南广场喷泉傍晚有音乐表演。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/xian-datang-everbright.jpg" data-jev="9.93" data-src="来源：小红书笔记《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">19:00</span>
+          <span class="ev-title">大唐不夜城</span>
+          <span class="badge b-check">jev 图片匹配 9.93</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">19 点后灯光全开才是盛唐气象：贞观之治群雕、不倒翁小姐姐、街头演艺一路向北。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: Day 3 ============ -->
+  <section class="tab-panel" id="tab-d3">
+    <div class="sec-head"><span class="no">Day 3</span><h2>城墙骑行 · 慢收尾与归途</h2></div>
+    <div class="day-head">
+      强度 <span class="stars">★★☆☆☆</span>
+      <span class="badge b-check">jev 合理性 8.5/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev card" data-img="xhs-images/xian-citywall.jpg" data-jev="9.77" data-src="来源：小红书笔记《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">09:00</span>
+          <span class="ev-title">西安城墙（永宁门）</span>
+          <span class="badge b-check">jev 图片匹配 9.77</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">中国现存最完整古城垣，门票 ¥54，城上可租自行车环骑 13.74 km——俯瞰长安的最好方式。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/xian-bell-drum-tower.jpg" data-jev="9.30" data-src="来源：小红书笔记《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">12:30</span>
+          <span class="ev-title">钟楼 · 鼓楼</span>
+          <span class="badge b-check">jev 图片匹配 9.30</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">城市中轴的双子地标，联票 ¥50；「文武盛地」匾额的鼓楼与夜景金顶的钟楼遥相呼应。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/xian-sajinqiao.jpg" data-jev="9.10" data-src="来源：小红书笔记《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">13:30</span>
+          <span class="ev-title">洒金桥午餐</span>
+          <span class="badge b-check">jev 图片匹配 9.10</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">本地人扎堆的美食街：酸汤饺子、羊肉泡馍、甑糕——收尾前最后一顿地道西安味。</p>
+      </div>
+      <div class="ev transit card">
+        <div class="ev-head">
+          <span class="ev-time">16:40</span>
+          <span class="ev-title">G1930 · 西安北 → 郑州东</span>
+          <span class="badge b-warn">余票紧张</span>
+          <span class="toggle-hint">点击展开详情 ▾</span>
+        </div>
+        <p class="sum">16:40 发车 — 19:02 抵达，二等座 <b>¥239</b>。</p>
+        <div class="warn-row">⚠ 余票紧张，建议尽快购票或备选 17:26 G1909</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: 预算 ============ -->
+  <section class="tab-panel" id="tab-budget">
+    <div class="sec-head"><span class="no">02</span><h2>预算 · 交通 · 住宿</h2></div>
+    <div class="grid3">
+      <div class="card">
+        <h3>💰 预算明细</h3>
+        <ul class="bl">
+          <li>高铁往返 <b>¥478</b></li>
+          <li>门票 <b>¥344</b></li>
+          <li>餐饮 <b>¥458</b></li>
+          <li>住宿 2 晚 <b>¥700</b></li>
+          <li><strong>合计</strong> <b>¥1,980 / ¥2,400</b></li>
+        </ul>
+        <div class="bar"><i></i></div>
+        <div class="bar-note">已用 82% · 余 ¥420</div>
+      </div>
+      <div class="card">
+        <h3>🚄 交通比较</h3>
+        <ul class="bl">
+          <li>🚄 高铁 <b>¥478 · 2h21m</b> <span class="rec">推荐</span></li>
+          <li>✈️ 飞机 <b>¥800+ · 3h 门到门</b></li>
+          <li>🚗 自驾 <b>¥700 · 5.5h</b></li>
+          <li>🚌 大巴 <b>¥260 · 7h</b></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🏨 住宿建议</h3>
+        <ul class="bl">
+          <li>首选 <b>钟楼 · 地铁枢纽</b></li>
+          <li>地铁 1/2/6 号线交汇 <b>去哪都快</b></li>
+          <li>性价比 <b>大雁塔南</b></li>
+          <li>避免 <b>偏远开发区</b>（通勤太远）</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: 告警 ============ -->
+  <section class="tab-panel" id="tab-alerts">
+    <div class="sec-head"><span class="no">03</span><h2>告警与提示</h2></div>
+    <div id="alerts-list"></div>
+  </section>
+
+</main>
+
+<!-- ============ EXPORT BAR ============ -->
+<div class="export-bar">
+  <div class="wrap">
+    <button class="cta" onclick="alert('导出 .ics 日历（原型演示）')">📅 导出日历</button>
+    <button onclick="alert('生成小红书图文（原型演示）')">📕 小红书图文</button>
+    <button onclick="window.print()">🖨 打印 / PDF</button>
+    <span class="hint">数据由 window.__GUIDE_SCHEMA__ 驱动 · 单文件原型 v2 · ferrari 品牌</span>
+  </div>
+</div>
+
+<!-- ============ 主题切换钮 ============ -->
+<button class="theme-toggle" id="theme-toggle" title="切换亮色模式">☀️</button>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>图片管线</h4>
+        <p><span class="ok">✔ OpenCLI 采集成功</span>：小红书 4 篇笔记 · 43 张素材图<br>
+        <span class="m">《西安📍3天2夜精华路线》@奶罐糖环游记、《西安3-5天保姆级攻略》@爱分享｜大知闲闲、《两日500一人保姆级攻略》@曼曼、《假如西安攻略有段位》@熬夜整理攻略的泽老师（视频笔记）</span></p>
+      </div>
+      <div>
+        <h4>jev 筛选（TypeSafe System One）</h4>
+        <p>10 次有效调用（上限 20）· 阈值 ≥7 · 每点取最高分 1 张<br>
+        <span class="m">9 处行程点全部采用真图 · 0 降级。原始分 criteria 4 档（0–3 插值），页面展示分 = 原始分 ÷3 ×10 归一化（兵马俑双候选取主图 9.90 &gt; 备选 9.80）。</span></p>
+      </div>
+      <div>
+        <h4>视觉系统</h4>
+        <p><span class="m">全部视觉 token 来自 awesome-design-md 的 ferrari 品牌规范（近黑画布 #181818 · Rosso Corsa #da291c 稀缺强调 · FerrariSans/Inter 字体栈 · 尖角 0px CTA 与卡片 · 8px 命名间距阶梯 · 无多层阴影）。默认即品牌暗色；亮色模式为白色编辑带（canvas-light）token 组的整页扩展。</span></p>
+      </div>
+    </div>
+    <div class="legal">
+      <p><span class="ok">✔ 硬规则 3 条全部通过</span> · jev advisory 2 条 · RULE 1 条 · 行程点图片无未达标降级</p>
+      <p>行程点图片为小红书 UGC（untrusted），仅原型演示用途，版权属于原作者 · 数据为模拟 schema，非真实攻略 · 原型 v2 · © 2026 Guide Proto</p>
+      <p class="map-refs">地图交互参考：liketrek/TREK · itskovacs/trip · chenxuan520/roadbook（GitHub，MIT）</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ================= MOCK SCHEMA ================= */
+window.__GUIDE_SCHEMA__ = {
+  meta: {
+    origin: "郑州", days: "3 天 2 晚", budget: "人均 ¥2,400", party: "2 人 · 周末游",
+    destination_identity: {
+      brand_id: "ferrari",
+      theme: "ferrari · Rosso Corsa",
+      reason: "用户指定以 awesome-design-md 的 Ferrari 品牌设计系统为唯一视觉来源：近黑画布 #181818（禁纯黑）承载纯白展示型文字，唯一品牌电压 Rosso Corsa #da291c 稀缺用于主 CTA、时间轴节点与行程时间；尖角 0px 为品牌按钮与卡片形状（药丸几何仅限 badge-pill）；字体 FerrariSans（授权字体，文档替代 Inter 500），展示层级恒 500 不加粗；CTA 大写 + 1.4px 字距；8px 命名间距阶梯；无多层阴影（摄影深度 + 亮度分层，仅一层 hover soft drop）。hero 采用品牌签名组件 hero-band-cinema：全出血照片 + 标题浮于照片底部。"
+    }
+  },
+  weather: [
+    { day: "Day 1 · 10/16", icon: "☀️", temp: "12–22℃", advice: "临潼户外多，防晒 + 带水；早晚温差大备外套" },
+    { day: "Day 2 · 10/17", icon: "⛅", temp: "11–20℃", advice: "多云舒适 · 博物馆+夜游组合最宜" },
+    { day: "Day 3 · 10/18", icon: "🌧️", temp: "10–17℃", advice: "有小雨 · 城墙骑行备雨衣，砖面湿滑注意慢行" }
+  ],
+  /* spot.image：真实采集 + jev 筛选结果（阈值 ≥7，每点取最高分 1 张）。
+     url 为 OpenCLI 下载的本地文件；credibility 标记 untrusted UGC 来源。
+     jev_score 为归一化展示分（原始 criteria 4 档插值分 ÷3 ×10）。 */
+  spots: [
+    /* ll = 真实经纬度（AMap/GCJ-02），禁止从 SVG 示意图坐标伪映射 */
+    { name: "兵马俑", day: 1, ll: [109.2785, 34.3842], x: 770, y: 90, tw: "13:30-16:00",
+      image: { url: "xhs-images/xian-bingmayong.jpg", source: "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "兵马俑一号坑展厅拼贴：博物院正门、一号坑大棚下陶俑军阵俯瞰、跪姿与站姿陶俑特写", jev_score: 9.90 } },
+    { name: "华清宫", day: 1, ll: [109.2137, 34.3619], x: 720, y: 130, tw: "16:30-18:00",
+      image: { url: "xhs-images/xian-huaqing-palace.jpg", source: "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "华清宫贵妃出浴雕像喷泉、海棠汤遗址建筑与骊山园林池水倒影", jev_score: 9.80 } },
+    { name: "回民街", day: 1, ll: [108.9409, 34.2630], x: 330, y: 150, tw: "19:30-21:00",
+      image: { url: "xhs-images/xian-huiminjie.jpg", source: "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "回民街老字号悬匾与 biangbiang 面招牌的美食街街景", jev_score: 9.67 } },
+    { name: "陕历博", day: 2, ll: [108.9530, 34.2225], x: 420, y: 250, tw: "09:00-12:30",
+      image: { url: "xhs-images/xian-shanxi-history-museum.jpg", source: "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "陕西历史博物馆馆藏拼贴：舞马衔杯银壶、三彩武士俑、青釉提梁壶", jev_score: 8.60 } },
+    { name: "大雁塔", day: 2, ll: [108.9640, 34.2225], x: 520, y: 280, tw: "14:00-17:00",
+      image: { url: "xhs-images/xian-dayanta.jpg", source: "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "大雁塔塔身与玄奘雕像同框、大慈恩寺匾额与檐角铜铃特写", jev_score: 9.80 } },
+    { name: "大唐不夜城", day: 2, ll: [108.9580, 34.2160], x: 540, y: 320, tw: "19:00-22:00",
+      image: { url: "xhs-images/xian-datang-everbright.jpg", source: "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "大唐不夜城夜景：西安年·最中国灯光牌坊、贞观之治群雕与金色雕塑灯光", jev_score: 9.93 } },
+    { name: "城墙（永宁门）", day: 3, ll: [108.9348, 34.2522], x: 380, y: 190, tw: "09:00-12:00",
+      image: { url: "xhs-images/xian-citywall.jpg", source: "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "西安城墙永宁门牌匾门楼、城墙砖石步道红灯笼旌旗与角楼箭楼", jev_score: 9.77 } },
+    { name: "钟鼓楼", day: 3, ll: [108.9424, 34.2611], x: 350, y: 120, tw: "12:30-13:30",
+      image: { url: "xhs-images/xian-bell-drum-tower.jpg", source: "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "钟楼鼓楼夜景拼贴：金顶绿瓦钟楼、文武盛地匾额鼓楼城台与车流灯光", jev_score: 9.30 } },
+    { name: "洒金桥", day: 3, ll: [108.9320, 34.2680], x: 280, y: 130, tw: "13:30-15:30",
+      image: { url: "xhs-images/xian-sajinqiao.jpg", source: "小红书《西安📍3天2夜 精华路线保姆级逛吃住攻略》@奶罐糖环游记", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "洒金桥牌匾浮雕、羊肉泡馍与酸汤饺子特写、特色美食街红色门头", jev_score: 9.10 } }
+  ],
+  /* 路线 pts：按天用真实经纬度（ll）画 Polyline；xy 仅为静态 SVG 降级示意图坐标 */
+  routes: [
+    { day: 1, pts: [[109.2785,34.3842],[109.2137,34.3619],[108.9409,34.2630]] },
+    { day: 2, pts: [[108.9530,34.2225],[108.9640,34.2225],[108.9580,34.2160]] },
+    { day: 3, pts: [[108.9348,34.2522],[108.9424,34.2611],[108.9320,34.2680]] }
+  ],
+  /* 日线路色：Rosso Corsa / ink / body（ferrari.md 无多色系统，仅单强调色，故以中性白灰阶补足） */
+  dayColors: { 1: "#da291c", 2: "#ffffff", 3: "#969696" },
+  alerts: [
+    { source: "JEV", type: "图片筛选", title: "9 处行程点图片 jev 匹配分 8.60–9.93，全部达标",
+      detail: "候选池 10 次有效评分（上限 20），阈值 ≥7，每点位保留最高分 1 张；兵马俑双候选（9.90 主图 / 9.80 备选）取主图。原始分为 criteria 4 档插值（0–3），展示分 = 原始分 ÷3 ×10。" },
+    { source: "JEV", type: "素材可信度", title: "「99 元游西安」类不实笔记已弃用",
+      detail: "检索结果中的超低价引流笔记与实际门票/交通成本严重不符（兵马俑+华清宫联票即 ¥240），已从素材池剔除；其余行程点图片均为小红书 UGC（untrusted），出行前请核对官方渠道。" },
+    { source: "RULE", type: "节奏提示", title: "Day 1 临潼往返市区 1.5h+，节奏紧",
+      detail: "兵马俑与华清宫均位于临潼区，市区往返车程约 1.5 小时以上；建议 11:33 抵西安北后直接乘游 5（306）路赴临潼，行李寄存火车站或酒店，避免折返。" }
+  ],
+  blocking_count: 0,
+  hard_rules_passed: 3,
+  advisory_count: 3,
+  pipeline: {
+    collect: { ok: true, notes: 4, images: 43, tool: "opencli xiaohongshu search/note/download" },
+    jev: { ok: true, calls: 10, limit: 20, threshold: 7, adopted: 9, degraded: 0 }
+  }
+};
+
+/* ================= 行程点详情数据（点开详情五段：图 + 时间/门票/推荐/注意） ================= */
+var EV_DETAILS = {
+  "G1901 · 郑州东 → 西安北": {
+    hours: "09:12 发车 — 11:33 抵达（2h21m）",
+    ticket: "二等座 ¥239 · 一等座 ¥382",
+    why: "郑州东—西安北最快陆路通道，上午出发下午直奔临潼，时间利用最大化。",
+    note: "12306 提前 15 天开售，节假日请提前 3 天以上购票。"
+  },
+  "秦始皇兵马俑博物馆": {
+    hours: "08:30–18:00（16:30 停止检票）",
+    ticket: "¥120（含丽山园联票 · 摆渡车免费）",
+    why: "一号坑拱形大棚下的地下军团是世界第八大奇迹，跪射俑、铜车马均在馆内。",
+    note: "一定早去！人流大；建议蹭讲解或租导览器，否则看的是土坑。"
+  },
+  "华清宫": {
+    hours: "07:30–18:00",
+    ticket: "¥120（与骊山套票）",
+    why: "唐御汤遗址、五间厅西安事变旧址；园林池水与骊山日落是收尾华彩。",
+    note: "《长恨歌》演出需另购票，旺季务必早抢；体力有限时骊山走到兵谏亭即可折返。"
+  },
+  "回民街晚餐": {
+    hours: "全天 · 夜市最旺 18:00–23:00",
+    ticket: "人均 ¥60–80",
+    why: "泡馍、肉夹馍、biangbiang 面一次集齐，老字号招牌悬匾本身就是景观。",
+    note: "主街游客密集，往西羊市、大皮院纵深走性价比更高；拍照保持安静不打扰商户。"
+  },
+  "陕西历史博物馆": {
+    hours: "09:00–17:30（周一闭馆）",
+    ticket: "免费 · 需提前预约",
+    why: "先周到周唐 170 万件馆藏，舞马衔杯银壶、三彩载乐驼是镇馆之宝。",
+    note: "⚠ 周一闭馆——本行程已按周二至周日出行设计；预约放票即抢，约不上可去碑林博物馆替代。"
+  },
+  "大雁塔 · 大慈恩寺": {
+    hours: "08:00–17:00（塔 09:00 开放登塔）",
+    ticket: "寺院 ¥40 · 登塔 ¥30",
+    why: "玄奘译经之地，南广场玄奘雕像与塔身同框是西安最经典机位。",
+    note: "傍晚南广场有音乐喷泉；从陕历博步行或地铁 3 号线一站可达。"
+  },
+  "大唐不夜城": {
+    hours: "全天 · 灯光 19:00–23:00",
+    ticket: "免费开放",
+    why: "19 点后灯光全开才是盛唐气象：贞观之治群雕、不倒翁演艺、街头表演一路向北。",
+    note: "人超多，别穿高跟鞋全程靠走；沿北向南单线游览不折返，散场地铁 4 号线最顺。"
+  },
+  "西安城墙（永宁门）": {
+    hours: "08:00–22:00（南门）",
+    ticket: "¥54 · 自行车租赁单人 ¥45/3h",
+    why: "中国现存最完整古城垣，城上租自行车环骑 13.74 km，俯瞰长安的最好方式。",
+    note: "城上风大注意保暖；雨天砖面湿滑慢行；拍照时远离边缘护栏。"
+  },
+  "钟楼 · 鼓楼": {
+    hours: "08:30–20:30（联票登楼）",
+    ticket: "钟楼+鼓楼联票 ¥50",
+    why: "城市中轴双子地标；不想登楼可去开元商城 5 楼观景台免费拍钟楼全景。",
+    note: "鼓楼「文武盛地」匾额是必拍细节；夜景比白天更出片。"
+  },
+  "洒金桥午餐": {
+    hours: "06:30–22:00（本地正餐时段最旺）",
+    ticket: "人均 ¥40–60",
+    why: "本地人扎堆的美食街：酸汤饺子、羊肉泡馍、甑糕、胡辣汤，比主街更地道。",
+    note: "金桥裡美食街门头最好认；午市排队 15 分钟起，规划好返程时间。"
+  },
+  "G1930 · 西安北 → 郑州东": {
+    hours: "16:40 发车 — 19:02 抵达",
+    ticket: "二等座 ¥239 · 备选 17:26 G1909",
+    why: "时间衔接 Day 3 行程最从容的一班。",
+    note: "余票紧张，建议尽快购票；13:30 洒金桥收尾后预留 2h+ 地铁赴西安北缓冲。"
+  }
+};
+
+/* ================= 品牌主题（destination_identity 驱动） ================= */
+var THEMES = {
+  ferrari: { name: "ferrari · Rosso Corsa", data: "ferrari" },
+  light:   { name: "ferrari · 白色编辑带（亮色扩展）", data: "light" }
+};
+
+/* 图片加载失败 → 占位色块（禁止随机占位图冒充真图） */
+window.__imgFail = function (img) {
+  var p = img.parentElement;
+  p.innerHTML = '<div class="ph">🏛️<span>图片加载失败 · 占位色块</span></div>';
+};
+
+(function () {
+  var S = window.__GUIDE_SCHEMA__;
+
+  /* ---- hero meta ---- */
+  document.getElementById("meta-row").innerHTML =
+    "<span>出发 <b>" + S.meta.origin + "</b></span>" +
+    "<span>日期 <b>10/16 – 10/18</b></span>" +
+    "<span>人均预算 <b>" + S.meta.budget + "</b></span>" +
+    "<span>出行人 <b>" + S.meta.party + "</b></span>" +
+    "<span>品牌 <b>brand_id: " + S.meta.destination_identity.brand_id + "</b></span>";
+  document.title = "西安 3 日游 · " + S.meta.destination_identity.theme + " · AI 旅游攻略原型 v2";
+
+  /* ---- weather ---- */
+  document.getElementById("weather-row").innerHTML = S.weather.map(function (w) {
+    return '<div class="card w-card"><div class="d">' + w.day +
+      '</div><div class="t">' + w.icon + " " + w.temp +
+      '</div><div class="a">' + w.advice + "</div></div>";
+  }).join("");
+
+  /* ---- alerts ---- */
+  document.getElementById("alerts-list").innerHTML = S.alerts.map(function (a) {
+    var cls = a.source === "JEV" ? "jev" : (a.source === "RULE" ? "rule" : "info");
+    return '<div class="alert card"><span class="chip ' + cls + '">' + a.source +
+      "</span><div class=\"txt\"><b>" + a.type + " · " + a.title +
+      "</b><span>" + a.detail + "</span></div></div>";
+  }).join("");
+
+  /* ---- tab 切换 ---- */
+  var btns = document.querySelectorAll(".tab-btn");
+  var panels = document.querySelectorAll(".tab-panel");
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (x) { x.classList.remove("active"); });
+      panels.forEach(function (p) { p.classList.remove("active"); });
+      b.classList.add("active");
+      document.getElementById("tab-" + b.dataset.tab).classList.add("active");
+      /* 交通地图在隐藏 tab 里初始化时容器尺寸为 0，setFitView 会失效——切到交通 tab 时重新框视野 */
+      if (b.dataset.tab === "transit" && window.tmapRef && window.AMap) {
+        try { if (window.fitTransit) window.fitTransit(); } catch (e) {}
+      }
+    });
+  });
+
+  /* ---- 行程点：注入图片/占位 + jev 评分徽章 + untrusted 来源 + 详情面板 ---- */
+  document.querySelectorAll(".ev").forEach(function (ev) {
+    var title = ev.querySelector(".ev-title").textContent;
+    var det = EV_DETAILS[title] || {};
+    var head = ev.querySelector(".ev-head");
+
+    var panel = document.createElement("div");
+    panel.className = "ev-detail";
+    var imgHTML;
+    if (ev.dataset.img) {
+      var jevBadge = ev.dataset.jev ? '<div class="jev-mark">jev ' + ev.dataset.jev + "/10</div>" : "";
+      imgHTML = '<div class="ev-img"><img loading="lazy" src="' + ev.dataset.img +
+        '" alt="' + title + '" onerror="window.__imgFail(this)">' + jevBadge +
+        '<div class="src-mark">' + (ev.dataset.src || "来源：小红书笔记（untrusted）") + "</div></div>";
+    } else {
+      imgHTML = '<div class="ev-img"><div class="ph">🏛️<span>无达标图 · 占位</span></div></div>';
+    }
+    panel.innerHTML = imgHTML +
+      '<div class="ev-info"><dl>' +
+      "<dt>营业时间</dt><dd>" + (det.hours || "—") + "</dd>" +
+      "<dt>门票价格</dt><dd>" + (det.ticket || "—") + "</dd>" +
+      '<dd class="why"><b>为什么推荐：</b>' + (det.why || "—") + "</dd>" +
+      '<dd class="note">⚠ ' + (det.note || "暂无注意事项") + "</dd>" +
+      "</dl></div>";
+    ev.appendChild(panel);
+
+    var toggle = function () { ev.classList.toggle("open"); };
+    head.addEventListener("click", toggle);
+    ev.querySelector(".sum").addEventListener("click", toggle);
+  });
+
+  /* ---- 地图：key 引导 → AMAP SDK，降级为一等公民静态 SVG ---- */
+  var status = document.getElementById("map-status");
+  var guide = document.getElementById("key-guide");
+  var mapOk = document.getElementById("map-ok");
+  var key = null;
+  try { key = localStorage.getItem("amap_key"); } catch (e) {}
+    if (!key) { key = "d3d68a8d1fe35a03053ee6bc7e5d448e"; /* ponytail: 本地演示默认 key，正式实施改回仅 localStorage */ }
+
+  function legend() {
+    document.getElementById("map-legend").innerHTML =
+      [1, 2, 3].map(function (d) {
+        return '<span><i class="legend-dot" style="background:' + S.dayColors[d] + '"></i>Day ' + d + "</span>";
+      }).join("");
+  }
+
+  /* ---- 决策2/3 状态：标签开关 + 当天筛选（0 = 全程） ---- */
+  var twOn = true;
+  var curDay = 0;
+
+  /* 一等公民降级静态图：近黑画布 + 街区块 + 按天三色路线 + 时间窗标签 + 按天筛选 + 渭河装饰曲线 */
+  function renderFallback() {
+    var cs = getComputedStyle(document.documentElement);
+    var block = cs.getPropertyValue("--map-block").trim();
+    var river = cs.getPropertyValue("--map-river").trim();
+    var dayRoutes = curDay === 0 ? S.routes : S.routes.filter(function (r) { return r.day === curDay; });
+    var lines = dayRoutes.map(function (r) {
+      var c = S.dayColors[r.day];
+      return '<polyline points="' + r.pts.map(function (p) { return p.join(","); }).join(" ") +
+        '" fill="none" stroke="' + c + '" stroke-width="4" stroke-dasharray="9 6" opacity="0.85" stroke-linecap="round" stroke-linejoin="round"/>';
+    }).join("");
+    var dots = S.spots.filter(function (s) { return curDay === 0 || s.day === curDay; }).map(function (s) {
+      var c = S.dayColors[s.day];
+      /* 决策2：静态降级同样直显时间窗标签（tw） */
+      var twText = '<text x="' + (s.x + 13) + '" y="' + (s.y + 21) + '" font-size="11" font-weight="600" fill="' + c + '" opacity="0.8">' + (s.tw || "") + "</text>";
+      return '<circle cx="' + s.x + '" cy="' + s.y + '" r="8" fill="' + c + '" stroke="' + (cs.getPropertyValue("--canvas").trim() || "#181818") + '" stroke-width="2.5"/>' +
+        '<text x="' + (s.x + 13) + '" y="' + (s.y + 5) + '" font-size="13" font-weight="600" fill="' + c + '" opacity="0.92">' + s.name + "</text>" +
+        (twOn ? twText : "");
+    }).join("");
+    var blocks = "";
+    [[30,20,180,120],[30,170,150,140],[240,60,200,150],[470,40,220,110],[460,220,180,130],[680,180,140,160],[230,270,200,90]]
+      .forEach(function (b) {
+        blocks += '<rect x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + b[3] +
+          '" fill="' + block + '" opacity="0.8"/>'; /* 尖角：rounded.none */
+      });
+    document.getElementById("map-area").innerHTML =
+      '<svg viewBox="0 0 840 380" preserveAspectRatio="xMidYMid slice" role="img" aria-label="西安行程静态路线图">' +
+      '<rect width="840" height="380" fill="var(--canvas)"/>' + blocks +
+      '<path d="M40 20 C 200 42, 260 26, 380 40 S 620 66, 838 28" fill="none" stroke="' + river + '" stroke-width="26" stroke-linecap="round"/>' + /* 渭河（北郊） */
+      '<g stroke="rgba(255,255,255,.05)" stroke-width="1">' +
+      '<path d="M0 95 H840 M0 195 H840 M0 305 H840 M160 0 V380 M330 0 V380 M500 0 V380 M700 0 V380"/>' +
+      "</g>" + lines + dots + "</svg>";
+    if (!key) {
+      status.textContent = "⚠ 未配置 AMAP_KEY — 静态路线图已就绪（填 key 可切换交互地图）" + (curDay ? " · Day " + curDay : " · 全程");
+    }
+  }
+
+  /* ---- 决策1：跨城交通视图（交互 AMap 版，仅在有 key 且 SDK 就绪后调用） ---- */
+  var tmapDone = false;
+  function renderTransitAMap() {
+    if (tmapDone) return;
+    tmapDone = true;
+    var tmap = new AMap.Map("tmap-area", {
+      zoom: 6, viewMode: "2D",
+      /* 跨城两端车站：郑州东 / 西安北（真实 GCJ-02） */
+      center: [111.28, 34.56]
+    });
+    window.tmapRef = tmap;
+    var zhengzhou = new AMap.Marker({
+      position: [113.6254, 34.7466],
+      title: "郑州东站", map: tmap,
+      label: { content: "郑州东", direction: "top" }
+    });
+    var xianbei = new AMap.Marker({
+      position: [108.9377, 34.3764],
+      title: "西安北站", map: tmap,
+      label: { content: "西安北", direction: "top" }
+    });
+    /* 徐兰高铁跨城段：虚线 + showDir 沿线方向箭头（chenxuan520/roadbook 交通段着色交互） */
+    new AMap.Polyline({
+      path: [[113.6254, 34.7466], [108.9377, 34.3764]],
+      strokeColor: "#da291c", strokeWeight: 4, strokeOpacity: 0.9,
+      strokeStyle: "dashed", strokeDasharray: [10, 6],
+      showDir: true, lineJoin: "round", lineCap: "round"
+    }).setMap(tmap);
+    window.tmapFitTargets = [zhengzhou, xianbei];
+    /* ponytail: setFitView 在隐藏容器初始化的地图上不生效，两端车站的中点+固定 zoom 更可靠 */
+    tmap.setZoomAndCenter(6, [111.28, 34.56]);
+    window.fitTransit = function () { tmap.setZoomAndCenter(6, [111.28, 34.56]); };
+    document.getElementById("tmap-status").textContent = "✅ 跨城高铁段（徐兰高铁 · 约 2h21m · 二等座 ¥239）— 方向箭头沿线流动";
+  }
+
+  /* 无 key 降级：跨城高铁示意图（一等公民静态 SVG） */
+  function renderTransitFallback() {
+    document.getElementById("tmap-area").innerHTML =
+      '<svg viewBox="0 0 840 380" preserveAspectRatio="xMidYMid slice" role="img" aria-label="郑州东—西安北跨城高铁示意图">' +
+      '<rect width="840" height="380" fill="var(--canvas)"/>' +
+      '<g stroke="rgba(255,255,255,.05)" stroke-width="1">' +
+      '<path d="M0 95 H840 M0 195 H840 M0 305 H840 M160 0 V380 M330 0 V380 M500 0 V380 M700 0 V380"/>' +
+      "</g>" +
+      /* 高铁虚线 + 三角箭头示意沿线方向（showDir 降级对应物） */
+      '<line x1="120" y1="200" x2="720" y2="180" stroke="#da291c" stroke-width="4" stroke-dasharray="12 8"/>' +
+      '<g fill="#da291c"><polygon points="300,194 316,188 316,200"/><polygon points="500,187 516,181 516,193"/><polygon points="660,181 676,175 676,187"/></g>' +
+      '<circle cx="120" cy="200" r="12" fill="#da291c" stroke="var(--canvas)" stroke-width="3"/>' +
+      '<circle cx="720" cy="180" r="12" fill="#da291c" stroke="var(--canvas)" stroke-width="3"/>' +
+      '<text x="120" y="238" font-size="15" font-weight="600" fill="#ffffff" text-anchor="middle">郑州东 09:12 发</text>' +
+      '<text x="720" y="218" font-size="15" font-weight="600" fill="#ffffff" text-anchor="middle">西安北 11:33 抵</text>' +
+      '<text x="420" y="156" font-size="13" font-weight="600" fill="#da291c" text-anchor="middle">徐兰高铁 · 约 2h21m · 二等座 ¥239</text>' +
+      "</svg>";
+    document.getElementById("tmap-status").textContent = "⚠ 未配置 AMAP_KEY — 跨城示意图已就绪（市内动线见「总览」tab）";
+  }
+
+  /* ---- 决策3：AMap 按天 OverlayGroup + setFitView（liketrek/TREK + itskovacs/trip） ---- */
+  var amapMap = null;
+  var dayOverlays = {}; /* { 0: OverlayGroup(全程), 1..3 } */
+  var twMarkers = {};   /* spot name -> marker（列表 hover 联动用） */
+
+  function buildDayOverlays() {
+    dayOverlays = {}; twMarkers = {};
+    [0, 1, 2, 3].forEach(function (d) { dayOverlays[d] = []; });
+    S.spots.forEach(function (sp) {
+      /* 决策2：marker 自定义 DOM content——序号 + 时间窗一行小字（itskovacs/trip 序号气泡） */
+      var idx = S.spots.indexOf(sp) + 1;
+      var el = document.createElement("div");
+      /* marker 分级（用户定案）：游览时长 >=2h 的重点行程点放大显示 */
+      var twParts = String(sp.tw || "").split("-");
+      var big = twParts.length === 2 && (function (h1, m1, h2, m2) { return (h2 * 60 + m2) - (h1 * 60 + m1) >= 120; })(
+        +twParts[0].split(":")[0], +twParts[0].split(":")[1], +twParts[1].split(":")[0], +twParts[1].split(":")[1]);
+      el.className = "tw-label" + (big ? " big" : "");
+      el.innerHTML = "<b>" + idx + "</b> · " + sp.name + (twOn ? " <b>" + sp.tw + "</b>" : "");
+      var m = new AMap.Marker({
+        position: sp.ll,
+        content: el,
+        anchor: "bottom-center",
+        title: sp.name,
+        map: amapMap /* 直接挂图——AMap 2.3.5 OverlayGroup.setMap 对未挂图 marker 不渲染 */
+      });
+      twMarkers[sp.name] = m;
+      dayOverlays[sp.day].push(m);
+      dayOverlays[0].push(m);
+    });
+    S.routes.forEach(function (r) {
+      var line = new AMap.Polyline({
+        path: r.pts,
+        strokeColor: S.dayColors[r.day],
+        strokeWeight: 4, strokeOpacity: 0.85,
+        strokeStyle: "dashed", strokeDasharray: [9, 6],
+        lineJoin: "round", lineCap: "round",
+        map: amapMap
+      });
+      dayOverlays[r.day].push(line);
+      dayOverlays[0].push(line);
+    });
+  }
+
+  /* 决策3：切换时只显当天覆盖物并框视野（show/hide 直管，绕开 OverlayGroup 渲染缺陷） */
+  /* 全程 = 跨城概览：高铁线 + 两端车站同图（用户定案修订「交通线」语义，CONTEXT.md 已同步） */
+  var hsrOnMain = null;
+  function buildHsrOnMain() {
+    if (hsrOnMain) return;
+    hsrOnMain = [
+      new AMap.Polyline({
+        path: [[113.6254, 34.7466], [108.9377, 34.3764]],
+        strokeColor: "#da291c", strokeWeight: 3, strokeOpacity: 0.85,
+        strokeStyle: "dashed", strokeDasharray: [10, 6],
+        showDir: true, lineJoin: "round", lineCap: "round", map: amapMap
+      }),
+      new AMap.Marker({ position: [113.6254, 34.7466], map: amapMap,
+        content: (function(){ var d = document.createElement("div"); d.className = "hsr-station"; d.textContent = "郑州东 09:12 发"; return d; })() }),
+      new AMap.Marker({ position: [108.9377, 34.3764], map: amapMap,
+        content: (function(){ var d = document.createElement("div"); d.className = "hsr-station"; d.textContent = "西安北 11:33 抵"; return d; })() })
+    ];
+    hsrOnMain.forEach(function (o) { o.hide(); });
+  }
+  function applyDayView() {
+    var g = dayOverlays[curDay];
+    if (g) {
+      [0, 1, 2, 3].forEach(function (d) {
+        dayOverlays[d].forEach(function (ov) {
+          if (d === curDay) { ov.show(); } else { ov.hide(); }
+        });
+      });
+      if (hsrOnMain) hsrOnMain.forEach(function (o) { if (curDay === 0) { o.show(); } else { o.hide(); } });
+      var fit = curDay === 0 && hsrOnMain ? g.concat(hsrOnMain) : g;
+      amapMap.setFitView(fit, false, [60, 60, 60, 60]);
+      applyZoomTier();
+    }
+  }
+
+  /* zoom 分级显隐（用户定案）：zoom<9 只留每天首站重点标签，拉近全显 */
+  var KEY_SPOTS = { 1: "兵马俑", 2: "陕历博", 3: "城墙（永宁门）" };
+  function applyZoomTier() {
+    var far = amapMap.getZoom() < 9;
+    S.spots.forEach(function (sp) {
+      var m = twMarkers[sp.name];
+      if (!m || !m.getContent) return;
+      var el = m.getContent();
+      if (el && el.classList) el.classList.toggle("dim", far && KEY_SPOTS[sp.day] !== sp.name);
+    });
+  }
+
+  /* 列表↔地图联动：详情卡片 hover 时对应 marker 高亮（决策3） */
+  document.querySelectorAll(".ev.card[data-img], .ev.card[data-jev]").forEach(function (ev) {
+    var title = ev.querySelector(".ev-title").textContent;
+    var spotKey = { "秦始皇兵马俑博物馆": "兵马俑", "陕西历史博物馆": "陕历博", "西安城墙（永宁门）": "城墙（永宁门）", "洒金桥午餐": "洒金桥" }[title] ||
+      title.replace(/晚餐|午餐/, "");
+    ev.addEventListener("mouseenter", function () {
+      var m = twMarkers[spotKey];
+      if (m && m.getContent && m.getContent()) { m.getContent().classList.add("hl"); }
+    });
+    ev.addEventListener("mouseleave", function () {
+      var m = twMarkers[spotKey];
+      if (m && m.getContent && m.getContent()) { m.getContent().classList.remove("hl"); }
+    });
+  });
+
+  /* 按天切换钮（决策3）+ 标签开关（决策2）——交互与降级静态图共用 */
+  function applyDay(day) {
+    curDay = day;
+    document.querySelectorAll(".day-btn[data-day]").forEach(function (b) {
+      b.classList.toggle("active", +b.dataset.day === day);
+    });
+    if (amapMap && window.AMap && amapMap.getLayers) {
+      applyDayView();
+    } else {
+      renderFallback();
+    }
+  }
+  document.querySelectorAll(".day-btn[data-day]").forEach(function (b) {
+    b.addEventListener("click", function () { applyDay(+b.dataset.day); });
+  });
+  document.getElementById("label-toggle").addEventListener("click", function () {
+    twOn = !twOn;
+    this.textContent = "标签 " + (twOn ? "开" : "关");
+    S.spots.forEach(function (sp) {
+      var m = twMarkers[sp.name];
+      if (m && m.getContent && m.getContent()) {
+        /* 决策2：开关重建标签内容，不重建 marker */
+        m.getContent().innerHTML = "<b>" + (S.spots.indexOf(sp) + 1) + "</b> · " + sp.name + (twOn ? " <b>" + sp.tw + "</b>" : "");
+      }
+    });
+    if (!(amapMap && window.AMap && amapMap.getLayers)) renderFallback();
+  });
+
+  function renderAMap() {
+    var s = document.createElement("script");
+    s.src = "https://webapi.amap.com/maps?v=2.0&key=" + key;
+    s.onload = function () {
+      try {
+        /* 兵马俑/华清宫在临潼较远 → 初始 center 设西安市区（决策1：总览只画市内动线），build 后 fitView */
+        amapMap = new AMap.Map("map-area", {
+          zoom: 11, center: [108.94, 34.34], viewMode: "2D"
+        });
+        buildDayOverlays();
+        buildHsrOnMain();
+        applyDayView();
+        /* 点击弹窗（用户定案）：marker click → InfoWindow（时间窗/名称/tip/门票/高德导航 deep-link） */
+        var infoWin = new AMap.InfoWindow({ isCustom: true, offset: new AMap.Pixel(0, -30) });
+        var DETAIL_KEY = { "兵马俑": "秦始皇兵马俑博物馆", "回民街": "回民街晚餐", "陕历博": "陕西历史博物馆",
+          "大雁塔": "大雁塔 · 大慈恩寺", "城墙（永宁门）": "西安城墙（永宁门）", "钟鼓楼": "钟楼 · 鼓楼", "洒金桥": "洒金桥午餐" };
+        S.spots.forEach(function (sp) {
+          var m = twMarkers[sp.name];
+          if (!m) return;
+          m.on("click", function () {
+            var d = EV_DETAILS[DETAIL_KEY[sp.name] || sp.name] || {};
+            var ll = sp.ll[0] + "," + sp.ll[1];
+            infoWin.setContent(
+              '<div class="tw-info">' +
+              '<b class="t">' + sp.name + " " + sp.tw + "</b><br>" +
+              (d.hours ? '<span class="meta">🕘 ' + d.hours + "</span><br>" : "") +
+              (d.ticket ? '<span class="meta">🎫 ' + d.ticket + "</span><br>" : "") +
+              (d.why ? '<span class="meta">' + d.why + "</span><br>" : "") +
+              '<a href="https://uri.amap.com/marker?position=' + ll + "&name=" + encodeURIComponent(sp.name) +
+              '" target="_blank" rel="noopener">高德导航 →</a></div>');
+            infoWin.open(amapMap, sp.ll);
+          });
+        });
+        /* 卡片点击飞行（用户定案）：点行程卡片 → 镜头飞到 marker + 弹窗 */
+        document.querySelectorAll(".ev").forEach(function (ev) {
+          var title = ev.querySelector(".ev-title").textContent;
+          var REVERSE = { "秦始皇兵马俑博物馆": "兵马俑", "回民街晚餐": "回民街", "陕西历史博物馆": "陕历博",
+            "大雁塔 · 大慈恩寺": "大雁塔", "西安城墙（永宁门）": "城墙（永宁门）", "钟楼 · 鼓楼": "钟鼓楼", "洒金桥午餐": "洒金桥" };
+          var spotName = REVERSE[title] || title;
+          if (!twMarkers[spotName]) return;
+          ev.addEventListener("click", function () {
+            var sp = S.spots.filter(function (x) { return x.name === spotName; })[0];
+            if (!sp) return;
+            amapMap.setZoomAndCenter(13, sp.ll, false, 400);
+            twMarkers[spotName].getContent().classList.remove("dim");
+            (function (sp) {
+              var m = twMarkers[spotName];
+              setTimeout(function () { m.emit && m.emit("click"); }, 450);
+            })(sp);
+          });
+        });
+        /* 动线回放（用户定案）：当天首 marker 沿动线 moveAlong，结束归位 */
+        document.getElementById("replay-btn").addEventListener("click", function () {
+          var day = curDay === 0 ? 1 : curDay;
+          var route = S.routes.filter(function (r) { return r.day === day; })[0];
+          var daySpots = S.spots.filter(function (x) { return x.day === day; });
+          if (!route || !daySpots.length) return;
+          var lead = twMarkers[daySpots[0].name];
+          /* AMap 2.0 的 moveAlong 需要 MoveAnimation 插件，缺了会静默不动 */
+          AMap.plugin("AMap.MoveAnimation", function () {
+            lead.moveAlong(route.pts, { duration: 6000, autoRotation: false });
+          });
+          this.textContent = "▶ 回放中…";
+          var btn = this;
+          lead.on("movealong", function () {
+            lead.setPosition(daySpots[0].ll);
+            btn.textContent = "▶ 回放";
+          });
+        });
+        amapMap.on("zoomend", applyZoomTier);
+        status.textContent = "✅ 高德地图加载成功 · " + S.spots.length + " 个景点（真实经纬度）· 按天 setFitView";
+        mapOk.style.display = "inline-block";
+        guide.style.display = "none";
+        /* 决策1：交通 tab 的交互地图（跨城段） */
+        renderTransitAMap();
+      } catch (e) { renderFallback(); }
+    };
+    s.onerror = function () {
+      status.textContent = "⚠ 高德 SDK 加载失败（key 无效或网络受限）— 已降级为静态路线图";
+      amapMap = null;
+      renderFallback();
+      renderTransitFallback();
+    };
+    document.head.appendChild(s);
+  }
+
+  guide.querySelector("#amap-go").addEventListener("click", function () {
+    var v = document.getElementById("amap-key-input").value.trim();
+    if (!v) { document.getElementById("amap-key-input").focus(); return; }
+    try { localStorage.setItem("amap_key", v); } catch (e) {}
+    key = v;
+    guide.style.display = "none";
+    renderAMap();
+  });
+  guide.querySelector("#key-guide-close").addEventListener("click", function () {
+    guide.style.display = "none";
+  });
+
+  legend();
+  renderTransitFallback();
+  if (key) { guide.style.display = "none"; renderAMap(); } else { renderFallback(); }
+
+  /* ---- 主题切换钮（默认暗色 = 品牌默认；切换为白色编辑带亮色扩展） ---- */
+  var tbtn = document.getElementById("theme-toggle");
+  function setTheme(id) {
+    var t = THEMES[id];
+    if (!t) return;
+    document.documentElement.setAttribute("data-culture", t.data);
+    document.getElementById("brand-name").textContent = "主题：" + t.name;
+    tbtn.textContent = t.data === "light" ? "🌙" : "☀️";
+    if (!(amapMap && window.AMap && amapMap.getLayers)) renderFallback();
+  }
+  tbtn.addEventListener("click", function () {
+    var light = document.documentElement.getAttribute("data-culture") === "light";
+    setTheme(light ? "ferrari" : "light");
+  });
+})();
+</script>
+</body>
+</html>

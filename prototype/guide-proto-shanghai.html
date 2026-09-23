@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-culture="theverge">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>上海 3 日游 · AI 旅游攻略原型 v3（theverge 品牌）</title>
+<style>
+/* ================================================================
+   视觉来源：theverge.md（awesome-design-md The Verge 品牌设计系统）
+   近黑画布 #131313 为产品本体（§1：no light mode）；
+   酸性薄荷 #3cffd0 + 紫外 #5200ff 仅作 hazard 强调（§1/§2）；
+   Manuka 展示字 ≥60px、PolySans 主力、PolySans Mono 全大写标签（§3）；
+   全系统无阴影无渐变，深度靠 1px 边线与饱和色块（§1/§6）。
+   所有 token 均标注 theverge.md 出处，未自行引入任何外部配色。
+   ================================================================ */
+:root{
+  /* --- colors（出处：theverge.md §2 Color Palette & Roles）--- */
+  --mint:#3cffd0;               /* {Primary: Jelly Mint} CTA 填充/活动下划线/高注意力色块 */
+  --uv:#5200ff;                 /* {Primary: Verge Ultraviolet} 次级 hazard，兼作错误/告警强调（§4 Inputs: Error） */
+  --mint-border:#309875;        /* {Console Mint Border} 薄荷描边的深变体 */
+  --link-hover:#3860be;         /* {Deep Link Blue} 所有链接 hover 唯一色（§7 Do） */
+  --focus-cyan:#1eaedb;         /* {Focus Cyan} 仅键盘 focus ring（§2 Semantic） */
+  --rule-purple:#3d00bf;        /* {Purple Rule} StoryStream 左侧时间轴竖线（§4） */
+  --canvas:#131313;             /* {Canvas Black} 默认页面底色，非纯黑 */
+  --surface:#2d2d2d;            /* {Surface Slate} 次级卡片底 */
+  --frame:#313131;              /* {Image Frame} 图片 1px 包边 */
+  --white:#ffffff;              /* {Hazard White} 大字文本 / 色块聚光灯填充 */
+  --black:#000000;              /* {Absolute Black} 仅用于薄荷/白/黄色块上的文字 */
+  --text-2:#949494;             /* {Secondary Text} 署名/时间戳/元数据层 */
+  --muted-text:#e9e9e9;         /* {Muted Text} 暗底按钮文字 */
+  --pressed:#8c8c8c;            /* {Dim Gray} 按下态背景 / 中灰 */
+  --ring:rgba(0,0,0,.33);       /* {Overlay Black} 层叠卡片唯一"氛围"1px 环（§6 Level 5） */
+  --hover-ring:#c2c2c2;         /* 按钮 hover 的 1px ring（§4 Primary Hover） */
+  --scrim:rgba(0,0,0,.55);      /* key 引导遮罩：由 Canvas Black 加深推导，不引入新色相 */
+  /* --- radius（出处：theverge.md §5 Border Radius Scale，8 档是刻意的）--- */
+  --r-input:2px;   /* 输入框：打字机标签感 */
+  --r-img:3px;     /* 行内图片 */
+  --r-nested:4px;  /* 嵌套卡片图 */
+  --r-card:20px;   /* 标准药丸卡片 */
+  --r-feature:24px;/* feature 卡 / 主按钮 */
+  --r-promo:30px;  /* 大号宣传按钮 */
+  --r-pill:40px;   /* 描边 CTA 药丸（最响的药丸） */
+  /* --- spacing（出处：theverge.md §5 Spacing，8px 基准）--- */
+  --s-2:2px; --s-4:4px; --s-6:6px; --s-8:8px; --s-10:10px; --s-12:12px;
+  --s-16:16px; --s-20:20px; --s-24:24px; --s-32:32px; --s-48:48px; --s-64:64px;
+  /* --- 字体（出处：theverge.md §3 Font Family + 替代说明）--- */
+  --font-display:"Manuka",Impact,"Arial Narrow Bold","PingFang SC","Microsoft YaHei",sans-serif;
+  --font-ui:"PolySans","Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+  --font-mono:"PolySans Mono","Courier New",Courier,"PingFang SC","Microsoft YaHei",monospace;
+  --font-serif:"FK Roman Standard",Georgia,"Songti SC",SimSun,serif;
+  /* 地图装饰底色（取自 surface/frame token 推导，非新色） */
+  --map-river:#313131;            /* 黄浦江复用 {Image Frame} */
+  --map-grid:rgba(255,255,255,.06);
+  /* 日线路色：全系统仅有的三个品牌色相（theverge.md §2），无双色系统外加色 */
+  --day1:#3cffd0; --day2:#5200ff; --day3:#ffffff;
+}
+/* 暗色/亮色模式：theverge.md §1 明示「There is no light mode — 暗色画布是产品本体」，
+   因此默认态即暗色。以下亮色为原型推导扩展：仅由已文档 token 反转拼装——
+   画布取 {Hazard White}（白块在原文档中是合法表面）、文本取 {Inverted Text} #131313、
+   次级文本取 {Dim Gray}、次级表面取 {Muted Text} 色值，不引入新色相。 */
+html[data-culture="verge-light"]{
+  --canvas:#ffffff; --surface:#e9e9e9; --frame:#131313;
+  --white:#131313; --black:#ffffff; --text-2:#8c8c8c; --muted-text:#131313;
+  --ring:rgba(0,0,0,.33); --map-river:#e9e9e9; --map-grid:rgba(0,0,0,.06);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--canvas); color:var(--white);
+  font-family:var(--font-ui);
+  /* {Body Relaxed} 16px/500/1.60（§3 层级表） */
+  font-size:16px; line-height:1.6; font-weight:500;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1280px;margin:0 auto;padding:0 48px} /* Desktop 容器 1280px / 48px 边距（§5 Grid） */
+a{color:var(--white);text-decoration:none}
+a:hover{color:var(--link-hover)} /* {Deep Link Blue} 唯一 hover 色、无下划线（§4 Navigation） */
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:1px solid var(--focus-cyan);outline-offset:2px} /* {Focus Cyan} 仅键盘 */
+
+/* mono 全大写工具类：PolySans Mono 在此系统里不存在小写（§3 Principles） */
+.mono{
+  font-family:var(--font-mono); text-transform:uppercase;
+  letter-spacing:1.8px; /* ALL-CAPS 标签 1.1–1.9px 字距（§7 Do） */
+}
+
+/* ---------- masthead（§4 Navigation：wordmark 即 hero，不是角落 logo） ---------- */
+.masthead{padding:var(--s-64) 0 var(--s-32);border-bottom:1px solid var(--frame)}
+.kicker{
+  /* {Eyebrow All-Caps} 12px/400/1.30/1.8px（§3） */
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:12px;letter-spacing:1.8px;color:var(--text-2);
+}
+.brand-chip{
+  /* {Pill Tag} 薄荷填充 + 绝对黑文字 + 20px 半径（§4） */
+  display:inline-flex;align-items:center;gap:8px;margin-top:var(--s-12);
+  background:var(--mint);color:var(--black);
+  border-radius:var(--r-card);padding:4px 10px;
+  font-family:var(--font-mono);font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:1.8px;
+}
+.masthead h1{
+  /* {Hero Display} Manuka 107px/900/0.80/1.07px——替代字体按 §3 注记放宽 +0.15 行高 */
+  font-family:var(--font-display);
+  font-size:clamp(56px,9vw,107px);font-weight:900;line-height:.95;letter-spacing:1.07px;
+  margin:var(--s-16) 0 var(--s-8);
+}
+.masthead .dek{
+  /* {Light Capitalized Label} 19px/300/1.20/1.9px——whisper 与 shout 的对位是品牌指纹（§3） */
+  font-size:19px;font-weight:300;letter-spacing:1.9px;line-height:1.5;
+  color:var(--muted-text);max-width:720px;
+}
+/* masthead 信息条：石板药丸变体（§4 Secondary Dark Slate Pill 静态装饰） */
+.info-pill{
+  display:flex;align-items:center;margin-top:var(--s-24);
+  background:var(--surface);border-radius:var(--r-feature);height:56px;max-width:720px;
+}
+.info-pill .seg{flex:1;padding:6px 24px;border-right:1px solid var(--frame)}
+.info-pill .seg:last-child{border-right:none}
+.info-pill .lbl{
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:10px;font-weight:500;letter-spacing:1.5px;color:var(--text-2); /* {Meta Nano} */
+}
+.info-pill .val{font-size:15px;color:var(--muted-text)} /* {Inline Label} 15px/400 */
+
+.meta{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:var(--s-24);font-size:13px;color:var(--text-2)} /* {Body Compact} */
+.meta b{color:var(--white);font-weight:700} /* {Bold Body} */
+
+/* ---------- tab nav（§6 Level 6：活动态 = 1px 薄荷 inset 下划线） ---------- */
+.tab-nav{
+  position:sticky;top:0;z-index:50;background:var(--canvas);
+  border-bottom:1px solid var(--frame);
+}
+.tab-nav .wrap{display:flex;gap:var(--s-24);overflow-x:auto;padding:0 48px}
+.tab-btn{
+  border:none;background:transparent;color:var(--text-2);
+  padding:var(--s-16) 2px; /* 44px 触控目标（§8 Touch Targets） */
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:12px;font-weight:600;letter-spacing:1.5px;white-space:nowrap;
+  transition:color .15s ease;
+}
+.tab-btn:hover{color:var(--link-hover)}
+.tab-btn.active{color:var(--white);box-shadow:inset 0 -1px 0 0 var(--mint)} /* 签名式 inset 下划线（§6） */
+.tab-panel{display:none;padding:var(--s-32) 0 var(--s-8)}
+.tab-panel.active{display:block;animation:fadein .2s ease}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+
+/* ---------- section head & cards（§4 StoryStream Tile：20px 半径 + 1px 白边，无阴影） ---------- */
+.sec-head{display:flex;align-items:baseline;gap:var(--s-12);margin-bottom:var(--s-24)}
+.sec-head .no{
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:12px;letter-spacing:1.8px;color:var(--mint); /* kicker 用薄荷（§4 StoryStream item） */
+}
+.sec-head h2{font-size:34px;font-weight:700;line-height:1.0} /* {Large Headline} 34px/700/1.00 */
+.card{
+  background:var(--canvas);border:1px solid var(--white);
+  border-radius:var(--r-card);
+  transition:border-color .15s ease;
+}
+.card:hover{box-shadow:0 0 0 1px var(--ring)} /* 层叠卡片唯一氛围环（§6 Level 5），无浮起 */
+
+/* ---------- map ---------- */
+.map-card{overflow:hidden;position:relative;border-radius:var(--r-feature)} /* feature 24px */
+.map-area{height:360px;position:relative;background:var(--canvas)}
+.map-area svg{width:100%;height:100%;display:block}
+.map-status{padding:var(--s-12) var(--s-16);font-size:13px;color:var(--text-2);border-top:1px solid var(--frame)}
+.map-legend{display:flex;gap:18px;padding:var(--s-12) var(--s-16);font-size:13px;color:var(--text-2);border-top:1px solid var(--frame);flex-wrap:wrap}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+/* 地图控制条：视图/标签/按天切换（地图交互参考：liketrek/TREK · itskovacs/trip · chenxuan520/roadbook，MIT） */
+.map-ctrl{display:flex;gap:var(--s-8);padding:var(--s-12) var(--s-16);border-top:1px solid var(--frame);flex-wrap:wrap;align-items:center}
+.map-ctrl .grp{display:flex;gap:var(--s-4)}
+.map-ctrl button{
+  background:transparent;color:var(--muted-text);
+  border:1px solid var(--frame);border-radius:var(--r-input);
+  padding:6px 12px;min-height:32px;
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:10px;font-weight:600;letter-spacing:1.5px;
+  transition:color .15s ease,border-color .15s ease,background .15s ease;
+}
+.map-ctrl button:hover{color:var(--link-hover);border-color:var(--hover-ring)}
+.map-ctrl button.active{background:var(--mint);color:var(--black);border-color:var(--mint)} /* 活动态 = 薄荷填充（§4 Primary Jelly Mint） */
+.map-ctrl .sep{width:1px;align-self:stretch;background:var(--frame);margin:0 var(--s-8)}
+/* AMAP marker 自定义 DOM（itskovacs/trip 序号气泡 + 时间窗一行小字）：品牌 token 直用 */
+.amap-marker-label.mk-label{border:none!important;background:transparent!important;padding:0!important;box-shadow:none!important}
+.mk-tag{
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+  background:var(--canvas);color:var(--white);
+  border:1px solid var(--mint-border);border-radius:var(--r-card);
+  padding:2px 8px;
+  font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.5px;
+}
+.mk-tag .no{color:var(--mint);font-variant-numeric:tabular-nums}
+.mk-tag .tw{color:var(--text-2);font-variant-numeric:tabular-nums}
+.mk-tag.hot{background:var(--mint);color:var(--black);border-color:var(--mint)} /* 列表联动高亮态 */
+.mk-tag.hot .no,.mk-tag.hot .tw{color:var(--black)}
+/* 跨城交通视图（chenxuan520/roadbook：车站两端大 marker + 流动方向虚线高铁线） */
+.hsr-view{display:none;padding:var(--s-12) var(--s-16);border-top:1px solid var(--frame)}
+.hsr-view.active{display:block}
+.hsr-line{display:flex;align-items:center;gap:var(--s-12);font-size:14px;color:var(--muted-text)}
+.hsr-line .st{font-family:var(--font-mono);text-transform:uppercase;font-size:12px;letter-spacing:1.1px;color:var(--white)}
+.hsr-line .dash{flex:1;border-top:2px dashed var(--mint);position:relative;overflow:hidden;height:0}
+.hsr-line .dash::after{
+  content:"";position:absolute;top:-6px;left:-20px;width:14px;height:11px;
+  background:var(--mint);clip-path:polygon(0 0,100% 50%,0 100%);
+  animation:hsrflow 2.2s linear infinite; /* showDir 方向箭头沿线流动的静态对应 */
+}
+@keyframes hsrflow{to{left:100%}}
+.hsr-note{margin-top:var(--s-8);font-size:13px;color:var(--text-2)}
+
+/* key 引导卡片 — 浮在静态图上（§4 Inputs：2px 半径 + focus 薄荷描边，无 glow） */
+.key-guide{
+  position:absolute;inset:0;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--scrim);
+}
+.key-guide .inner{
+  max-width:460px;margin:0 24px;padding:var(--s-24);
+  background:var(--surface);border:1px solid var(--white);border-radius:var(--r-card);
+  box-shadow:0 0 0 1px var(--ring);
+}
+.key-guide h3{font-size:24px;font-weight:700;margin-bottom:var(--s-8)} /* {Heading Medium} */
+.key-guide p{font-size:13px;color:var(--text-2);margin-bottom:var(--s-16);line-height:1.6}
+.key-guide code{font-family:var(--font-mono);font-size:12px;background:var(--canvas);color:var(--mint);padding:2px 6px;border-radius:var(--r-input)}
+.key-guide .row{display:flex;gap:var(--s-8)}
+.key-guide input{
+  flex:1;min-width:0;
+  background:var(--canvas);border:1px solid var(--text-2);border-radius:var(--r-input);
+  padding:12px;font-size:15px;color:var(--white); /* {Inline Label} 15px */
+  transition:border-color .15s ease;
+}
+.key-guide input::placeholder{color:var(--text-2)}
+.key-guide input:focus{outline:none;border-color:var(--mint)} /* focus 转薄荷，无 glow（§4 Inputs） */
+.key-guide .go{
+  border:none;background:var(--mint);color:var(--black);
+  border-radius:var(--r-feature);padding:10px 24px; /* {Primary Jelly Mint Pill} 10px 24px */
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:12px;font-weight:600;letter-spacing:1.5px;white-space:nowrap;
+  transition:background .18s ease,box-shadow .18s ease;
+}
+.key-guide .go:hover{background:rgba(255,255,255,.2);box-shadow:0 0 0 1px var(--hover-ring)}
+.key-guide .go:active{background:var(--pressed);opacity:.5} /* 按下态（§4 Primary Active） */
+.key-guide .close-link{
+  display:block;margin-top:var(--s-12);font-size:13px;color:var(--text-2);
+  background:none;border:none;text-decoration:underline;
+}
+.key-guide .close-link:hover{color:var(--link-hover)}
+.map-ok{
+  position:absolute;top:12px;right:12px;z-index:6;
+  background:var(--mint);color:var(--black);
+  border-radius:var(--r-card);padding:4px 10px;
+  font-family:var(--font-mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;
+}
+
+/* ---------- weather（三个 color-block tile：薄荷聚光灯块 + 白 spotlight 块 + 石板块，§1/§7） ---------- */
+.weather{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-16);margin:0 0 8px}
+.w-card{padding:var(--s-24);border-radius:var(--r-card)}
+.w-card.t-mint{background:var(--mint);color:var(--black)}
+.w-card.t-white{background:var(--white);color:var(--black)}
+.w-card.t-slate{background:var(--surface);color:var(--muted-text)}
+.w-card .d{
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:11px;font-weight:600;letter-spacing:1.8px;opacity:.75;
+}
+.w-card .t{font-size:24px;font-weight:700;margin:var(--s-8) 0 var(--s-4)} /* {Heading Medium} */
+.w-card .a{font-size:13px;opacity:.8} /* {Body Compact} */
+
+/* ---------- timeline（StoryStream：1px #3d00bf 竖轨 + mono 时间戳 + 药丸卡片，§4 Distinctive） ---------- */
+.tl{position:relative;margin:8px 0 0 8px;padding-left:32px}
+.tl::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:1px;background:var(--rule-purple)} /* {Purple Rule} */
+.ev{position:relative;padding:0;margin-bottom:var(--s-16);overflow:hidden;cursor:pointer}
+.ev::before{
+  content:"";position:absolute;left:-37px;top:22px;width:11px;height:11px;
+  border-radius:50%;background:var(--canvas);border:1px solid var(--mint);
+}
+.ev.transit::before{border-color:var(--white)}
+.ev-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:var(--s-16) var(--s-24) var(--s-4)}
+.ev-time{
+  /* {Mono Timestamp} 11px/600/UPPERCASE/1.1px（§3/§4） */
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-weight:600;font-size:11px;letter-spacing:1.1px;color:var(--mint);
+  font-variant-numeric:tabular-nums;
+}
+.ev.transit .ev-time{color:var(--white)}
+.ev-title{font-size:24px;font-weight:700;line-height:1.0;transition:color .15s ease} /* {Heading Medium} */
+.ev:hover .ev-title{color:var(--link-hover)} /* hover 仅变色，不浮起不缩放（§4 StoryStream Tile） */
+.badge{
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:10px;font-weight:600;letter-spacing:1.8px;
+  padding:3px 10px;border-radius:var(--r-card);white-space:nowrap; /* {Pill Tag} 20px */
+}
+.b-check{background:var(--mint);color:var(--black)}
+.b-est{background:var(--surface);color:var(--muted-text)}
+.b-live{background:var(--uv);color:var(--white)}
+.b-warn{background:transparent;color:var(--uv);border:1px solid var(--uv)} /* 紫外兼作告警强调（§4 Inputs Error） */
+.ev .sum{font-size:13px;color:var(--text-2);margin:var(--s-2) var(--s-24) var(--s-16)} /* {Body Compact} */
+.ev .toggle-hint{margin-left:auto;font-family:var(--font-mono);text-transform:uppercase;font-size:10px;letter-spacing:1.5px;color:var(--text-2);flex-shrink:0}
+.ev.open .toggle-hint{color:var(--mint)}
+.ev .warn-row{
+  margin:var(--s-8) var(--s-24) var(--s-16);font-size:13px;color:var(--uv);
+  border:1px solid var(--uv);border-radius:var(--r-input);padding:var(--s-8) var(--s-12);
+  background:var(--canvas);
+}
+
+.ev-detail{display:none;border-top:1px solid var(--frame);padding:var(--s-16) var(--s-24);background:var(--surface)}
+.ev.open .ev-detail{display:grid;grid-template-columns:180px 1fr;gap:var(--s-16);animation:fadein .2s ease}
+.ev-img{width:180px;height:128px;border-radius:var(--r-nested);overflow:hidden;position:relative;background:var(--frame)}
+.ev-img img{width:100%;height:100%;object-fit:cover;display:block;border:1px solid var(--frame)} /* 1px {Image Frame} 包边（§4 Image Treatment） */
+.ev-img .ph{
+  width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;background:var(--surface);color:var(--text-2);font-size:26px;
+}
+.ev-img .ph span{
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:9px;letter-spacing:1.5px;text-align:center;padding:0 6px;
+}
+.src-mark{
+  position:absolute;left:0;right:0;bottom:0;font-size:9px;padding:2px 5px;
+  background:var(--canvas);color:var(--text-2);text-align:center;white-space:nowrap;overflow:hidden;
+}
+.jev-mark{
+  position:absolute;top:6px;right:6px;
+  background:var(--mint);color:var(--black);
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:9px;font-weight:600;letter-spacing:1.1px;
+  border-radius:var(--r-card);padding:1px 6px;
+}
+.ev-info dl{font-size:13px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:4px}
+.ev-info dt{
+  font-family:var(--font-mono);text-transform:uppercase;
+  color:var(--text-2);white-space:nowrap;font-size:10px;letter-spacing:1.1px;padding-top:2px;
+}
+.ev-info dd{color:var(--muted-text)}
+.ev-info .why{grid-column:1/-1;color:var(--muted-text);margin-top:4px;line-height:1.6}
+.ev-info .why b{color:var(--mint)}
+.ev-info .note{
+  grid-column:1/-1;color:var(--uv);border:1px solid var(--uv);
+  border-radius:var(--r-input);padding:var(--s-8) var(--s-12);margin-top:var(--s-8);font-size:13px;
+}
+.day-head{margin:0 0 var(--s-16);font-size:19px;font-weight:300;letter-spacing:1.9px;color:var(--muted-text)} /* {Light Capitalized Label} whisper */
+.day-head .badge{margin-left:var(--s-8)}
+
+/* ---------- grid cards（预算/交通/住宿） ---------- */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-16)}
+.grid3 .card{padding:var(--s-24)}
+.grid3 h3{font-size:20px;font-weight:700;margin-bottom:var(--s-16);line-height:1.0} /* {Heading Small} */
+.bl{list-style:none;font-size:13px}
+.bl li{display:flex;justify-content:space-between;gap:8px;padding:var(--s-12) 0;border-bottom:1px solid var(--frame)}
+.bl li:last-child{border-bottom:none}
+.bl li b{font-variant-numeric:tabular-nums;color:var(--white)}
+.rec{color:var(--mint);font-family:var(--font-mono);text-transform:uppercase;font-size:10px;font-weight:600;letter-spacing:1.5px}
+.bar{height:8px;border-radius:var(--r-input);background:var(--surface);margin-top:var(--s-16);overflow:hidden;border:1px solid var(--frame)}
+.bar i{display:block;height:100%;width:83%;background:var(--mint)} /* 色块即层级：无阴影（§6 color-as-elevation） */
+.bar-note{font-family:var(--font-mono);text-transform:uppercase;font-size:10px;letter-spacing:1.1px;color:var(--text-2);margin-top:var(--s-8);text-align:right}
+
+/* ---------- alerts ---------- */
+.alert{display:flex;gap:12px;padding:var(--s-16) var(--s-24);margin-bottom:var(--s-12);align-items:flex-start}
+.alert .txt{font-size:13px}
+.alert .txt b{display:block;font-size:16px;font-weight:700;color:var(--white)} /* {Bold Body} */
+.alert .txt span{color:var(--text-2)}
+.chip{
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:10px;font-weight:600;letter-spacing:1.8px;
+  padding:3px 10px;border-radius:var(--r-card);flex-shrink:0;margin-top:2px;
+}
+.chip.jev{background:var(--mint);color:var(--black)}
+.chip.rule{background:var(--uv);color:var(--white)} /* 紫外 hazard tile（§4 color-block tile） */
+.chip.info{background:var(--surface);color:var(--muted-text)}
+
+/* ---------- export bar（§4 Tertiary Outlined Mint：40px 药丸 + mono 大写） ---------- */
+.export-bar{position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--canvas);border-top:1px solid var(--frame)}
+.export-bar .wrap{display:flex;gap:var(--s-10);padding:var(--s-12) 48px;align-items:center;flex-wrap:wrap}
+.export-bar button{
+  background:transparent;color:var(--mint);
+  border:1px solid var(--mint);border-radius:var(--r-pill);
+  padding:10px 20px;min-height:44px; /* §8 Touch Targets ≥44px */
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:12px;font-weight:600;letter-spacing:1.5px;
+  transition:background .15s ease,color .15s ease;
+}
+.export-bar button:hover{background:var(--mint);color:var(--black)} /* hover 反转为薄荷填充 */
+.export-bar button.cta{background:var(--mint);color:var(--black);border-radius:var(--r-feature)} /* {Primary Mint Pill} */
+.export-bar button.cta:hover{background:rgba(255,255,255,.2);color:var(--black);box-shadow:0 0 0 1px var(--hover-ring)}
+.export-bar .hint{font-family:var(--font-mono);text-transform:uppercase;font-size:10px;letter-spacing:1.5px;color:var(--text-2);margin-left:auto}
+
+/* ---------- theme toggle & footer ---------- */
+.theme-toggle{
+  position:fixed;right:18px;bottom:64px;z-index:60;width:44px;height:44px;border-radius:50%;
+  background:var(--canvas);border:1px solid var(--white);box-shadow:0 0 0 1px var(--ring);
+  font-size:16px;display:flex;align-items:center;justify-content:center;
+}
+footer{padding:var(--s-48) 0 96px;border-top:1px solid var(--frame)}
+footer .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-24);margin-bottom:var(--s-24)}
+footer h4{
+  font-family:var(--font-mono);text-transform:uppercase;
+  font-size:11px;font-weight:600;letter-spacing:1.8px;color:var(--mint);margin-bottom:var(--s-8);
+}
+footer .cols p{font-size:13px;color:var(--muted-text);line-height:1.6}
+footer .cols .m{color:var(--text-2)}
+footer .legal{font-size:13px;color:var(--text-2);border-top:1px solid var(--frame);padding-top:var(--s-16);line-height:1.7}
+footer .ok{color:var(--mint);font-weight:700}
+footer .legal a{text-decoration:underline}
+footer .legal a:hover{color:var(--link-hover)}
+
+/* ---------- print & mobile ---------- */
+@media print{
+  .tab-nav,.theme-toggle,.export-bar{display:none!important}
+  body{background:#fff;color:#000}
+  .card{border-color:#ccc}
+  .tab-panel{display:block!important;page-break-before:always}
+  .ev{cursor:auto}
+}
+@media (max-width:768px){ /* Tablet 断点（§8） */
+  .wrap{padding:0 24px}
+  .tab-nav .wrap,.export-bar .wrap{padding-left:24px;padding-right:24px}
+  .masthead h1{font-size:clamp(48px,12vw,64px)} /* hero 缩到 48–54px 档（§8） */
+  .info-pill{height:auto;flex-direction:column;align-items:stretch;border-radius:var(--r-card)}
+  .info-pill .seg{border-right:none;border-bottom:1px solid var(--frame)}
+  .weather,.grid3,footer .cols{grid-template-columns:1fr}
+  .map-area{height:300px}
+  .ev.open .ev-detail{grid-template-columns:1fr}
+  .ev-img{width:100%;height:140px}
+  .export-bar .hint{display:none}
+  .masthead .dek{font-size:16px;letter-spacing:.5px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ MASTHEAD（theverge 品牌主题展示：wordmark 即 hero） ============ -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="kicker">Travel Guide · Shanghai · Citywalk Protocol</div>
+    <div class="brand-chip" id="brand-chip">
+      <span id="brand-name">主题：theverge</span>
+    </div>
+    <h1>上海三日</h1>
+    <p class="dek">梧桐区、万国建筑与陆家嘴天际线——一份不绕路的海派 Citywalk 攻略：高铁直达、地铁串联、下雨也有博物馆 Plan B。</p>
+    <!-- 石板药丸信息条（§4 Secondary Dark Slate Pill 静态装饰） -->
+    <div class="info-pill" aria-hidden="true">
+      <div class="seg"><div class="lbl">目的地</div><div class="val">上海</div></div>
+      <div class="seg"><div class="lbl">日期</div><div class="val">10/16 – 10/18 · 3 天 2 晚</div></div>
+      <div class="seg"><div class="lbl">出行人</div><div class="val">2 人</div></div>
+    </div>
+    <div class="meta" id="meta-row"></div>
+  </div>
+</header>
+
+<!-- ============ TAB NAV ============ -->
+<nav class="tab-nav">
+  <div class="wrap" id="tab-btns">
+    <button class="tab-btn active" data-tab="overview">总览</button>
+    <button class="tab-btn" data-tab="transport">交通</button>
+    <button class="tab-btn" data-tab="d1">Day 1</button>
+    <button class="tab-btn" data-tab="d2">Day 2</button>
+    <button class="tab-btn" data-tab="d3">Day 3</button>
+    <button class="tab-btn" data-tab="budget">预算</button>
+    <button class="tab-btn" data-tab="alerts">告警</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ============ TAB: 总览 ============ -->
+  <section class="tab-panel active" id="tab-overview">
+    <div class="sec-head"><span class="no">01 / MAP</span><h2>行程总览图</h2></div>
+    <div class="card map-card">
+      <div class="map-area" id="map-area">
+        <!-- 降级静态 SVG 路线图（一等公民设计）由 JS 注入 -->
+      </div>
+      <div class="map-ok" id="map-ok" style="display:none">AMAP 已启用</div>
+      <!-- key 引导卡片：浮在静态图上，填 key 或关闭后才露出静态图 -->
+      <div class="key-guide" id="key-guide">
+        <div class="inner">
+          <h3>启用交互地图</h3>
+          <p>当前未配置高德地图 Key。填入你的 AMAP_KEY（申请地址 <a href="https://lbs.amap.com" target="_blank" rel="noopener">lbs.amap.com</a>），Key 只保存在本地 <code>localStorage('amap_key')</code>，不会上传。也可先关闭此卡片查看静态路线图。</p>
+          <div class="row">
+            <input type="text" id="amap-key-input" placeholder="粘贴 AMAP_WEB Key…" autocomplete="off">
+            <button class="go" id="amap-go">启用</button>
+          </div>
+          <button class="close-link" id="key-guide-close">先看看静态路线图 →</button>
+        </div>
+      </div>
+      <div class="map-legend" id="map-legend"></div>
+      <div class="map-status" id="map-status">地图加载中…</div>
+      <!-- 地图控制条：视图切换（决策 1 总览=市内动线 / 交通=跨城段）+ 标签开关（决策 2）+ 按天切换（决策 3，参考 liketrek/TREK · itskovacs/trip · chenxuan520/roadbook） -->
+      <div class="map-ctrl" id="map-ctrl">
+        <div class="grp" id="view-grp">
+          <button class="active" data-view="city" id="btn-view-city">市内动线</button>
+          <button data-view="hsr" id="btn-view-hsr">跨城交通</button>
+        </div>
+        <span class="sep" aria-hidden="true"></span>
+        <button data-toggle="labels" id="btn-labels">标签 开</button>
+        <span class="sep" aria-hidden="true"></span>
+        <div class="grp" id="day-grp">
+          <button class="active" data-day="all">全程</button>
+          <button data-day="1">Day 1</button>
+          <button data-day="2">Day 2</button>
+          <button data-day="3">Day 3</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-head" style="margin-top:48px"><span class="no">WX / FORECAST</span><h2>三天气预报</h2></div>
+    <div class="weather" id="weather-row"></div>
+  </section>
+
+  <!-- ============ TAB: 交通（决策 1：高铁跨城段单独视图，市内动线留总览） ============ -->
+  <section class="tab-panel" id="tab-transport">
+    <div class="sec-head"><span class="no">01B / HSR</span><h2>跨城交通</h2></div>
+    <div class="card map-card">
+      <div class="map-area" id="hsr-map-area">
+        <!-- 跨城段静态 SVG（无 key 降级一等公民）由 JS 注入 -->
+      </div>
+      <div class="hsr-view active" id="hsr-info">
+        <div class="hsr-line">
+          <span class="st" id="hsr-from">出发站</span>
+          <span class="dash" aria-hidden="true"></span>
+          <span class="st" id="hsr-to">上海虹桥站</span>
+        </div>
+        <p class="hsr-note" id="hsr-note">高铁跨城段以 12306 车次卡为准（Day 1 / Day 3 行程卡），本图为衔接呈现。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: Day 1 ============ -->
+  <section class="tab-panel" id="tab-d1">
+    <div class="sec-head"><span class="no">DAY 1 / 10-16</span><h2>抵达日 · 浦江两岸经典线</h2></div>
+    <div class="day-head">
+      强度 ★★☆☆☆
+      <span class="badge b-check">jev 合理性 8.6/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev transit card">
+        <div class="ev-head">
+          <span class="ev-time">08:00</span>
+          <span class="ev-title">G13 · 北京南 → 上海虹桥</span>
+          <span class="badge b-live">12306 实时</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">08:00 发车 — 13:28 抵达，二等座 <b>¥662</b>，<span class="badge b-check">有票</span>。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/shanghai-oneday-wukang-chenghuang-bund-lujiazui.jpg" data-jev="8.76" data-src="来源：小红书笔记《上海特种兵一日游》@走走逛逛耍耍（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">14:30</span>
+          <span class="ev-title">外滩 · 万国建筑博览群</span>
+          <span class="badge b-check">jev 图片匹配 8.76</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">黄浦江畔万国建筑群临江站，对岸就是陆家嘴天际线——上海的门面。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/shanghai-day1-nanjing-oriental-lujiazui-bund.jpg" data-jev="8.94" data-src="来源：小红书笔记《上海2日游懒人版逛吃攻略》@小居吃八方（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">16:00</span>
+          <span class="ev-title">南京路步行街</span>
+          <span class="badge b-check">jev 图片匹配 8.94</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">上海老牌繁华商业街，从人民广场一路逛到外滩，顺路吃老字号。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/shanghai-wukang-xintiandi-tianzifang-sinan-yuyuan.jpg" data-jev="8.13" data-src="来源：小红书笔记《上海懒人三日游》@小丸子特别饿（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">17:30</span>
+          <span class="ev-title">豫园 · 城隍庙</span>
+          <span class="badge b-check">jev 图片匹配 8.13</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">江南古典园林与老城厢小吃商圈：九曲桥、湖心亭，南翔小笼必打卡。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/shanghai-bund-lujiazui-yuyuan-checkin.jpg" data-jev="8.85" data-src="来源：小红书笔记《上海懒人三日游》@小丸子特别饿（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">19:30</span>
+          <span class="ev-title">外滩夜景</span>
+          <span class="badge b-check">jev 图片匹配 8.85</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">19:00–22:00 亮灯时段，万国建筑与对岸陆家嘴灯火隔江同框。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: Day 2 ============ -->
+  <section class="tab-panel" id="tab-d2">
+    <div class="sec-head"><span class="no">DAY 2 / 10-17</span><h2>博物馆与梧桐区 · 人文日</h2></div>
+    <div class="day-head">
+      强度 ★★★☆☆
+      <span class="badge b-check">jev 合理性 8.0/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev card" data-img="xhs-images/shanghai-peoples-square-shmuseum.jpg" data-jev="8.59" data-src="来源：小红书笔记《上海懒人三日游》@小丸子特别饿（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">09:30</span>
+          <span class="ev-title">上海博物馆（人民广场馆）</span>
+          <span class="badge b-check">jev 图片匹配 8.59</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">中国古代艺术博物馆，青铜器、陶瓷、书画藏品体系完整——雨天完美 Plan B。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/shanghai-wukang-xintiandi-tianzifang-sinan-yuyuan.jpg" data-jev="7.84" data-src="来源：小红书笔记《上海懒人三日游》@小丸子特别饿（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">13:00</span>
+          <span class="ev-title">新天地</span>
+          <span class="badge b-check">jev 图片匹配 7.84</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">石库门建筑改造的时尚街区，一大会址所在地，餐饮买手店云集。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/shanghai-wukang-road-street.jpg" data-jev="8.59" data-src="来源：小红书笔记《上海特种兵一日游》@走走逛逛耍耍（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">14:30</span>
+          <span class="ev-title">武康路 · 安福路</span>
+          <span class="badge b-check">jev 图片匹配 8.59</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">梧桐树下的老洋房街区：武康大楼转角、咖啡馆小店扎堆，上海梧桐区的灵魂。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/shanghai-oneday-wukang-chenghuang-bund-lujiazui.jpg" data-jev="7.98" data-src="来源：小红书笔记《上海特种兵一日游》@走走逛逛耍耍（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">17:30</span>
+          <span class="ev-title">陆家嘴 · 滨江步道</span>
+          <span class="badge b-check">jev 图片匹配 7.98</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">摩天大楼扎堆的金融区：滨江步道仰拍「三件套」，日落后华灯初上更出片。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: Day 3 ============ -->
+  <section class="tab-panel" id="tab-d3">
+    <div class="sec-head"><span class="no">DAY 3 / 10-18</span><h2>弄堂慢收尾 · 归途</h2></div>
+    <div class="day-head">
+      强度 ★☆☆☆☆
+      <span class="badge b-check">jev 合理性 9.0/10</span>
+    </div>
+    <div class="tl">
+      <div class="ev card" data-img="xhs-images/shanghai-wukang-xintiandi-tianzifang-sinan-yuyuan.jpg" data-jev="8.66" data-src="来源：小红书笔记《上海懒人三日游》@小丸子特别饿（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">10:00</span>
+          <span class="ev-title">田子坊</span>
+          <span class="badge b-check">jev 图片匹配 8.66</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">泰康路老弄堂改造的文创街区，支弄小店与手作淘物——真正有意思的藏在分支小巷里。</p>
+      </div>
+      <div class="ev card" data-img="xhs-images/shanghai-wukang-xintiandi-sinan-yuyuan-grid.jpg" data-jev="8.53" data-src="来源：小红书笔记《上海2日游懒人版逛吃攻略》@小居吃八方（untrusted）">
+        <div class="ev-head">
+          <span class="ev-time">13:00</span>
+          <span class="ev-title">思南公馆</span>
+          <span class="badge b-check">jev 图片匹配 8.53</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">洋房群里的人文街区：花园洋房、露天咖啡座，散步拍照很出片。</p>
+      </div>
+      <div class="ev transit card">
+        <div class="ev-head">
+          <span class="ev-time">16:11</span>
+          <span class="ev-title">G1540 · 上海虹桥 → 北京南</span>
+          <span class="badge b-warn">余票紧张</span>
+          <span class="toggle-hint">详情 ▾</span>
+        </div>
+        <p class="sum">16:11 发车 — 21:53 抵达，二等座 <b>¥662</b>。</p>
+        <div class="warn-row">余票紧张，建议尽快购票；备选 G120（有票），务必预留 3h 取行李+地铁缓冲。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: 预算 ============ -->
+  <section class="tab-panel" id="tab-budget">
+    <div class="sec-head"><span class="no">02 / BUDGET</span><h2>预算 · 交通 · 住宿</h2></div>
+    <div class="grid3">
+      <div class="card">
+        <h3>预算明细</h3>
+        <ul class="bl">
+          <li>高铁往返 <b>¥1,324</b></li>
+          <li>门票 <b>¥40</b></li>
+          <li>餐饮 <b>¥776</b></li>
+          <li>住宿 2 晚 <b>¥750</b></li>
+          <li><strong>合计</strong> <b>¥2,890 / ¥3,500</b></li>
+        </ul>
+        <div class="bar"><i></i></div>
+        <div class="bar-note">已用 83% · 余 ¥610</div>
+      </div>
+      <div class="card">
+        <h3>交通比较</h3>
+        <ul class="bl">
+          <li>高铁 G13 <b>¥662 · 5h28m</b> <span class="rec">推荐</span></li>
+          <li>飞机 <b>¥900+ · 4h 门到门</b></li>
+          <li>自驾 <b>¥1,100 · 12h+</b></li>
+          <li>大巴 <b>¥380 · 13h</b></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>住宿建议</h3>
+        <ul class="bl">
+          <li>首选 <b>人民广场 · 南京东路</b></li>
+          <li>地铁 1/2/8 号线枢纽 <b>步行到外滩/豫园</b></li>
+          <li>性价比 <b>静安寺 / 南京西路</b></li>
+          <li>避免 <b>远郊 / 迪士尼周边</b>（通勤 1.5h+）</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: 告警 ============ -->
+  <section class="tab-panel" id="tab-alerts">
+    <div class="sec-head"><span class="no">03 / ALERTS</span><h2>告警与提示</h2></div>
+    <div id="alerts-list"></div>
+  </section>
+
+</main>
+
+<!-- ============ EXPORT BAR ============ -->
+<div class="export-bar">
+  <div class="wrap">
+    <button class="cta" onclick="alert('导出 .ics 日历（原型演示）')">导出日历 (.ics)</button>
+    <button onclick="alert('生成小红书图文（原型演示）')">小红书图文</button>
+    <button onclick="window.print()">打印 / PDF</button>
+    <span class="hint">数据由 window.__GUIDE_SCHEMA__ 驱动 · 单文件原型 v3 · theverge 品牌</span>
+  </div>
+</div>
+
+<!-- ============ 主题切换钮（暗色为默认产品态，亮色为推导扩展） ============ -->
+<button class="theme-toggle" id="theme-toggle" title="切换亮色（推导扩展）">☀️</button>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>图片管线 / OpenCLI</h4>
+        <p><span class="ok">✔ 采集成功</span>：小红书搜索「上海旅游攻略」→ 精读 4 篇笔记全文 → 下载 26 张素材图 → 本地化 8 张关键拼贴图（xhs-images/shanghai-*.jpg，CDN 链接会过期）<br>
+        <span class="m">《亲测不绕路懒人三日游》@小丸子特别饿（3305 赞）、《上海2日游懒人版逛吃攻略》@小居吃八方（5709 赞）、《特种兵一日游不走回头路》@走走逛逛耍耍（5369 赞）、《两天一夜保姆级逛吃攻略》@跟着云玺去旅行（630 赞）</span></p>
+      </div>
+      <div>
+        <h4>jev 筛选 / TypeSafe System One</h4>
+        <p>评分调用 10 次 + 请求格式探测 4 次（上限 20）· 阈值 ≥7 保留每点最高分 1 张<br>
+        <span class="m">10 处行程点全部采用真图（7.84–8.94）· 0 点位降级 · 422 排坑：model 字段必填 + questions.type 为判别联合（type/score/criteria 列表）</span></p>
+      </div>
+      <div>
+        <h4>视觉系统</h4>
+        <p><span class="m">全部视觉 token 来自 awesome-design-md 的 theverge 品牌规范（Canvas Black #131313 · Jelly Mint #3cffd0 / Ultraviolet #5200ff hazard 强调 · Manuka ≥60px 展示字 · PolySans Mono 全大写标签 · 1px 边线代替阴影 · 无渐变）。暗色为默认产品态；亮色模式为原型推导扩展（DESIGN.md 明示 no light mode）。</span></p>
+      </div>
+    </div>
+    <div class="legal">
+      <p><span class="ok">✔ 管线状态：采集 4 篇 26 图 → 本地化 8 图 → jev 14 次请求（10 次评分 + 4 次格式探测）→ 10 处采用 · 0 点位降级</span></p>
+      <p>行程点图片为小红书 UGC 攻略拼贴卡（untrusted），仅原型演示用途，版权属于原作者 · 数据为模拟 schema，非真实攻略 · 原型 v3 · © 2026 Guide Proto</p>
+      <p>地图交互参考：liketrek/TREK · itskovacs/trip · chenxuan520/roadbook（GitHub，MIT）</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ================= MOCK SCHEMA ================= */
+window.__GUIDE_SCHEMA__ = {
+  meta: {
+    origin: "北京", days: "3 天 2 晚", budget: "人均 ¥3,500", party: "2 人 · 秋季梧桐季",
+    destination_identity: {
+      brand_id: "theverge",
+      theme: "theverge · Canvas Black + Jelly Mint",
+      reason: "用户指定以 awesome-design-md 的 The Verge 品牌设计系统为唯一视觉来源：近黑画布 #131313 为产品本体，酸性薄荷 #3cffd0 与紫外 #5200ff 仅作 hazard 强调（CTA/边线/活动下划线/色块），Manuka 风格展示字 107px 级 hero、PolySans Mono 全大写标签、FK Roman 衬线仅作印刷语气点缀，全系统 1px 边线与饱和色块承担层级、无阴影无渐变。"
+    }
+  },
+  weather: [
+    { day: "Day 1 · 10/16", icon: "☀️", temp: "18–24℃", advice: "梧桐季晴好，外滩江风大带薄外套", tile: "mint" },
+    { day: "Day 2 · 10/17", icon: "⛅", temp: "17–23℃", advice: "多云 · 适合武康路梧桐街拍", tile: "white" },
+    { day: "Day 3 · 10/18", icon: "🌥️", temp: "16–22℃", advice: "多云转阴 · 弄堂街区不受影响", tile: "slate" }
+  ],
+  /* spot.image：真实采集 + jev 筛选结果（阈值 ≥7，每点取最高分 1 张）。
+     url 为 OpenCLI 下载的本地文件；ll 为真实经纬度（高德 GCJ-02 近似），供交互地图挂点；
+     credibility 标记 untrusted UGC 来源。 */
+  spots: [
+    /* tw：时间窗标签（决策 2），与页面时间轴 ev-time 及 EV_DETAILS 营业时间对齐 */
+    { name: "南京路", day: 1, tw: "16:00-17:30", x: 420, y: 245, ll: [121.4799, 31.2357],
+      image: { url: "xhs-images/shanghai-day1-nanjing-oriental-lujiazui-bund.jpg", source: "小红书《上海2日游懒人版逛吃攻略》@小居吃八方", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "南京路步行街大字路牌石碑、人流与两侧欧式商业建筑拼贴", jev_score: 8.94 } },
+    { name: "外滩", day: 1, tw: "14:30-16:00", x: 505, y: 285, ll: [121.4906, 31.2397],
+      image: { url: "xhs-images/shanghai-oneday-wukang-chenghuang-bund-lujiazui.jpg", source: "小红书《上海特种兵一日游》@走走逛逛耍耍", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "外滩日落时分的万国建筑群与海关大楼钟楼剪影", jev_score: 8.76 } },
+    { name: "豫园城隍庙", day: 1, tw: "17:30-19:00", x: 470, y: 330, ll: [121.4921, 31.2279],
+      image: { url: "xhs-images/shanghai-wukang-xintiandi-tianzifang-sinan-yuyuan.jpg", source: "小红书《上海懒人三日游》@小丸子特别饿", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "豫园湖心亭茶楼、九曲桥飞檐与城隍庙红灯笼街巷拼贴", jev_score: 8.13 } },
+    { name: "外滩夜景", day: 1, tw: "19:30-21:30", x: 515, y: 305, ll: [121.4906, 31.2397],
+      image: { url: "xhs-images/shanghai-bund-lujiazui-yuyuan-checkin.jpg", source: "小红书《上海懒人三日游》@小丸子特别饿", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "蓝调夜空下陆家嘴摩天楼群霓虹与黄浦江灯光倒影", jev_score: 8.85 } },
+    { name: "上海博物馆", day: 2, tw: "09:30-12:30", x: 390, y: 215, ll: [121.4750, 31.2286],
+      image: { url: "xhs-images/shanghai-peoples-square-shmuseum.jpg", source: "小红书《上海懒人三日游》@小丸子特别饿", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "上海博物馆人民广场馆圆顶主体建筑外观与广场台阶", jev_score: 8.59 } },
+    { name: "新天地", day: 2, tw: "13:00-14:30", x: 440, y: 320, ll: [121.4756, 31.2190],
+      image: { url: "xhs-images/shanghai-wukang-xintiandi-tianzifang-sinan-yuyuan.jpg", source: "小红书《上海懒人三日游》@小丸子特别饿", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "新天地石库门改造商业街区与现代商场入口街景", jev_score: 7.84 } },
+    { name: "武康路", day: 2, tw: "14:30-17:00", x: 280, y: 300, ll: [121.4379, 31.2075],
+      image: { url: "xhs-images/shanghai-wukang-road-street.jpg", source: "小红书《上海特种兵一日游》@走走逛逛耍耍", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "武康大楼船头形红砖公寓街景与武康路路牌梧桐夹道", jev_score: 8.59 } },
+    { name: "陆家嘴", day: 2, tw: "17:30-20:30", x: 600, y: 260, ll: [121.5013, 31.2397],
+      image: { url: "xhs-images/shanghai-oneday-wukang-chenghuang-bund-lujiazui.jpg", source: "小红书《上海特种兵一日游》@走走逛逛耍耍", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "陆家嘴三件套（上海中心/环球金融中心/金茂大厦）蓝天仰拍", jev_score: 7.98 } },
+    { name: "田子坊", day: 3, tw: "10:00-12:30", x: 350, y: 330, ll: [121.4666, 31.2104],
+      image: { url: "xhs-images/shanghai-wukang-xintiandi-tianzifang-sinan-yuyuan.jpg", source: "小红书《上海懒人三日游》@小丸子特别饿", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "田子坊老弄堂绿植藤蔓、暖色灯光与游客穿行的支弄", jev_score: 8.66 } },
+    { name: "思南公馆", day: 3, tw: "13:00-15:30", x: 400, y: 345, ll: [121.4661, 31.2152],
+      image: { url: "xhs-images/shanghai-wukang-xintiandi-sinan-yuyuan-grid.jpg", source: "小红书《上海2日游懒人版逛吃攻略》@小居吃八方", credibility: "untrusted · 小红书 UGC（OpenCLI 采集）", alt_description: "思南公馆法式老洋房建筑群红瓦坡顶与庭院梧桐", jev_score: 8.53 } }
+  ],
+  routes: [
+    { day: 1, pts: [[420,245],[505,285],[470,330],[515,305]],
+      ll: [[121.4799,31.2357],[121.4906,31.2397],[121.4921,31.2279],[121.4906,31.2397]] },
+    { day: 2, pts: [[390,215],[440,320],[280,300],[600,260]],
+      ll: [[121.4750,31.2286],[121.4756,31.2190],[121.4379,31.2075],[121.5013,31.2397]] },
+    { day: 3, pts: [[350,330],[400,345]],
+      ll: [[121.4666,31.2104],[121.4661,31.2152]] }
+  ],
+  /* 日线路色：Jelly Mint / Verge Ultraviolet / Hazard White（DESIGN.md 无多色系统，仅双 hazard + 白，故以三者补足三天） */
+  dayColors: { 1: "#3cffd0", 2: "#5200ff", 3: "#ffffff" },
+  /* 跨城高铁段（决策 1）：出发站→上海虹桥，来自页面 12306 车次卡 G13（北京南 08:00 → 上海虹桥 13:28） */
+  intercity: {
+    label: "G13 · 北京南 → 上海虹桥",
+    from: { name: "北京南站", ll: [116.3788, 39.8652] },
+    to: { name: "上海虹桥站", ll: [121.3206, 31.1944] }
+  },
+  amap: { center: [121.47, 31.23], zoom: 12 },
+  alerts: [
+    { source: "JEV", type: "图片筛选", title: "10 处行程点图片 jev 匹配分 7.84–8.94，全部达标",
+      detail: "候选池 10 次评分（上限 20），每点位保留最高分 1 张；同一笔记拼贴图可服务多个行程点（新天地/豫园/田子坊共用 Day2 行程卡）。" },
+    { source: "JEV", type: "素材可信度", title: "行程点图片均为小红书 UGC 攻略拼贴卡（untrusted）",
+      detail: "4 篇笔记 26 张素材经 OpenCLI 采集，筛选后 8 张拼贴图 10 处引用。拼贴卡为信息图非单点实拍，新天地 7.84 / 陆家嘴 7.98 贴近阈值，图文匹配仅供参考，出行前请核对官方渠道。" },
+    { source: "RULE", type: "节奏提示", title: "Day 2 跨江两次，节奏需前置收紧",
+      detail: "上午浦西（上博→新天地→武康路）、傍晚跨江至浦东（陆家嘴）。上博 09:30 开馆即入，武康路停留控制在 2h 内，17:30 前抵达陆家嘴接日落夜景；Day 3 返程 G1540 16:11 发车，14:30 前返回虹桥，符合硬规则「返程缓冲 ≥ 3h」。" }
+  ],
+  blocking_count: 0,
+  hard_rules_passed: 3,
+  advisory_count: 3,
+  pipeline: {
+    collect: { ok: true, notes: 4, images: 26, localized: 8, tool: "opencli xiaohongshu search/note/download" },
+    jev: { ok: true, calls: 14, scoring_calls: 10, limit: 20, threshold: 7, adopted: 10, degraded: 0 }
+  }
+};
+
+/* ================= 行程点详情数据（点开详情五段：图 + 时间/门票/推荐/注意） ================= */
+var EV_DETAILS = {
+  "G13 · 北京南 → 上海虹桥": {
+    hours: "08:00 发车 — 13:28 抵达",
+    ticket: "二等座 ¥662 / 一等座 ¥1,077",
+    why: "京沪高铁标杆车次，全程 5h28m，午前抵沪正好衔接 Day 1 行程。",
+    note: "12306 提前 15 天开售，节假日请提前 3 天以上购票。"
+  },
+  "外滩 · 万国建筑博览群": {
+    hours: "全天开放 · 江风大",
+    ticket: "免费",
+    why: "黄浦江畔万国建筑博览群临江站，对岸陆家嘴天际线一江同框，是上海辨识度最高的门面。",
+    note: "别只挤观景平台，往北走到外白渡桥人少景美；别找路边摄影师，容易漫天要价。"
+  },
+  "南京路步行街": {
+    hours: "全天开放 · 商铺 10:00–22:00",
+    ticket: "免费",
+    why: "上海老牌繁华商业街，地铁 1/2/8 号线人民广场站或 2/10 号线南京东路站直达，一路向东步行即达外滩。",
+    note: "别在步行街买高价特产；热门饮品店分店很多，没必要排长队。"
+  },
+  "豫园 · 城隍庙": {
+    hours: "豫园 09:00–16:30（周末延至 18:00）",
+    ticket: "豫园 ¥40 · 城隍庙商圈免费",
+    why: "江南古典园林与老城厢小吃商圈相邻：九曲桥、湖心亭必看，玩法不一样——豫园是收费园林，城隍庙是免费商圈。",
+    note: "别在城隍庙主街买小吃和丝绸珍珠，溢价严重；豫园旁老街里的小笼更地道。"
+  },
+  "外滩夜景": {
+    hours: "亮灯 19:00–22:00",
+    ticket: "免费",
+    why: "19:00–22:00 亮灯时段，万国建筑与对岸陆家嘴灯火隔江同框，夜景看灯超治愈。",
+    note: "建议 19:30 左右到；想拍照去外白渡桥或金陵东路渡口，人少。江边风大带薄外套。"
+  },
+  "上海博物馆（人民广场馆）": {
+    hours: "09:00–17:00（周一闭馆）",
+    ticket: "免费 · 需提前预约（提前 1 天）",
+    why: "中国古代艺术博物馆，青铜器、陶瓷、书画藏品体系完整，人民广场馆要提前预约。",
+    note: "预约放票即抢，周末尤其紧俏；东馆基本陈列免约但互动空间另约，出发前再确认一遍。"
+  },
+  "新天地": {
+    hours: "街区全天 · 店铺 10:00–22:00",
+    ticket: "免费",
+    why: "石库门建筑改造的时尚休闲街区，一大会址所在地，餐饮买手店云集。",
+    note: "地铁 10/13 号线新天地站直达；石库门立面在外围街巷，商场内部大同小异。"
+  },
+  "武康路 · 安福路": {
+    hours: "街区全天 · 上午人少光线好",
+    ticket: "免费",
+    why: "梧桐树下的老洋房街区：武康大楼转角超好拍氛围感拉满，安福路潮人聚集地，咖啡店买手店扎堆。",
+    note: "不要站马路中间拍照，来往车辆多；居民楼不能进，只在外围打卡；秋天落叶季最美。"
+  },
+  "陆家嘴 · 滨江步道": {
+    hours: "全天 · 日落后灯景最佳",
+    ticket: "免费（登塔另计）",
+    why: "摩天大楼扎堆的金融区：滨江步道拍「三件套」与对岸外滩，日落时分的蓝调天际线最出片。",
+    note: "国金中心节假日天桥人挤人，尽量工作日下午；2 元东金线轮渡过江比打车划算还能拍两岸全景。"
+  },
+  "田子坊": {
+    hours: "全天开放 · 店铺 10:00–22:00",
+    ticket: "免费",
+    why: "泰康路老弄堂改造的文创街区，主街都是网红店，真正有意思的藏在支弄老房子里。",
+    note: "往深处走才值回票价；9 号线打浦桥站直达；部分小店溢价高，随便逛逛即可。"
+  },
+  "思南公馆": {
+    hours: "街区全天 · 露天咖啡座 11:00–22:00",
+    ticket: "免费",
+    why: "洋房群里的人文街区：法式花园洋房成片保留，露天咖啡座散步拍照很出片。",
+    note: "地铁 10/13 号线新天地站步行可达；傍晚灯光亮起后洋房立面更出片。"
+  },
+  "G1540 · 上海虹桥 → 北京南": {
+    hours: "16:11 发车 — 21:53 抵达",
+    ticket: "二等座 ¥662 · 备选 G120（有票）",
+    why: "时间衔接 Day 3 行程最从容的一班，14:30 前从思南公馆返回虹桥即可。",
+    note: "余票紧张，建议尽快购票；务必预留 3h 取行李+地铁缓冲。"
+  }
+};
+
+/* ================= 品牌主题（destination_identity 驱动） ================= */
+var THEMES = {
+  theverge:    { name: "theverge", label: "主题：theverge", data: "theverge", icon: "☀️" },
+  "verge-light": { name: "theverge · 亮色（推导扩展）", label: "主题：theverge · 亮色（推导扩展，DESIGN.md 无 light mode）", data: "verge-light", icon: "🌙" }
+};
+
+/* 图片加载失败 → 占位色块（禁止随机占位图冒充真图） */
+window.__imgFail = function (img) {
+  var p = img.parentElement;
+  p.innerHTML = '<div class="ph">🏛️<span>图片加载失败 · 占位色块</span></div>';
+};
+
+(function () {
+  var S = window.__GUIDE_SCHEMA__;
+
+  /* ---- masthead meta ---- */
+  document.getElementById("meta-row").innerHTML =
+    "<span>出发 <b>" + S.meta.origin + "</b></span>" +
+    "<span>日期 <b>10/16 – 10/18</b></span>" +
+    "<span>人均预算 <b>" + S.meta.budget + "</b></span>" +
+    "<span>出行人 <b>" + S.meta.party + "</b></span>" +
+    "<span>品牌 <b>brand_id: " + S.meta.destination_identity.brand_id + "</b></span>";
+  document.title = "上海 3 日游 · " + S.meta.destination_identity.theme + " · AI 旅游攻略原型 v3";
+
+  /* ---- weather ---- */
+  document.getElementById("weather-row").innerHTML = S.weather.map(function (w) {
+    return '<div class="card w-card t-' + w.tile + '"><div class="d">' + w.day +
+      '</div><div class="t">' + w.icon + " " + w.temp +
+      '</div><div class="a">' + w.advice + "</div></div>";
+  }).join("");
+
+  /* ---- alerts ---- */
+  document.getElementById("alerts-list").innerHTML = S.alerts.map(function (a) {
+    var cls = a.source === "JEV" ? "jev" : (a.source === "RULE" ? "rule" : "info");
+    return '<div class="alert card"><span class="chip ' + cls + '">' + a.source +
+      "</span><div class=\"txt\"><b>" + a.type + " · " + a.title +
+      "</b><span>" + a.detail + "</span></div></div>";
+  }).join("");
+
+  /* ---- tab 切换 ---- */
+  var btns = document.querySelectorAll(".tab-btn");
+  var panels = document.querySelectorAll(".tab-panel");
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (x) { x.classList.remove("active"); });
+      panels.forEach(function (p) { p.classList.remove("active"); });
+      b.classList.add("active");
+      document.getElementById("tab-" + b.dataset.tab).classList.add("active");
+    });
+  });
+
+  /* ---- 行程点：注入图片/占位 + jev 评分徽章 + untrusted 来源 + 详情面板 ---- */
+  document.querySelectorAll(".ev").forEach(function (ev) {
+    var title = ev.querySelector(".ev-title").textContent;
+    var det = EV_DETAILS[title] || {};
+    var head = ev.querySelector(".ev-head");
+
+    var panel = document.createElement("div");
+    panel.className = "ev-detail";
+    var imgHTML;
+    if (ev.dataset.img) {
+      var jevBadge = ev.dataset.jev ? '<div class="jev-mark">jev ' + ev.dataset.jev + "/10</div>" : "";
+      imgHTML = '<div class="ev-img"><img loading="lazy" src="' + ev.dataset.img +
+        '" alt="' + title + '" onerror="window.__imgFail(this)">' + jevBadge +
+        '<div class="src-mark">' + (ev.dataset.src || "来源：小红书笔记（untrusted）") + "</div></div>";
+    } else {
+      imgHTML = '<div class="ev-img"><div class="ph">🏛️<span>无达标图 · 占位</span></div></div>';
+    }
+    panel.innerHTML = imgHTML +
+      '<div class="ev-info"><dl>' +
+      "<dt>营业时间</dt><dd>" + (det.hours || "—") + "</dd>" +
+      "<dt>门票价格</dt><dd>" + (det.ticket || "—") + "</dd>" +
+      '<dd class="why"><b>为什么推荐：</b>' + (det.why || "—") + "</dd>" +
+      '<dd class="note">⚠ ' + (det.note || "暂无注意事项") + "</dd>" +
+      "</dl></div>";
+    ev.appendChild(panel);
+
+    var toggle = function () { ev.classList.toggle("open"); };
+    head.addEventListener("click", toggle);
+    ev.querySelector(".sum").addEventListener("click", toggle);
+  });
+
+  /* ---- 地图：key 引导 → AMAP SDK（真实经纬度挂点 + 按天 OverlayGroup），降级为一等公民静态 SVG ----
+     地图交互参考：liketrek/TREK（按天 OverlayGroup + setFitView）· itskovacs/trip（序号气泡 + 列表联动）
+     · chenxuan520/roadbook（跨城交通视图：车站 marker + 流动方向虚线），均 MIT */
+  var status = document.getElementById("map-status");
+  var guide = document.getElementById("key-guide");
+  var mapOk = document.getElementById("map-ok");
+  var key = null;
+  try { key = localStorage.getItem("amap_key"); } catch (e) {}
+  if (!key) { key = "d3d68a8d1fe35a03053ee6bc7e5d448e"; /* ponytail: 本地演示默认 key，正式实施改回仅 localStorage */ }
+
+  /* 当前交互态（静态 SVG 与 AMAP 共用同一套控制逻辑） */
+  var ui = { view: "city", labels: true, day: "all" };
+
+  function legend() {
+    document.getElementById("map-legend").innerHTML =
+      [1, 2, 3].map(function (d) {
+        return '<span><i class="legend-dot" style="background:' + S.dayColors[d] + '"></i>Day ' + d + "</span>";
+      }).join("");
+  }
+
+  /* marker 自定义 DOM 标签（itskovacs/trip 序号气泡 + 决策 2 时间窗一行小字） */
+  function spotLabelHTML(idx, sp) {
+    return '<span class="mk-tag" data-spot-idx="' + idx + '"><span class="no">' + (idx + 1) +
+      '</span><span class="tw">' + (sp.tw || "") + " " + sp.name + "</span></span>";
+  }
+
+  /* 时间窗可见性过滤（决策 3 按天切换同步作用于标签） */
+  function spotVisible(sp) {
+    if (ui.view === "hsr") return false;
+    return ui.day === "all" || sp.day === ui.day;
+  }
+
+  /* 一等公民降级静态图：暗色画布 + 街区块 + 黄浦江 + 按天三色路线（示意图坐标仅供俯瞰） */
+  function renderFallback() {
+    var cs = getComputedStyle(document.documentElement);
+    var block = cs.getPropertyValue("--surface").trim();
+    var river = cs.getPropertyValue("--map-river").trim();
+    var grid = cs.getPropertyValue("--map-grid").trim();
+    var lines = S.routes.filter(function (r) { return ui.day === "all" || r.day === ui.day; }).map(function (r) {
+      var c = S.dayColors[r.day];
+      return '<polyline points="' + r.pts.map(function (p) { return p.join(","); }).join(" ") +
+        '" fill="none" stroke="' + c + '" stroke-width="4" stroke-dasharray="9 6" opacity="0.9" stroke-linecap="round" stroke-linejoin="round"/>';
+    }).join("");
+    var dots = S.spots.map(function (s, i) {
+      var c = S.dayColors[s.day];
+      var tc = s.day === 3 ? "var(--white)" : c;
+      if (!spotVisible(s)) return "";
+      /* 标签直显（决策 2）：序号 + 时间窗 + 名称，与 AMAP mk-tag 同构 */
+      var lbl = ui.labels
+        ? '<g><rect x="' + (s.x + 12) + '" y="' + (s.y - 16) + '" rx="10" width="' + ((s.tw ? s.tw.length : 0) * 8 + s.name.length * 13 + 54) + '" height="26" fill="var(--canvas)" stroke="' + (s.day === 3 ? "var(--white)" : "var(--mint-border)") + '" stroke-width="1"/>' +
+          '<text x="' + (s.x + 22) + '" y="' + (s.y + 2) + '" font-size="12" font-family="monospace" fill="' + tc + '">' + (i + 1) + "</text>" +
+          '<text x="' + (s.x + 36) + '" y="' + (s.y + 2) + '" font-size="12" font-family="monospace" fill="var(--text-2)">' + (s.tw ? s.tw : "") + " " + s.name + "</text></g>"
+        : '<text x="' + (s.x + 13) + '" y="' + (s.y + 5) + '" font-size="13" font-weight="600" fill="' + tc + '" opacity="0.92">' + s.name + "</text>";
+      return '<circle cx="' + s.x + '" cy="' + s.y + '" r="8" fill="' + c + '" stroke="#131313" stroke-width="2.5"/>' + lbl;
+    }).join("");
+    var blocks = "";
+    [[30,20,180,120],[30,170,150,140],[240,60,200,150],[470,40,180,110],[660,220,150,120],[230,270,170,80],[560,300,120,60]]
+      .forEach(function (b) {
+        blocks += '<rect x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + b[3] +
+          '" rx="6" fill="' + block + '" opacity="0.85"/>';
+      });
+    document.getElementById("map-area").innerHTML =
+      '<svg viewBox="0 0 840 380" preserveAspectRatio="xMidYMid slice" role="img" aria-label="上海行程静态路线图">' +
+      '<rect width="840" height="380" fill="var(--canvas)"/>' + blocks +
+      /* 黄浦江：S 形纵贯（示意） */
+      '<path d="M560 0 C 540 90, 600 160, 580 240 S 545 330, 590 380" fill="none" stroke="' + river + '" stroke-width="26" stroke-linecap="round" opacity="0.9"/>' +
+      '<g stroke="' + grid + '" stroke-width="1">' +
+      '<path d="M0 95 H840 M0 195 H840 M0 305 H840 M160 0 V380 M330 0 V380 M500 0 V380 M700 0 V380"/>' +
+      "</g>" + lines + dots + "</svg>";
+    if (!key) {
+      status.textContent = "⚠ 未配置 AMAP_KEY — 静态路线图已就绪（填 key 可切换交互地图）";
+    }
+  }
+
+  /* 跨城交通静态 SVG（决策 1，chenxuan520/roadbook：车站两端大 marker + 虚线高铁线，无 key 降级一等公民） */
+  function renderHsrFallback() {
+    var cs = getComputedStyle(document.documentElement);
+    var grid = cs.getPropertyValue("--map-grid").trim();
+    document.getElementById("hsr-map-area").innerHTML =
+      '<svg viewBox="0 0 840 380" preserveAspectRatio="xMidYMid slice" role="img" aria-label="跨城高铁段静态示意图">' +
+      '<rect width="840" height="380" fill="var(--canvas)"/>' +
+      '<g stroke="' + grid + '" stroke-width="1"><path d="M0 95 H840 M0 285 H840 M170 0 V380 M670 0 V380"/></g>' +
+      /* 虚线高铁线 + 流动方向箭头（showDir 的静态对应） */
+      '<line x1="140" y1="230" x2="700" y2="150" stroke="var(--mint)" stroke-width="3" stroke-dasharray="14 10"/>' +
+      '<polygon points="430,168 456,180 430,192" fill="var(--mint)"/>' +
+      /* 车站两端大 marker（rect+circle 合成品牌方钉） */
+      '<circle cx="140" cy="230" r="14" fill="var(--mint)" stroke="#131313" stroke-width="3"/>' +
+      '<text x="140" y="270" text-anchor="middle" font-size="14" font-weight="600" fill="var(--white)" font-family="monospace">' + S.intercity.from.name + "</text>" +
+      '<circle cx="700" cy="150" r="14" fill="var(--uv)" stroke="#131313" stroke-width="3"/>' +
+      '<text x="700" y="116" text-anchor="middle" font-size="14" font-weight="600" fill="var(--white)" font-family="monospace">' + S.intercity.to.name + "</text>" +
+      '<text x="420" y="130" text-anchor="middle" font-size="12" font-family="monospace" fill="var(--text-2)">' + S.intercity.label + "</text>" +
+      "</svg>";
+  }
+
+  var map = null; var hsrGroup = null;
+  function renderAMap() {
+    var sc = document.createElement("script");
+    sc.src = "https://webapi.amap.com/maps?v=2.0&key=" + key;
+    sc.onload = function () {
+      try {
+        /* center 必须显式设置（成都版踩坑：不设 center 会初始化失败/漂移）；
+           总览只画市内动线（决策 1），跨城段在交通视图单独渲染 */
+        map = new AMap.Map("map-area", { zoom: S.amap.zoom, center: S.amap.center, viewMode: "2D" });
+        refreshOverlays();
+        mapOk.style.display = "inline-block";
+      } catch (e) { map = null; renderFallback(); }
+    };
+    sc.onerror = function () {
+      status.textContent = "⚠ 高德 SDK 加载失败（key 无效或网络受限）— 已降级为静态路线图";
+      renderFallback();
+    };
+    document.head.appendChild(sc);
+  }
+
+  /* 交通视图控制：有 key 用 AMAP 拉到跨城；无 key / 未初始化用静态 SVG。市内动线留总览图 */
+  function setView(v) {
+    ui.view = v;
+    document.getElementById("btn-view-city").classList.toggle("active", v === "city");
+    document.getElementById("btn-view-hsr").classList.toggle("active", v === "hsr");
+    document.getElementById("hsr-info").classList.toggle("active", v === "hsr");
+    var hsrArea = document.getElementById("hsr-map-area");
+    if (v === "hsr") {
+      if (map && S.intercity) {
+        hsrArea.style.display = "block";
+        drawHsrOverlay();
+      } else {
+        renderHsrFallback();
+      }
+    } else if (map) {
+      refreshOverlays();
+    } else {
+      renderFallback();
+    }
+  }
+
+  function drawHsrOverlay() {
+    /* 清掉市内 overlay，画跨城段（chenxuan520/roadbook） */
+    Object.keys(dayOverlays).forEach(function (d) {
+      dayOverlays[d].clear(); dayOverlays[d].setMap(null);
+    });
+    dayOverlays = {};
+    var line = new AMap.Polyline({
+      path: [S.intercity.from.ll, S.intercity.to.ll],
+      strokeColor: "#3cffd0", strokeWeight: 4, strokeOpacity: 0.9,
+      strokeStyle: "dashed", showDir: true, lineJoin: "round" /* showDir：方向箭头沿线流动 */
+    });
+    var mk = function (p, title) {
+      return new AMap.Marker({ position: p.ll, title: title, label: { content: title, direction: "top" } });
+    };
+    hsrGroup = new AMap.OverlayGroup([line, mk(S.intercity.from, S.intercity.from.name), mk(S.intercity.to, S.intercity.to.name)]);
+    hsrGroup.setMap(map);
+    map.setFitView([hsrGroup], false, [60, 60, 60, 60]);
+    status.textContent = "✅ 跨城段已渲染（" + S.intercity.label + "）— 车次以 12306 为准";
+  }
+
+  /* 按天 OverlayGroup + 标签开关 + setFitView（liketrek/TREK + itskovacs/trip） */
+  var dayOverlays = {}; /* { day: OverlayGroup }，重建即刷新 */
+  function refreshOverlays() {
+    if (!map) return;
+    if (hsrGroup) { hsrGroup.clear(); hsrGroup.setMap(null); hsrGroup = null; }
+    Object.keys(dayOverlays).forEach(function (d) {
+      dayOverlays[d].clear(); dayOverlays[d].setMap(null);
+    });
+    dayOverlays = {};
+    var visible = S.spots.filter(spotVisible);
+    visible.forEach(function (sp) {
+      var m = new AMap.Marker({
+        position: sp.ll, title: sp.name,
+        content: '<div class="amap-marker-label mk-label">' + spotLabelHTML(S.spots.indexOf(sp), sp) + "</div>",
+        offset: new AMap.Pixel(-12, -12)
+      });
+      (dayOverlays[sp.day] = dayOverlays[sp.day] || new AMap.OverlayGroup()).addOverlay(m);
+    });
+    S.routes.filter(function (r) { return ui.day === "all" || r.day === ui.day; }).forEach(function (r) {
+      var pl = new AMap.Polyline({
+        path: r.ll, strokeColor: S.dayColors[r.day], strokeWeight: 5,
+        strokeOpacity: 0.9, strokeStyle: "dashed", lineJoin: "round"
+      });
+      (dayOverlays[r.day] = dayOverlays[r.day] || new AMap.OverlayGroup()).addOverlay(pl);
+    });
+    var groups = [];
+    Object.keys(dayOverlays).forEach(function (d) {
+      if (ui.day === "all" || +d === ui.day) { dayOverlays[d].setMap(map); groups.push(dayOverlays[d]); }
+    });
+    /* setFitView 聚焦当前选择（决策 3：全程/按天，60px 内边距） */
+    map.setFitView(groups, false, [60, 60, 60, 60]);
+    status.textContent = "✅ 高德地图 · " + visible.length + "/" + S.spots.length + " 景点 · " + (ui.day === "all" ? "全程" : "Day " + ui.day) + " 视野";
+  }
+
+  guide.querySelector("#amap-go").addEventListener("click", function () {
+    var v = document.getElementById("amap-key-input").value.trim();
+    if (!v) { document.getElementById("amap-key-input").focus(); return; }
+    try { localStorage.setItem("amap_key", v); } catch (e) {}
+    key = v;
+    guide.style.display = "none";
+    renderAMap();
+  });
+  guide.querySelector("#key-guide-close").addEventListener("click", function () {
+    guide.style.display = "none";
+  });
+
+  legend();
+  renderHsrFallback(); /* 交通视图静态 SVG 常驻（一等公民）；map-ctrl「跨城交通」有 key 时切 AMAP 跨城 */
+  if (key) { guide.style.display = "none"; renderAMap(); } else { renderFallback(); }
+
+  /* ---- 地图控制条（决策 1/2/3）：视图切换 + 标签开关 + 按天切换 ---- */
+  document.getElementById("btn-view-city").addEventListener("click", function () { setView("city"); });
+  document.getElementById("btn-view-hsr").addEventListener("click", function () { setView("hsr"); });
+  document.getElementById("btn-labels").addEventListener("click", function () {
+    ui.labels = !ui.labels;
+    this.textContent = ui.labels ? "标签 开" : "标签 关";
+    if (!map) renderFallback();
+  });
+  document.querySelectorAll("#day-grp button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll("#day-grp button").forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      ui.day = b.dataset.day === "all" ? "all" : +b.dataset.day;
+      if (ui.view === "hsr") { setView("city"); }
+      else if (!map) { renderFallback(); }
+      else { refreshOverlays(); }
+    });
+  });
+  /* 交通视图信息条：来自 schema 跨城段（页面 12306 车次卡 G13，北京南 → 上海虹桥） */
+  if (S.intercity) {
+    document.getElementById("hsr-from").textContent = S.intercity.from.name;
+    document.getElementById("hsr-to").textContent = S.intercity.to.name;
+  }
+
+  /* ---- 列表↔地图联动（决策 3，itskovacs/trip）：行程点详情卡 hover → 对应 marker 高亮 ---- */
+  /* spot 名称 → 页面行程卡标题的对应（名称前缀匹配，如「武康路」↔「武康路 · 安福路」） */
+  function findCardForSpot(sp) {
+    var cards = document.querySelectorAll(".ev");
+    for (var i = 0; i < cards.length; i++) {
+      var t = cards[i].querySelector(".ev-title");
+      if (t && t.textContent.indexOf(sp.name) !== -1) return cards[i];
+    }
+    return null;
+  }
+  function highlightTag(idx, on) {
+    var tag = document.querySelector('.mk-tag[data-spot-idx="' + idx + '"]');
+    if (tag) tag.classList.toggle("hot", on);
+  }
+  S.spots.forEach(function (sp, idx) {
+    var card = findCardForSpot(sp);
+    if (!card) return;
+    card.addEventListener("mouseenter", function () { highlightTag(idx, true); });
+    card.addEventListener("mouseleave", function () { highlightTag(idx, false); });
+  });
+
+  /* ---- 主题切换钮：默认暗色（产品本体），亮色为推导扩展 ---- */
+  var tbtn = document.getElementById("theme-toggle");
+  function setTheme(id) {
+    var t = THEMES[id];
+    if (!t) return;
+    document.documentElement.setAttribute("data-culture", t.data);
+    document.getElementById("brand-name").textContent = t.label;
+    tbtn.textContent = t.icon;
+    if (!key) renderFallback();
+  }
+  tbtn.addEventListener("click", function () {
+    var light = document.documentElement.getAttribute("data-culture") === "verge-light";
+    setTheme(light ? "theverge" : "verge-light");
+  });
+})();
+</script>
+</body>
+</html>
